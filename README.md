@@ -12,8 +12,7 @@ Production domain: [eagleevals.com](https://eagleevals.com)
 - React and TypeScript
 - Tailwind CSS
 - Vercel for hosting and deployment
-- Postgres through a Vercel Marketplace integration for restored evaluation
-  data (provider to be connected before the migration)
+- Neon Postgres through the Vercel Marketplace for restored evaluation data
 
 ## Local development
 
@@ -40,6 +39,35 @@ commit database exports, source-feed snapshots, cached API responses, or user
 identifiers. Migration code and database schemas may be committed later, but
 the data itself must remain in the separate temporary recovery directory until
 it is imported and independently backed up.
+
+### Migration workflow
+
+The migration accepts only an absolute path to an isolated recovery snapshot.
+It verifies every gzip checksum, record count, foreign-key relationship, rating
+range, and comment-anonymization invariant before connecting to Postgres. It is
+idempotent: rerunning the same snapshot updates its rows and performs the same
+database verification again.
+
+After the Vercel Marketplace database has supplied `DATABASE_URL`:
+
+```bash
+pnpm db:migrate:recovered -- \
+  --snapshot /Users/giuliadaly/workplace/eagle-eval/recovered-data/2026-08-13
+
+pnpm db:verify -- \
+  --snapshot /Users/giuliadaly/workplace/eagle-eval/recovered-data/2026-08-13
+```
+
+The schema preserves the original source object in a JSONB column while also
+normalizing fields needed for the Next.js search, course, and professor pages.
+Exact legacy professors are stored separately from the current public faculty
+directory supplement. The discovery archive is retained for reconciliation
+but is not inserted as a second set of reviews.
+
+Successful migration writes `manifests/database-verification.json` into the
+recovery snapshot and marks only the database-migration gate as verified. The
+snapshot remains blocked from deletion until the independent provider backup,
+restore test, and deployed-page checks also pass.
 
 ## Deployment
 
