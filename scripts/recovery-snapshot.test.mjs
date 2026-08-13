@@ -132,7 +132,7 @@ test('splits schema only at explicit migration boundaries', async () => {
     'utf8',
   );
   const statements = sqlStatements(schema);
-  assert.equal(statements.length, 11);
+  assert.equal(statements.length, 21);
   assert.match(statements[0], /CREATE EXTENSION/);
   assert.match(statements.at(-1), /professor_summaries/);
 });

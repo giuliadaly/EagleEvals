@@ -7,8 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:migration": "node --test scripts/recovery-snapshot.test.mjs",
+    "test:migration": "node --test scripts/*.test.mjs",
     "db:validate-snapshot": "node scripts/validate-recovery-snapshot.mjs",
+    "db:test-full-migration": "node scripts/test-full-migration-locally.mjs",
     "db:migrate:recovered": "node scripts/migrate-recovered-data.mjs",
     "db:verify": "node scripts/verify-database.mjs"
   },
@@ -20,6 +21,7 @@
     "server-only": "^0.0.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.4",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

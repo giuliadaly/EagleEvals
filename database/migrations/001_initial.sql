@@ -120,17 +120,47 @@ CREATE TABLE IF NOT EXISTS faculty_directory_entries (
 
 CREATE INDEX IF NOT EXISTS courses_search_trgm_idx
   ON courses USING gin ((lower(code || ' ' || title || ' ' || subject)) gin_trgm_ops);
+
+-- migrate:split
+
 CREATE INDEX IF NOT EXISTS courses_college_idx ON courses (college);
+
+-- migrate:split
+
 CREATE INDEX IF NOT EXISTS professors_search_trgm_idx
-  ON professors USING gin ((lower(name || ' ' || array_to_string(titles, ' '))) gin_trgm_ops);
+  ON professors USING gin ((lower(name)) gin_trgm_ops);
+
+-- migrate:split
+
 CREATE INDEX IF NOT EXISTS professors_email_idx ON professors (lower(email)) WHERE email IS NOT NULL;
+
+-- migrate:split
+
 CREATE INDEX IF NOT EXISTS reviews_course_idx ON reviews (course_id, semester);
+
+-- migrate:split
+
 CREATE INDEX IF NOT EXISTS reviews_professor_idx ON reviews (professor_id, semester);
+
+-- migrate:split
+
 CREATE INDEX IF NOT EXISTS reviews_course_code_idx ON reviews (course_code);
+
+-- migrate:split
+
 CREATE INDEX IF NOT EXISTS comments_course_idx ON student_comments (course_id, created_at DESC) WHERE published;
+
+-- migrate:split
+
 CREATE INDEX IF NOT EXISTS comments_professor_idx ON student_comments (professor_id, created_at DESC) WHERE published;
+
+-- migrate:split
+
 CREATE INDEX IF NOT EXISTS faculty_name_trgm_idx
   ON faculty_directory_entries USING gin ((lower(name)) gin_trgm_ops);
+
+-- migrate:split
+
 CREATE INDEX IF NOT EXISTS faculty_email_idx
   ON faculty_directory_entries (lower(email)) WHERE email IS NOT NULL;
 

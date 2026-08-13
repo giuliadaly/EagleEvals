@@ -1,5 +1,6 @@
 import { readFile, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 import { applySchema, connectDatabase, importBatches } from './lib/database.mjs';
 import { verifyDatabase } from './lib/database-verification.mjs';
@@ -9,7 +10,7 @@ import {
   sqlStatements,
 } from './lib/recovery-snapshot.mjs';
 
-const courseQuery = `
+export const courseQuery = `
   INSERT INTO courses (id, code, title, subject, college, description, legacy_document, source_snapshot, imported_at)
   SELECT
     document->>'_id', document->>'code', document->>'title', document->>'subject',
@@ -22,7 +23,7 @@ const courseQuery = `
     imported_at = now()
 `;
 
-const professorQuery = `
+export const professorQuery = `
   INSERT INTO professors (
     id, name, titles, education, phone, email, office, photo_url,
     legacy_document, source_snapshot, imported_at
@@ -41,7 +42,7 @@ const professorQuery = `
     source_snapshot = EXCLUDED.source_snapshot, imported_at = now()
 `;
 
-const reviewQuery = `
+export const reviewQuery = `
   INSERT INTO reviews (
     id, course_id, professor_id, section_code, course_code, professor_name,
     semester, section, course_overall, instructor_overall,
@@ -63,7 +64,7 @@ const reviewQuery = `
     imported_at = now()
 `;
 
-const metricQuery = `
+export const metricQuery = `
   INSERT INTO review_metrics (
     id, review_id, attendance_necessary, available_for_help_outside_class,
     course_intellectually_challenging, course_well_organized,
@@ -98,7 +99,7 @@ const metricQuery = `
     imported_at = now()
 `;
 
-const commentQuery = `
+export const commentQuery = `
   INSERT INTO student_comments (
     id, professor_id, course_id, message, would_take_again, source, published,
     created_at, legacy_document, source_snapshot, imported_at
@@ -116,7 +117,7 @@ const commentQuery = `
     source_snapshot = EXCLUDED.source_snapshot, imported_at = now()
 `;
 
-const facultyQuery = `
+export const facultyQuery = `
   INSERT INTO faculty_directory_entries (
     profile_path, source_school, name, first_name, last_name, title, department,
     phone, email, office, profile_url, source_name, source_document,
@@ -137,6 +138,17 @@ const facultyQuery = `
     source_snapshot = EXCLUDED.source_snapshot, imported_at = now()
 `;
 
+export function migrationJobs(records) {
+  return [
+    ['Courses', courseQuery, records.courses],
+    ['Professors', professorQuery, records.professors],
+    ['Reviews', reviewQuery, records.reviews],
+    ['Review metrics', metricQuery, records.reviewMetrics],
+    ['Student comments', commentQuery, records.comments],
+    ['Current faculty directory', facultyQuery, records.facultyDirectory],
+  ];
+}
+
 async function atomicWriteJson(filePath, value) {
   const temporaryPath = `${filePath}.tmp`;
   await writeFile(temporaryPath, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
@@ -155,7 +167,7 @@ async function updateLocalMigrationState(snapshot, report) {
   });
 }
 
-async function run() {
+export async function run() {
   const snapshotPath = parseSnapshotArgument(process.argv.slice(2));
   process.stdout.write('Validating recovery snapshot checksums and relationships...\n');
   const snapshot = await loadAndValidateSnapshot(snapshotPath);
@@ -183,15 +195,7 @@ async function run() {
   );
 
   try {
-    const jobs = [
-      ['Courses', courseQuery, snapshot.records.courses],
-      ['Professors', professorQuery, snapshot.records.professors],
-      ['Reviews', reviewQuery, snapshot.records.reviews],
-      ['Review metrics', metricQuery, snapshot.records.reviewMetrics],
-      ['Student comments', commentQuery, snapshot.records.comments],
-      ['Current faculty directory', facultyQuery, snapshot.records.facultyDirectory],
-    ];
-    for (const [label, query, records] of jobs) {
+    for (const [label, query, records] of migrationJobs(snapshot.records)) {
       await importBatches({ sql, query, records, snapshotId: snapshot.snapshotId, label });
     }
 
@@ -217,7 +221,9 @@ async function run() {
   }
 }
 
-run().catch((error) => {
-  process.stderr.write(`${error.stack || error.message}\n`);
-  process.exitCode = 1;
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  run().catch((error) => {
+    process.stderr.write(`${error.stack || error.message}\n`);
+    process.exitCode = 1;
+  });
+}
