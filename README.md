@@ -14,6 +14,20 @@ Production domain: [eagleevals.com](https://eagleevals.com)
 - Vercel for hosting and deployment
 - Neon Postgres through the Vercel Marketplace for restored evaluation data
 
+## Current product
+
+The first production release is intentionally read-only. It includes:
+
+- live autocomplete across course codes, titles, subjects, and professor names
+- paginated course and professor directories
+- course ratings, workload estimates, instructor comparisons, comments, and semester history
+- professor ratings, course history, public faculty details, and comments
+- recovery context, privacy information, terms, loading, error, and missing-record states
+
+Accounts and new review submission are out of scope until authentication,
+moderation, abuse prevention, corrections, and updated privacy controls are in
+place.
+
 ## Local development
 
 Use Node.js 20 or newer and pnpm:
@@ -30,6 +44,7 @@ Then open [http://localhost:3000](http://localhost:3000).
 ```bash
 pnpm lint
 pnpm build
+pnpm test:migration
 ```
 
 ## Data migration boundary
