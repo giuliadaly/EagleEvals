@@ -1,0 +1,21 @@
+{
+  "project": "EagleEvals",
+  "task": "responsive-redesign-showcases",
+  "framework": "Next.js 16.3 with React 19 and Tailwind CSS 4",
+  "existingTypography": {
+    "body": "Avenir Next system stack",
+    "display": "Georgia system stack"
+  },
+  "existingPalette": {
+    "summary": "navy, bright gold, cream",
+    "decision": "User rejected navy and requested a Boston College maroon-and-gold direction"
+  },
+  "motion": "Existing site uses small hover lifts and reduced-motion overrides",
+  "spacing": "Existing site mixes Tailwind utilities with a small global CSS layer",
+  "constraints": [
+    "Keep the production interface unchanged while concepts are evaluated",
+    "Use only verified course and professor data",
+    "Do not imply official Boston College affiliation",
+    "Support 320px, 375px, 414px, and 768px viewports"
+  ]
+}

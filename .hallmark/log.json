@@ -1,0 +1,13 @@
+{
+  "project": "EagleEvals",
+  "runs": [
+    {
+      "date": "2026-08-19",
+      "task": "responsive-redesign-showcases",
+      "macrostructures": ["Feature Stack", "Workbench", "Split Studio"],
+      "palette": "custom BC maroon and muted gold",
+      "enrichment": "none — product evidence and interaction are the visual material",
+      "motion": "manual snap scrolling and small control state transitions only"
+    }
+  ]
+}

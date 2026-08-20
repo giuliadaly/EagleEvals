@@ -1,0 +1,56 @@
+:root {
+  /* EagleEvals showcase tokens — Boston College maroon and muted gold. */
+  --ee-maroon: oklch(40% 0.155 30);
+  --ee-maroon-deep: oklch(27% 0.098 30);
+  --ee-maroon-pressed: oklch(34% 0.135 30);
+  --ee-maroon-wash: oklch(95.5% 0.025 43);
+  --ee-gold: oklch(70% 0.068 84);
+  --ee-gold-bright: oklch(82% 0.06 84);
+  --ee-gold-deep: oklch(48% 0.066 80);
+  --ee-gold-wash: oklch(96% 0.026 86);
+  --ee-paper: oklch(98% 0.009 86);
+  --ee-paper-raised: oklch(99.2% 0.004 86);
+  --ee-paper-deep: oklch(94.8% 0.014 78);
+  --ee-ink: oklch(23% 0.027 29);
+  --ee-ink-soft: oklch(39% 0.025 31);
+  --ee-muted: oklch(47% 0.025 39);
+  --ee-line: oklch(84% 0.025 72);
+  --ee-line-strong: oklch(68% 0.038 69);
+  --ee-positive: oklch(42% 0.095 148);
+  --ee-positive-wash: oklch(95% 0.025 148);
+  --ee-error: oklch(46% 0.17 25);
+  --ee-accent-ink: oklch(98% 0.009 86);
+  --ee-focus: oklch(70% 0.13 85);
+  --ee-transparent: transparent;
+
+  --ee-font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --ee-font-body: "Avenir Next", Avenir, "Segoe UI", Helvetica, Arial, sans-serif;
+
+  --ee-space-1: 0.25rem;
+  --ee-space-2: 0.5rem;
+  --ee-space-3: 0.75rem;
+  --ee-space-4: 1rem;
+  --ee-space-5: 1.25rem;
+  --ee-space-6: 1.5rem;
+  --ee-space-8: 2rem;
+  --ee-space-10: 2.5rem;
+  --ee-space-12: 3rem;
+  --ee-space-16: 4rem;
+  --ee-space-20: 5rem;
+  --ee-space-24: 6rem;
+
+  --ee-radius-sm: 0.5rem;
+  --ee-radius-md: 0.75rem;
+  --ee-radius-lg: 1rem;
+  --ee-shadow-card: 0 0.75rem 2.25rem -1.5rem oklch(23% 0.027 29 / 0.32);
+  --ee-shadow-tray: 0 -0.75rem 2rem -1.5rem oklch(23% 0.027 29 / 0.38);
+  --ee-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ee-ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ee-duration-short: 160ms;
+  --ee-duration-medium: 260ms;
+}
+
+html,
+body {
+  overflow-x: clip;
+}
