@@ -22,7 +22,7 @@ export default async function Home() {
         <section className={`page-shell ${styles.hero}`}>
           <div className={styles.heroCopy}>
             <h1>Choose the class.<br />Know the professor.</h1>
-            <p>Search recovered Boston College evaluations, understand the tradeoffs behind a rating, and add a fully anonymous review after the semester.</p>
+            <p>Explore course and professor evaluations from BC students past and present, understand the tradeoffs behind a rating, and add a fully anonymous review after the semester.</p>
             <div className={styles.searchBlock}>
               <span>What are you considering?</span>
               <SearchBox />
@@ -30,20 +30,20 @@ export default async function Home() {
             </div>
           </div>
 
-          <aside className={styles.archiveLedger} aria-label="Recovered archive summary">
-            <h2>Recovered archive</h2>
+          <aside className={styles.archiveLedger} aria-label="EagleEvals data summary">
+            <h2>EagleEvals at a glance</h2>
             <div><span>Structured evaluations</span><strong>{formatCount(stats.reviews)}</strong></div>
             <div><span>Courses</span><strong>{formatCount(stats.courses)}</strong></div>
             <div><span>Professors</span><strong>{formatCount(stats.professors)}</strong></div>
             <div><span>Written comments</span><strong>{formatCount(stats.comments)}</strong></div>
-            <Link href="/about">See what was recovered</Link>
+            <Link href="/about">About EagleEvals</Link>
           </aside>
         </section>
 
         <div className={styles.trustLine}>
           <div className="page-shell">
             <strong>Independent and student-run.</strong>
-            <span>Read the full public archive without an account. New reviews are anonymous.</span>
+            <span>Read every public evaluation without an account. New reviews are anonymous.</span>
           </div>
         </div>
 

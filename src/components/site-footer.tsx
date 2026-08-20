@@ -8,7 +8,7 @@ export function SiteFooter() {
         <div>
           <Brand light />
           <p className="mt-4 max-w-sm text-sm leading-6 text-white/58">
-            Recovered historical course and professor evaluations, rebuilt as an independent resource for Boston College students.
+            Course and professor information shaped by evaluations from Boston College students past and present.
           </p>
         </div>
         <div>
@@ -24,7 +24,7 @@ export function SiteFooter() {
         <div>
           <p className="eyebrow text-[var(--gold)]">Project</p>
           <div className="mt-4 flex flex-col gap-2 text-sm text-white/72">
-            <Link className="footer-link" href="/about">About the recovery</Link>
+            <Link className="footer-link" href="/about">About EagleEvals</Link>
             <Link className="footer-link" href="/privacy">Privacy</Link>
             <Link className="footer-link" href="/terms">Terms</Link>
           </div>

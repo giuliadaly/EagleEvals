@@ -9,7 +9,7 @@ import { getEvaluationsPage } from "@/data/queries";
 
 export const metadata: Metadata = {
   title: "All evaluations",
-  description: "Browse every publicly recovered EagleEval evaluation record and new anonymous review.",
+  description: "Browse EagleEvals course and professor evaluation records and anonymous student reviews.",
 };
 
 export default async function EvaluationsPage({ searchParams }: { searchParams: Promise<{ q?: string; page?: string }> }) {
@@ -23,13 +23,13 @@ export default async function EvaluationsPage({ searchParams }: { searchParams: 
       <main className="flex-1">
         <section className="border-b border-[var(--line)] bg-white py-10 sm:py-14">
           <div className="page-shell">
-            <p className="eyebrow text-[var(--gold-dark)]">The complete public archive</p>
+            <p className="eyebrow text-[var(--gold-dark)]">BC course history</p>
             <h1 className="mt-3 font-serif text-4xl font-bold tracking-[-0.04em] text-[var(--navy)] sm:text-5xl">All evaluations</h1>
-            <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--ink-soft)]">The recovered data was never lost: it contains 32,417 section-level numerical evaluation records and 720 written comments. Every public evaluation row is browsable here; written comments also appear on their course and professor pages.</p>
+            <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--ink-soft)]">Browse 32,417 section-level numerical evaluations from BC students across courses, professors, and semesters. Written reviews also appear on their related course and professor pages.</p>
             <form className="mt-7 flex max-w-3xl flex-col gap-3 sm:flex-row" role="search">
               <label className="sr-only" htmlFor="evaluation-search">Search evaluations</label>
               <input id="evaluation-search" name="q" defaultValue={result.query} className="form-control flex-1" placeholder="Course code, title, professor, or semester" />
-              <button className="button-primary" type="submit">Search archive</button>
+              <button className="button-primary" type="submit">Search evaluations</button>
             </form>
           </div>
         </section>

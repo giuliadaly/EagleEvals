@@ -44,7 +44,7 @@ export default async function CourseDetailPage({ params, searchParams }: { param
                 <p className="eyebrow text-[var(--gold-dark)]">{course.code} · {course.subject}</p>
                 <h1 className="mt-3 font-serif text-4xl font-bold leading-tight tracking-[-0.04em] text-[var(--navy)] sm:text-5xl">{course.title}</h1>
                 {collegeName(course.college) ? <p className="mt-3 text-sm font-semibold text-[var(--muted)]">{collegeName(course.college)}</p> : null}
-                <p className="mt-6 max-w-2xl text-sm leading-7 text-[var(--ink-soft)]">{course.description || "No course description was available in the recovered catalog."}</p>
+                <p className="mt-6 max-w-2xl text-sm leading-7 text-[var(--ink-soft)]">{course.description || "No course description is currently available."}</p>
               </div>
               <RatingBadge value={course.courseOverall} label="course" large />
             </div>
@@ -72,7 +72,7 @@ export default async function CourseDetailPage({ params, searchParams }: { param
           </section>
 
           <section className="detail-section">
-            <SectionHeading eyebrow="Instructor options" title={`Who taught ${course.code}`} description="Ratings below reflect only recovered evaluations connected to this course." />
+            <SectionHeading eyebrow="Instructor options" title={`Who taught ${course.code}`} description="Ratings below reflect the evaluations connected to this course." />
             <form className="mb-6 grid gap-3 rounded-[.75rem] border border-[var(--line-strong)] bg-[var(--paper-ledger)] p-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end">
               <label><span className="form-label">Order instructors</span><select className="form-control" name="sort" defaultValue={sort}><option value="evidence">Most evaluations</option><option value="rating">Highest instructor rating</option><option value="course">Highest course rating</option><option value="name">Name A–Z</option></select></label>
               <label><span className="form-label">Minimum instructor rating</span><select className="form-control" name="min" defaultValue={String(min)}><option value="0">Any rating</option><option value="4">4.0 and above</option><option value="4.5">4.5 and above</option></select></label>
@@ -88,9 +88,9 @@ export default async function CourseDetailPage({ params, searchParams }: { param
             </div> : <p className="border-block border-[var(--line)] py-6 text-sm text-[var(--muted)]">No instructors match those filters.</p>}
           </section>
 
-          {comments.length ? <section className="detail-section"><SectionHeading eyebrow="Student perspective" title="Written reviews" description="Recovered and new anonymous comments are shown as written and may reflect different course formats." href={`/comments?q=${encodeURIComponent(course.code)}`} linkLabel="Browse all matching comments" /><div className="grid gap-4 lg:grid-cols-2">{comments.map((comment) => <CommentCard key={comment.id} comment={comment} context="course" />)}</div></section> : null}
+          {comments.length ? <section className="detail-section"><SectionHeading eyebrow="Student perspective" title="Written reviews" description="Anonymous comments from BC students past and present are shown as submitted and may reflect different course formats." href={`/comments?q=${encodeURIComponent(course.code)}`} linkLabel="Browse all matching comments" /><div className="grid gap-4 lg:grid-cols-2">{comments.map((comment) => <CommentCard key={comment.id} comment={comment} context="course" />)}</div></section> : null}
 
-          {semesters.length ? <section className="detail-section"><SectionHeading eyebrow="Across time" title="Evaluation history" description="Section-level results available in the recovered archive." /><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{semesters.slice(0, 12).map((semester) => <div key={semester.semester} className="rounded-xl border border-[var(--line)] bg-white p-4"><div className="flex items-center justify-between gap-3"><p className="font-bold text-[var(--navy)]">{semester.semester}</p><span className="text-xs text-[var(--muted)]">{semester.reviewCount} section{semester.reviewCount === 1 ? "" : "s"}</span></div><div className="mt-3 flex gap-5 text-xs text-[var(--muted)]"><span>Course <strong className="text-[var(--ink)]">{formatRating(semester.courseOverall)}</strong></span><span>Instructor <strong className="text-[var(--ink)]">{formatRating(semester.instructorOverall)}</strong></span></div></div>)}</div></section> : null}
+          {semesters.length ? <section className="detail-section"><SectionHeading eyebrow="Across time" title="Evaluation history" description="Available section-level results across semesters." /><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{semesters.slice(0, 12).map((semester) => <div key={semester.semester} className="rounded-xl border border-[var(--line)] bg-white p-4"><div className="flex items-center justify-between gap-3"><p className="font-bold text-[var(--navy)]">{semester.semester}</p><span className="text-xs text-[var(--muted)]">{semester.reviewCount} section{semester.reviewCount === 1 ? "" : "s"}</span></div><div className="mt-3 flex gap-5 text-xs text-[var(--muted)]"><span>Course <strong className="text-[var(--ink)]">{formatRating(semester.courseOverall)}</strong></span><span>Instructor <strong className="text-[var(--ink)]">{formatRating(semester.instructorOverall)}</strong></span></div></div>)}</div></section> : null}
         </div>
       </main>
       <SiteFooter />

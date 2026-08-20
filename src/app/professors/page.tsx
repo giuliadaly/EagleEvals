@@ -7,7 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 import { formatCount } from "@/data/format";
 import { getProfessorsPage } from "@/data/queries";
 
-export const metadata: Metadata = { title: "Professors", description: "Search and filter restored historical evaluations for Boston College professors." };
+export const metadata: Metadata = { title: "Professors", description: "Search and filter Boston College professors using EagleEvals ratings and student input." };
 
 export default async function ProfessorsPage({ searchParams }: { searchParams: Promise<{ q?: string; page?: string; sort?: string; min?: string }> }) {
   const params = await searchParams;
