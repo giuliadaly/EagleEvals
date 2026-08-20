@@ -73,6 +73,30 @@ export type StudentComment = {
   courseId: string | null;
   courseCode: string | null;
   courseTitle: string | null;
+  source: string;
+};
+
+export type EvaluationRecord = {
+  id: string;
+  semester: string;
+  section: number;
+  sectionCode: string;
+  courseOverall: number | null;
+  instructorOverall: number | null;
+  courseId: string | null;
+  courseCode: string;
+  courseTitle: string | null;
+  professorId: string | null;
+  professorName: string;
+  source: string;
+  submittedAt: string | null;
+  metrics: MetricValue[];
+};
+
+export type ReviewSelection = {
+  id: string;
+  primary: string;
+  secondary: string;
 };
 
 export type SemesterSummary = {

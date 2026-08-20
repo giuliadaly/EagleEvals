@@ -68,7 +68,7 @@ function records({ includeUserId = false } = {}) {
   };
 }
 
-async function writeFixture(options) {
+async function writeFixture(options = {}) {
   const root = await mkdtemp(path.join(tmpdir(), 'eagleevals-migration-'));
   const exportPath = path.join(root, 'export');
   const manifestPath = path.join(root, 'manifests');
@@ -98,7 +98,7 @@ async function writeFixture(options) {
   await writeFile(path.join(manifestPath, 'migration-inventory.json'), JSON.stringify({
     snapshotDate: '2026-08-13-test',
     source: 'https://eagleeval.com',
-    localDeletionStatus: 'blocked',
+    localDeletionStatus: options.localDeletionStatus ?? 'blocked',
   }));
   return root;
 }
@@ -109,6 +109,13 @@ test('validates a complete anonymized snapshot', async (t) => {
   const snapshot = await loadAndValidateSnapshot(root);
   assert.equal(snapshot.snapshotId, '2026-08-13-test');
   assert.equal(snapshot.records.reviews.length, 1);
+});
+
+test('validates a retained snapshot after the deletion gate passes', async (t) => {
+  const root = await writeFixture({ localDeletionStatus: 'eligible-retained' });
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const snapshot = await loadAndValidateSnapshot(root);
+  assert.equal(snapshot.inventory.localDeletionStatus, 'eligible-retained');
 });
 
 test('rejects a snapshot containing comment account IDs', async (t) => {

@@ -40,8 +40,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             <div className="mt-8 flex flex-wrap gap-2 text-xs font-semibold text-[var(--muted)]">
               <span className="rounded-full bg-[var(--wash)] px-3 py-2">{formatCount(course.reviewCount)} historical evaluations</span>
               <span className="rounded-full bg-[var(--wash)] px-3 py-2">{instructors.length} evaluated instructor{instructors.length === 1 ? "" : "s"}</span>
-              {comments.length ? <span className="rounded-full bg-[var(--wash)] px-3 py-2">{comments.length} student comment{comments.length === 1 ? "" : "s"}</span> : null}
+              {course.commentCount ? <span className="rounded-full bg-[var(--wash)] px-3 py-2">{formatCount(course.commentCount)} student comment{course.commentCount === 1 ? "" : "s"}</span> : null}
             </div>
+            <div className="mt-6 flex flex-wrap gap-3"><Link className="button-primary" href={`/evaluations?q=${encodeURIComponent(course.code)}`}>Browse all evaluations</Link><Link className="button-gold" href={`/review?course=${course.id}`}>Write anonymous review</Link></div>
           </div>
         </section>
 
@@ -71,7 +72,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             </div> : <p className="rounded-2xl border border-[var(--line)] bg-white p-6 text-sm text-[var(--muted)]">No instructors were connected to this course in the recovered evaluations.</p>}
           </section>
 
-          {comments.length ? <section className="detail-section"><SectionHeading eyebrow="Student perspective" title="Historical comments" description="Recovered anonymous comments are shown as written and may reflect older course formats." /><div className="grid gap-4 lg:grid-cols-2">{comments.map((comment) => <CommentCard key={comment.id} comment={comment} context="course" />)}</div></section> : null}
+          {comments.length ? <section className="detail-section"><SectionHeading eyebrow="Student perspective" title="Written reviews" description="Recovered and new anonymous comments are shown as written and may reflect different course formats." href={`/comments?q=${encodeURIComponent(course.code)}`} linkLabel="Browse all matching comments" /><div className="grid gap-4 lg:grid-cols-2">{comments.map((comment) => <CommentCard key={comment.id} comment={comment} context="course" />)}</div></section> : null}
 
           {semesters.length ? <section className="detail-section"><SectionHeading eyebrow="Across time" title="Evaluation history" description="Section-level results available in the recovered archive." /><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{semesters.slice(0, 12).map((semester) => <div key={semester.semester} className="rounded-xl border border-[var(--line)] bg-white p-4"><div className="flex items-center justify-between gap-3"><p className="font-bold text-[var(--navy)]">{semester.semester}</p><span className="text-xs text-[var(--muted)]">{semester.reviewCount} section{semester.reviewCount === 1 ? "" : "s"}</span></div><div className="mt-3 flex gap-5 text-xs text-[var(--muted)]"><span>Course <strong className="text-[var(--ink)]">{formatRating(semester.courseOverall)}</strong></span><span>Instructor <strong className="text-[var(--ink)]">{formatRating(semester.instructorOverall)}</strong></span></div></div>)}</div></section> : null}
         </div>

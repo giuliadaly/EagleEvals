@@ -1,13 +1,12 @@
-import { readFile, rename, writeFile } from 'node:fs/promises';
+import { rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import { applySchema, connectDatabase, importBatches } from './lib/database.mjs';
+import { applyMigrations, connectDatabase, importBatches } from './lib/database.mjs';
 import { verifyDatabase } from './lib/database-verification.mjs';
 import {
   loadAndValidateSnapshot,
   parseSnapshotArgument,
-  sqlStatements,
 } from './lib/recovery-snapshot.mjs';
 
 export const courseQuery = `
@@ -163,7 +162,7 @@ async function updateLocalMigrationState(snapshot, report) {
     ...snapshot.inventory,
     databaseMigrationStatus: 'verified',
     databaseMigrationVerifiedAt: report.verifiedAt,
-    localDeletionStatus: 'blocked',
+    localDeletionStatus: snapshot.inventory.localDeletionStatus ?? 'blocked',
   });
 }
 
@@ -172,9 +171,7 @@ export async function run() {
   process.stdout.write('Validating recovery snapshot checksums and relationships...\n');
   const snapshot = await loadAndValidateSnapshot(snapshotPath);
   const sql = connectDatabase();
-  const schemaPath = path.join(process.cwd(), 'database', 'migrations', '001_initial.sql');
-  const schemaSource = await readFile(schemaPath, 'utf8');
-  await applySchema(sql, sqlStatements(schemaSource));
+  await applyMigrations(sql, path.join(process.cwd(), 'database', 'migrations'));
 
   await sql.query(
     `INSERT INTO migration_runs (

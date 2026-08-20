@@ -1,0 +1,44 @@
+import type { Metadata } from "next";
+import { AnonymousReviewForm } from "@/components/anonymous-review-form";
+import { Breadcrumbs } from "@/components/page-parts";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { getReviewSelections } from "@/data/queries";
+
+export const metadata: Metadata = {
+  title: "Write an anonymous review",
+  description: "Share a fully anonymous Boston College course and professor review.",
+};
+
+function semesterOptions(currentYear: number): string[] {
+  const options: string[] = [];
+  for (let year = currentYear; year >= currentYear - 3; year -= 1) {
+    options.push(`Fall ${year}`, `Summer ${year}`, `Spring ${year}`);
+  }
+  return options;
+}
+
+export default async function ReviewPage({ searchParams }: { searchParams: Promise<{ course?: string; professor?: string }> }) {
+  const params = await searchParams;
+  const selections = await getReviewSelections(params.course, params.professor);
+  const year = new Date().getUTCFullYear();
+  return (
+    <>
+      <SiteHeader />
+      <main className="flex-1">
+        <section className="border-b border-[var(--line)] bg-white py-10 sm:py-14">
+          <div className="page-shell">
+            <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Write a review" }]} />
+            <p className="eyebrow mt-7 text-[var(--gold-dark)]">No account required</p>
+            <h1 className="mt-3 max-w-4xl font-serif text-4xl font-bold tracking-[-0.04em] text-[var(--navy)] sm:text-5xl">Write a fully anonymous review</h1>
+            <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--ink-soft)]">Help the next student understand the class. Your ratings and comment publish without an EagleEvals account or any identity field attached.</p>
+          </div>
+        </section>
+        <div className="page-shell py-10 sm:py-14">
+          <AnonymousReviewForm initialCourse={selections.course} initialProfessor={selections.professor} semesterOptions={semesterOptions(year)} />
+        </div>
+      </main>
+      <SiteFooter />
+    </>
+  );
+}

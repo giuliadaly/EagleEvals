@@ -27,7 +27,8 @@ export function SiteHeader({ showSearch = true }: { showSearch?: boolean }) {
         <nav className="ml-auto flex items-center gap-1 text-sm font-semibold text-[var(--muted)]" aria-label="Primary navigation">
           <Link className="nav-link inline-flex" href="/courses">Courses</Link>
           <Link className="nav-link inline-flex" href="/professors">Professors</Link>
-          <Link className="nav-link hidden sm:inline-flex" href="/about">About</Link>
+          <Link className="nav-link hidden lg:inline-flex" href="/evaluations">Evaluations</Link>
+          <Link className="button-gold ml-1 min-h-9 px-3 py-2" href="/review"><span className="sm:hidden">Review</span><span className="hidden sm:inline">Write review</span></Link>
         </nav>
       </div>
     </header>

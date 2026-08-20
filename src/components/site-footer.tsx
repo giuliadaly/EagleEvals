@@ -16,7 +16,9 @@ export function SiteFooter() {
           <div className="mt-4 flex flex-col gap-2 text-sm text-white/72">
             <Link className="footer-link" href="/courses">Browse courses</Link>
             <Link className="footer-link" href="/professors">Browse professors</Link>
-            <Link className="footer-link" href="/search">Search everything</Link>
+            <Link className="footer-link" href="/evaluations">Browse all evaluations</Link>
+            <Link className="footer-link" href="/comments">Browse written reviews</Link>
+            <Link className="footer-link" href="/review">Write an anonymous review</Link>
           </div>
         </div>
         <div>

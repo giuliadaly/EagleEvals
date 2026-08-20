@@ -40,9 +40,9 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-a, button, input { -webkit-tap-highlight-color: transparent; }
+a, button, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 
-a:focus-visible, button:focus-visible, input:focus-visible {
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--gold) 72%, white);
   outline-offset: 3px;
 }
@@ -90,6 +90,10 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .button-primary:hover { background: var(--blue); }
 .button-secondary { border: 1px solid var(--line); background: white; color: var(--navy); }
 .button-secondary:hover { border-color: var(--gold); background: var(--gold-pale); }
+
+.form-label { display: block; margin-bottom: .45rem; color: var(--navy); font-size: .78rem; font-weight: 800; }
+.form-control { width: 100%; min-height: 2.85rem; border: 1px solid var(--line); border-radius: .75rem; background: white; padding: .7rem .85rem; color: var(--ink); font-size: .9rem; outline: none; transition: border-color .15s, box-shadow .15s; }
+.form-control:focus { border-color: var(--gold-dark); box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 18%, transparent); }
 
 .detail-section { padding-block: 3.5rem; border-top: 1px solid var(--line); }
 

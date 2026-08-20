@@ -13,13 +13,13 @@ export default async function AboutPage() {
       <p>The public legacy application still exposed enough structured information to reconstruct most of its useful archive. We preserved and verified {formatCount(stats.courses)} courses, {formatCount(stats.professors)} professors, {formatCount(stats.reviews)} historical section evaluations, and {formatCount(stats.comments)} anonymized student comments before moving them into a new managed database.</p>
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="info-stat"><strong>Verified</strong><span>Counts and relationships were reconciled after migration.</span></div>
-        <div className="info-stat"><strong>Read-only</strong><span>No accounts or new reviews are being accepted at launch.</span></div>
+        <div className="info-stat"><strong>Anonymous</strong><span>New reviews require no account or identity fields.</span></div>
         <div className="info-stat"><strong>Independent</strong><span>This site is not operated by or affiliated with Boston College.</span></div>
       </div>
       <h2>How to read the ratings</h2>
       <p>The numerical ratings are historical averages from available Boston College course-evaluation records. They describe particular sections and semesters; they are not promises about a future class. Some courses, faculty roles, and teaching formats may have changed since the data was collected.</p>
-      <h2>What comes next</h2>
-      <p>The first priority is dependable access to the recovered archive. A future submission system would need authentication, abuse prevention, moderation, correction requests, and clear privacy rules before it opens. Until then, EagleEvals intentionally stays read-only.</p>
+      <h2>Keeping it useful</h2>
+      <p>The complete recovered evaluation archive is now publicly browsable, not just summarized. Students can also add new anonymous ratings and comments. Submissions are validated against the course and professor database, reject contact information and links, and do not store account or identity fields.</p>
     </InfoPage>
   );
 }
