@@ -27,11 +27,12 @@ export function SectionHeading({ eyebrow, title, description, href, linkLabel }:
   );
 }
 
-export function Pagination({ page, totalPages, basePath, query }: { page: number; totalPages: number; basePath: string; query?: string }) {
+export function Pagination({ page, totalPages, basePath, query, params: extraParams }: { page: number; totalPages: number; basePath: string; query?: string; params?: Record<string, string | undefined> }) {
   if (totalPages <= 1) return null;
   const href = (target: number) => {
     const params = new URLSearchParams();
     if (query) params.set("q", query);
+    Object.entries(extraParams ?? {}).forEach(([key, value]) => { if (value) params.set(key, value); });
     params.set("page", String(target));
     return `${basePath}?${params.toString()}`;
   };

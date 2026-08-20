@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-20T01:35:00-04:00",
+  "title": "Design System: EagleEvals Registrar Dossier",
+  "extensions": {
+    "colorMeta": {
+      "archive-paper": { "role": "neutral", "displayName": "Archive Paper", "canonical": "#fbf8f1", "tonalRamp": ["#241f18", "#403a31", "#5e574d", "#7e776c", "#9f988d", "#c1bbb1", "#e2ddd5", "#fbf8f1"] },
+      "raised-paper": { "role": "neutral", "displayName": "Raised Paper", "canonical": "#fffdf9", "tonalRamp": ["#25211b", "#423d35", "#615b52", "#817b72", "#a29c93", "#c4beb6", "#e6e1da", "#fffdf9"] },
+      "ledger-paper": { "role": "neutral", "displayName": "Ledger Paper", "canonical": "#f1eadc", "tonalRamp": ["#251f17", "#40382d", "#5d5345", "#7a705f", "#998e7d", "#b8ad9d", "#d7ccbc", "#f1eadc"] },
+      "hover-paper": { "role": "neutral", "displayName": "Hover Paper", "canonical": "#ebe1d1", "tonalRamp": ["#241e17", "#3e352a", "#5a4f41", "#76695a", "#928473", "#af9f8d", "#ccbaa6", "#ebe1d1"] },
+      "carbon-ink": { "role": "neutral", "displayName": "Carbon Ink", "canonical": "#2b211f", "tonalRamp": ["#2b211f", "#463a37", "#625451", "#7f706c", "#9c8d89", "#baaba7", "#d8cac7", "#f7eae7"] },
+      "soft-ink": { "role": "neutral", "displayName": "Soft Ink", "canonical": "#544640", "tonalRamp": ["#231b18", "#3b302c", "#544640", "#70605a", "#8d7b75", "#ab9892", "#c9b6b0", "#e8d6d1"] },
+      "marginalia": { "role": "neutral", "displayName": "Marginalia", "canonical": "#74645d", "tonalRamp": ["#261d1a", "#3e312d", "#574741", "#74645d", "#91817a", "#afa09a", "#cdbfba", "#ecdfda"] },
+      "bc-maroon": { "role": "primary", "displayName": "BC Maroon", "canonical": "#8a1830", "tonalRamp": ["#330611", "#520a1c", "#711023", "#8a1830", "#aa374c", "#c96878", "#e69fab", "#f9dce1"] },
+      "bc-maroon-deep": { "role": "primary", "displayName": "Deep BC Maroon", "canonical": "#5a1021", "tonalRamp": ["#29050d", "#420918", "#5a1021", "#7a2738", "#9a4555", "#b96b79", "#d99aa5", "#f4d6dc"] },
+      "on-maroon": { "role": "neutral", "displayName": "On-Maroon Paper", "canonical": "#fffaf1", "tonalRamp": ["#251f17", "#423a30", "#60574c", "#81776c", "#a2998d", "#c4baaf", "#e6ddd3", "#fffaf1"] },
+      "evidence-gold": { "role": "secondary", "displayName": "Evidence Gold", "canonical": "#c89c37", "tonalRamp": ["#302307", "#503b0c", "#705515", "#8f701f", "#ae8a2b", "#c89c37", "#e2c36f", "#f8edc8"] },
+      "evidence-gold-light": { "role": "secondary", "displayName": "Light Evidence Gold", "canonical": "#e2c36f", "tonalRamp": ["#302706", "#51430d", "#726019", "#927e29", "#b29d3e", "#cdb756", "#e2c36f", "#f8edca"] },
+      "evidence-gold-dark": { "role": "secondary", "displayName": "Dark Evidence Gold", "canonical": "#8b6412", "tonalRamp": ["#2c1d03", "#493207", "#68490b", "#8b6412", "#aa812c", "#c8a453", "#e3ca8a", "#f8edce"] },
+      "evidence-gold-pale": { "role": "secondary", "displayName": "Pale Evidence Gold", "canonical": "#f5ecd2", "tonalRamp": ["#2e260e", "#4d411c", "#6c5e2e", "#8c7c45", "#aa9a61", "#c9b981", "#e4d7ac", "#f5ecd2"] },
+      "ledger-rule": { "role": "neutral", "displayName": "Ledger Rule", "canonical": "#ded2c1", "tonalRamp": ["#261f17", "#41372c", "#5e5143", "#7b6c5c", "#998878", "#b6a594", "#d0c0ae", "#ede2d3"] },
+      "ledger-rule-strong": { "role": "neutral", "displayName": "Strong Ledger Rule", "canonical": "#b8a48c", "tonalRamp": ["#281e13", "#453528", "#614e3d", "#7f6853", "#9d836a", "#b8a48c", "#d5c6b3", "#efe5d8"] },
+      "success-ink": { "role": "tertiary", "displayName": "Success Ink", "canonical": "#247252", "tonalRamp": ["#09281b", "#103f2c", "#18583f", "#247252", "#438e6e", "#6cab91", "#9bc9b5", "#d8eee4"] },
+      "success-paper": { "role": "tertiary", "displayName": "Success Paper", "canonical": "#e7f5ee", "tonalRamp": ["#10281c", "#204333", "#39604c", "#567e68", "#769c84", "#9bbba4", "#c1dac7", "#e7f5ee"] },
+      "caution-ink": { "role": "tertiary", "displayName": "Caution Ink", "canonical": "#9c3f4b", "tonalRamp": ["#320f16", "#511923", "#702631", "#8f3540", "#ad5360", "#ca7c86", "#e5aeb5", "#f8dfe3"] },
+      "caution-paper": { "role": "tertiary", "displayName": "Caution Paper", "canonical": "#fbecef", "tonalRamp": ["#31151b", "#50262e", "#6f3b45", "#8f5360", "#ad707d", "#cb94a0", "#e5bdc5", "#fbecef"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Professor names and page-defining directory titles." },
+      "headline": { "displayName": "Headline", "purpose": "Dossier evidence sections and empty-state decisions." },
+      "title": { "displayName": "Title", "purpose": "Professor and course cards." },
+      "body": { "displayName": "Body", "purpose": "Interface copy, filters, explanations, and comments." },
+      "label": { "displayName": "Label", "purpose": "Form labels, column headings, and mobile data labels." },
+      "data": { "displayName": "Data", "purpose": "Scores, counts, course codes, terms, sections, and record numbers." }
+    },
+    "shadows": [
+      { "name": "directory-rest", "value": "0 1px 2px rgba(43, 33, 31, 0.045)", "purpose": "Low resting depth for navigable directory cards." },
+      { "name": "directory-hover", "value": "0 12px 30px rgba(43, 33, 31, 0.08)", "purpose": "Restrained hover lift for navigable cards." },
+      { "name": "search-overlay", "value": "0 18px 48px rgba(43, 33, 31, 0.1)", "purpose": "Transient separation for autocomplete results." }
+    ],
+    "motion": [
+      { "name": "state-change", "value": "160ms ease", "purpose": "Color, border, and transform feedback on controls and cards." }
+    ],
+    "breakpoints": [
+      { "name": "compact", "value": "640px" },
+      { "name": "desktop-rail", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The principal submit or dossier action.",
+      "html": "<button class=\"ds-button-primary\">Open professor record</button>",
+      "css": ".ds-button-primary { min-height: 2.75rem; padding: .7rem 1.05rem; border: 1px solid #5a1021; border-radius: .375rem; background: #5a1021; color: #fffaf1; font: 700 1rem/1.2 Arial, sans-serif; cursor: pointer; transition: background 160ms ease, transform 160ms ease; } .ds-button-primary:hover { background: #8a1830; transform: translateY(-1px); } .ds-button-primary:focus-visible { outline: 2px solid #8b6412; outline-offset: 3px; }"
+    },
+    {
+      "name": "Gold Review Button",
+      "kind": "button",
+      "refersTo": "button-gold",
+      "description": "The compact global action for writing an anonymous review.",
+      "html": "<button class=\"ds-button-gold\">Write review</button>",
+      "css": ".ds-button-gold { min-height: 2.75rem; padding: .7rem 1.05rem; border: 1px solid #8b6412; border-radius: .375rem; background: #c89c37; color: #5a1021; font: 700 1rem/1.2 Arial, sans-serif; cursor: pointer; transition: background 160ms ease, transform 160ms ease; } .ds-button-gold:hover { background: #e2c36f; transform: translateY(-1px); } .ds-button-gold:focus-visible { outline: 2px solid #5a1021; outline-offset: 3px; }"
+    },
+    {
+      "name": "Search Field",
+      "kind": "input",
+      "refersTo": "form-control",
+      "description": "A labeled course-or-professor search field with strong keyboard focus.",
+      "html": "<label class=\"ds-search-label\">Search the archive<input class=\"ds-search\" type=\"search\" placeholder=\"Professor or course\"></label>",
+      "css": ".ds-search-label { display: grid; gap: .4rem; color: #544640; font: 700 .75rem/1.2 Arial, sans-serif; letter-spacing: .04em; text-transform: uppercase; } .ds-search { min-height: 2.85rem; padding: .7rem .85rem; border: 1px solid #b8a48c; border-radius: .375rem; background: #fffdf9; color: #2b211f; font: 400 1rem/1.4 Arial, sans-serif; } .ds-search:hover { border-color: #8a1830; } .ds-search:focus-visible { border-color: #8b6412; outline: 2px solid #e2c36f; outline-offset: 2px; }"
+    },
+    {
+      "name": "Professor Directory Card",
+      "kind": "card",
+      "refersTo": "professor-card",
+      "description": "A flat ruled record for scanning a professor before opening the dossier.",
+      "html": "<article class=\"ds-professor\"><span class=\"ds-avatar\">MA</span><div><p class=\"ds-kicker\">Professor record</p><h3>Megan Bowman Arndt</h3><p>4.88 instructor · 5 evaluations</p></div><span class=\"ds-arrow\">→</span></article>",
+      "css": ".ds-professor { display: grid; grid-template-columns: 3rem 1fr auto; gap: 1rem; align-items: center; padding: 1.5rem; border: 1px solid #b8a48c; border-top: 3px solid #8a1830; border-radius: .375rem; background: #fffdf9; color: #2b211f; box-shadow: 0 1px 2px rgba(43,33,31,.045); transition: transform 160ms ease, box-shadow 160ms ease; } .ds-professor:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(43,33,31,.08); } .ds-professor:focus-within { outline: 2px solid #8b6412; outline-offset: 3px; } .ds-avatar { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: .375rem; background: #5a1021; color: #fffaf1; font-weight: 700; } .ds-kicker { margin: 0 0 .25rem; color: #8b6412; font: 700 .7rem/1.2 monospace; letter-spacing: .05em; text-transform: uppercase; } .ds-professor h3, .ds-professor p { margin: 0; } .ds-professor h3 { font: 700 1.25rem/1.25 Arial, sans-serif; } .ds-professor p:last-child { margin-top: .35rem; color: #544640; } .ds-arrow { color: #8a1830; font-size: 1.5rem; }"
+    },
+    {
+      "name": "Decision Summary",
+      "kind": "custom",
+      "refersTo": "decision-summary",
+      "description": "The first evidence block in a professor dossier.",
+      "html": "<section class=\"ds-summary\"><div><strong>4.88</strong><span>Instructor rating</span><small>5 evaluations</small></div><div><strong>4.79</strong><span>Course rating</span><small>5 evaluations</small></div><div><strong>5</strong><span>Evaluations</span><small>Recovered archive</small></div></section>",
+      "css": ".ds-summary { display: grid; grid-template-columns: repeat(3, 1fr); border-block: 3px solid #5a1021; background: #fbf8f1; color: #2b211f; } .ds-summary div { display: grid; gap: .2rem; padding: 1rem; border-right: 1px solid #ded2c1; } .ds-summary div:last-child { border-right: 0; } .ds-summary strong { color: #5a1021; font: 600 1.65rem/1.1 monospace; } .ds-summary span { font: 700 .9rem/1.3 Arial, sans-serif; } .ds-summary small { color: #74645d; font: 500 .72rem/1.3 monospace; } @media (max-width: 639px) { .ds-summary { grid-template-columns: 1fr; } .ds-summary div { border-right: 0; border-bottom: 1px solid #ded2c1; } }"
+    },
+    {
+      "name": "Written Comment Record",
+      "kind": "custom",
+      "description": "A ruled student comment with evidence context inline.",
+      "html": "<article class=\"ds-comment\"><p class=\"ds-comment-meta\">ENGL1080 · Spring 2024 · Would take again</p><p>Clear feedback, useful discussion, and a manageable weekly workload.</p></article>",
+      "css": ".ds-comment { padding: 1rem 0 1.25rem; border-top: 1px solid #b8a48c; color: #2b211f; } .ds-comment:last-child { border-bottom: 1px solid #b8a48c; } .ds-comment p { margin: 0; font: 400 1.02rem/1.65 Arial, sans-serif; } .ds-comment .ds-comment-meta { margin-bottom: .55rem; color: #74645d; font: 600 .72rem/1.35 monospace; letter-spacing: .02em; } .ds-comment:hover { background: #f1eadc; } .ds-comment:focus-within { outline: 2px solid #8b6412; outline-offset: 3px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Student Registrar's Dossier",
+    "overview": "EagleEvals is a trustworthy student-built registrar: warm, direct, and organized around a real registration decision. It uses ruled evidence, visible counts, and legible comparison instead of a generic review-card wall. Boston College maroon and restrained gold root the experience in its student community without imitating an official University product.\n\nThe system moves from a filterable directory into a professor dossier. The directory helps students narrow a large archive; the dossier places the decision signal first, written experience immediately after it, and complete structured evidence below. Imagery is nearly absent because names, comments, scores, terms, and source labels are the material.",
+    "keyCharacteristics": [
+      "Warm ivory paper with dark, high-legibility ink.",
+      "BC maroon for identity and primary actions; muted gold for contextual emphasis.",
+      "Square identity marks, gently rounded controls, and flat ruled records.",
+      "Geometric display type, hyperlegible body type, and monospaced data.",
+      "Dense evidence that linearizes cleanly without losing meaning on mobile."
+    ],
+    "rules": [
+      { "name": "The Maroon Means Priority Rule", "body": "Deep maroon carries identity and the principal action. Standard maroon handles links and active emphasis; neither becomes a decorative page wash.", "section": "colors" },
+      { "name": "The Gold Means Context Rule", "body": "Gold draws attention to review actions, rating context, or focus. It never communicates ranking by itself.", "section": "colors" },
+      { "name": "The No Navy Rule", "body": "Navy is not part of the visual world; legacy navy and blue aliases resolve to maroon.", "section": "colors" },
+      { "name": "The Three-Voice Rule", "body": "Archivo names the record, Atkinson explains it, and IBM Plex Mono carries the evidence. Do not swap those jobs.", "section": "typography" },
+      { "name": "The Data Stays Upright Rule", "body": "Hierarchy comes from weight, scale, rules, and spacing; headings and data are never italicized.", "section": "typography" },
+      { "name": "The Comments-Second Rule", "body": "Written comments follow the decision summary immediately because students need qualitative context before deeper tables.", "section": "layout" },
+      { "name": "The Desktop Index Rule", "body": "The record index aids wide-screen scanning; it must not consume mobile space or duplicate the linear mobile path.", "section": "layout" },
+      { "name": "The Ruled-Not-Floated Rule", "body": "Stable evidence is separated by rules and paper tones. Elevation belongs to navigation cards and overlays, not the dossier body.", "section": "elevation" },
+      { "name": "The Square Record Rule", "body": "Professor records should read as documents, not soft lifestyle cards. Avoid inflated radii and repeated pill containers.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do preserve the professor order: name → decision summary → written comments → course pairings → every rating field → term and section history → optional faculty details.",
+      "Do keep the professor directory filters URL-backed, labeled, and usable by keyboard.",
+      "Do put evidence counts, recency, course context, and source labels beside the evidence they qualify.",
+      "Do hide the record index below `64rem` and preserve a single linear mobile reading path.",
+      "Do keep interactive targets near `2.75rem` high with visible focus states.",
+      "Do use rules and spacing as the default organization system for records."
+    ],
+    "donts": [
+      "Don't move comments below course, metric, or history tables.",
+      "Don't add a separate “What came from where” section; label provenance inline.",
+      "Don't replace the dossier with a generic wall of review cards.",
+      "Don't use navy, official Boston College marks, or any treatment implying University affiliation.",
+      "Don't hide missing data, merge written comments into structured averages, or rely on color alone for status.",
+      "Don't introduce decorative gradients, glass effects, pill-heavy navigation, or ornamental shadows into the dossier."
+    ]
+  }
+}

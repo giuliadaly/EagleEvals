@@ -91,7 +91,7 @@ function CatalogPicker({
         </button>
       ) : null}
       {open ? (
-        <div id={`${inputId}-choices`} role="listbox" className="absolute left-0 right-0 top-full z-30 mt-2 max-h-72 overflow-y-auto rounded-xl border border-[var(--line)] bg-white p-2 shadow-xl">
+        <div id={`${inputId}-choices`} role="listbox" className="absolute left-0 right-0 top-full z-30 mt-2 max-h-72 overflow-y-auto rounded-[.375rem] border border-[var(--line-strong)] bg-[var(--paper-raised)] p-2 shadow-xl">
           {loading && choices.length === 0 ? <p className="p-3 text-sm text-[var(--muted)]">Searching…</p> : null}
           {!loading && choices.length === 0 ? <p className="p-3 text-sm text-[var(--muted)]">No matches found.</p> : null}
           {kind === "course" ? (choices as QuickCourse[]).map((course) => (
@@ -137,7 +137,7 @@ function CatalogPicker({
 
 function RatingField({ name, label, hint }: { name: string; label: string; hint?: string }) {
   return (
-    <label className="rounded-xl border border-[var(--line)] bg-white p-4">
+    <label className="rounded-[.375rem] border border-[var(--line-strong)] bg-[var(--paper-raised)] p-4">
       <span className="block text-sm font-bold text-[var(--navy)]">{label}</span>
       {hint ? <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">{hint}</span> : null}
       <select name={name} className="form-control mt-3" defaultValue="" required>
@@ -219,7 +219,7 @@ export function AnonymousReviewForm({
 
   return (
     <form onSubmit={submit} className="space-y-10">
-      <div className="rounded-2xl border border-[var(--line)] bg-white p-5 sm:p-7">
+      <div className="rounded-[.75rem] border border-[var(--line-strong)] bg-[var(--paper-raised)] p-5 sm:p-7">
         <h2 className="font-serif text-2xl font-bold text-[var(--navy)]">1. Choose the class</h2>
         <div className="mt-6 grid gap-5 md:grid-cols-2">
           <CatalogPicker kind="course" label="Course" selected={course} onSelect={setCourse} />
@@ -247,7 +247,7 @@ export function AnonymousReviewForm({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[var(--line)] bg-white p-5 sm:p-7">
+      <div className="rounded-[.75rem] border border-[var(--line-strong)] bg-[var(--paper-raised)] p-5 sm:p-7">
         <h2 className="font-serif text-2xl font-bold text-[var(--navy)]">3. Share useful context</h2>
         <label className="mt-6 block"><span className="form-label">Anonymous written review</span><textarea name="message" className="form-control min-h-40 resize-y leading-6" minLength={20} maxLength={1000} placeholder="What should another student know about the course, workload, teaching, or assignments?" required /></label>
         <p className="mt-2 text-xs leading-5 text-[var(--muted)]">20–1,000 characters. Do not include names of students, contact information, links, or private personal details.</p>
@@ -263,11 +263,11 @@ export function AnonymousReviewForm({
       </div>
 
       <div aria-live="polite">
-        {error ? <p className="rounded-xl border border-[var(--rose)]/25 bg-[var(--rose-pale)] p-4 text-sm font-semibold text-[var(--rose)]">{error}</p> : null}
-        {success ? <div className="rounded-xl border border-[var(--green)]/25 bg-[var(--green-pale)] p-5 text-sm text-[var(--green)]"><p className="font-bold">{success.message}</p><p className="mt-2">It is now included in the public ratings and anonymous comments.</p><div className="mt-3 flex flex-wrap gap-4 font-bold"><Link href={`/courses/${success.course.id}`}>View {success.course.code}</Link><Link href={`/professors/${success.professor.id}`}>View {success.professor.name}</Link></div></div> : null}
+        {error ? <p className="rounded-[.375rem] border border-[var(--rose)]/25 bg-[var(--rose-pale)] p-4 text-sm font-semibold text-[var(--rose)]">{error}</p> : null}
+        {success ? <div className="rounded-[.375rem] border border-[var(--green)]/25 bg-[var(--green-pale)] p-5 text-sm text-[var(--green)]"><p className="font-bold">{success.message}</p><p className="mt-2">It is now included in the public ratings and anonymous comments.</p><div className="mt-3 flex flex-wrap gap-4 font-bold"><Link href={`/courses/${success.course.id}`}>View {success.course.code}</Link><Link href={`/professors/${success.professor.id}`}>View {success.professor.name}</Link></div></div> : null}
       </div>
 
-      <div className="flex flex-col gap-4 rounded-2xl bg-[var(--navy)] p-6 text-white sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 rounded-[.75rem] bg-[var(--maroon-deep)] p-6 text-white sm:flex-row sm:items-center sm:justify-between">
         <p className="max-w-2xl text-sm leading-6 text-white/68">No account, name, email, student ID, IP address, or browser identifier is saved with your review. Infrastructure providers may still process routine security logs as described in the privacy policy.</p>
         <button className="button-gold shrink-0 disabled:cursor-not-allowed disabled:opacity-60" type="submit" disabled={pending}>{pending ? "Publishing…" : "Publish anonymous review"}</button>
       </div>

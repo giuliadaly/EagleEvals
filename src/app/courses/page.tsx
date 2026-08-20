@@ -7,31 +7,32 @@ import { SiteHeader } from "@/components/site-header";
 import { formatCount } from "@/data/format";
 import { getCoursesPage } from "@/data/queries";
 
-export const metadata: Metadata = { title: "Courses", description: "Browse restored historical evaluations for Boston College courses." };
+export const metadata: Metadata = { title: "Courses", description: "Search and filter restored historical evaluations for Boston College courses." };
 
-export default async function CoursesPage({ searchParams }: { searchParams: Promise<{ q?: string; page?: string }> }) {
+export default async function CoursesPage({ searchParams }: { searchParams: Promise<{ q?: string; page?: string; sort?: string; min?: string }> }) {
   const params = await searchParams;
-  const data = await getCoursesPage(params.q ?? "", Number(params.page ?? 1));
+  const sort = ["rating", "instructor", "name"].includes(params.sort ?? "") ? params.sort! : "evidence";
+  const min = [4, 4.5].includes(Number(params.min)) ? Number(params.min) : 0;
+  const data = await getCoursesPage(params.q ?? "", Number(params.page ?? 1), sort, min);
   return (
     <>
       <SiteHeader />
       <main className="flex-1">
-        <section className="border-b border-[var(--line)] bg-white py-12 sm:py-16">
+        <section className="border-b border-[var(--line-strong)] bg-[var(--paper-raised)] py-10 sm:py-14">
           <div className="page-shell">
-            <p className="eyebrow text-[var(--gold-dark)]">Course directory</p>
-            <div className="mt-3 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-              <div><h1 className="font-serif text-4xl font-bold tracking-[-0.035em] text-[var(--navy)] sm:text-5xl">Browse courses</h1><p className="mt-3 text-sm text-[var(--muted)]">{formatCount(data.total)} courses in the recovered archive</p></div>
-              <form role="search" className="relative w-full sm:max-w-sm">
-                <SearchIcon className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
-                <label htmlFor="course-filter" className="sr-only">Filter courses</label>
-                <input id="course-filter" name="q" defaultValue={data.query} placeholder="Filter code, title, or subject" className="h-11 w-full rounded-xl border border-[var(--line)] bg-[var(--cream)] pl-11 pr-4 text-sm outline-none focus:border-[var(--gold-dark)] focus:ring-4 focus:ring-[var(--gold)]/18" />
-              </form>
-            </div>
+            <h1 className="max-w-4xl font-serif text-4xl font-semibold tracking-[-0.035em] text-[var(--ink)] sm:text-5xl">Find a course without digging.</h1>
+            <p className="mt-3 text-sm text-[var(--muted)]">{formatCount(data.total)} matching courses · filter by rating or evidence depth</p>
+            <form role="search" className="mt-8 grid gap-3 rounded-[.75rem] border border-[var(--line-strong)] bg-[var(--paper-ledger)] p-4 sm:grid-cols-[minmax(0,1fr)_13rem_11rem_auto] sm:items-end">
+              <label className="relative"><span className="form-label">Course code, title, or subject</span><SearchIcon className="pointer-events-none absolute bottom-3.5 left-3.5 size-4 text-[var(--muted)]" /><input name="q" defaultValue={data.query} placeholder="e.g. ECON1101" className="form-control pl-10" /></label>
+              <label><span className="form-label">Order by</span><select name="sort" defaultValue={sort} className="form-control"><option value="evidence">Most evaluations</option><option value="rating">Highest course rating</option><option value="instructor">Highest instructor rating</option><option value="name">Course code A–Z</option></select></label>
+              <label><span className="form-label">Minimum rating</span><select name="min" defaultValue={String(min)} className="form-control"><option value="0">Any rating</option><option value="4">4.0 and above</option><option value="4.5">4.5 and above</option></select></label>
+              <button className="button-primary" type="submit">Apply filters</button>
+            </form>
           </div>
         </section>
         <div className="page-shell py-12">
-          {data.items.length ? <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{data.items.map((course) => <CourseCard key={course.id} course={course} />)}</div> : <div className="py-20 text-center"><h2 className="font-serif text-3xl font-bold text-[var(--navy)]">No courses found</h2><p className="mt-2 text-sm text-[var(--muted)]">Try a shorter course code, title, or subject.</p></div>}
-          <Pagination page={data.page} totalPages={data.totalPages} basePath="/courses" query={data.query} />
+          {data.items.length ? <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{data.items.map((course) => <CourseCard key={course.id} course={course} />)}</div> : <div className="py-20 text-center"><h2 className="font-serif text-3xl font-semibold text-[var(--ink)]">No courses match those filters</h2><p className="mt-2 text-sm text-[var(--muted)]">Lower the rating threshold or try a shorter search.</p></div>}
+          <Pagination page={data.page} totalPages={data.totalPages} basePath="/courses" query={data.query} params={{ sort, min: min ? String(min) : undefined }} />
         </div>
       </main>
       <SiteFooter />
