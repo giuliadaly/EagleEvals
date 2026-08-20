@@ -18,9 +18,17 @@ Every restored table retains its full original document in a JSONB column in
 addition to normalized fields. Legacy identifiers remain the primary keys so
 the migration is traceable and old relationships stay exact.
 
+## Anonymous submissions
+
+New reviews use `source = 'eagleevals_anonymous'` and a null
+`source_snapshot`; recovered rows retain their dated snapshot relationship.
+The application stores no identity or request-metadata column with a review.
+An exact-submission fingerprint is derived only from the review payload to
+prevent duplicate writes.
+
 ## Rerun behavior
 
-The importer applies `database/migrations/001_initial.sql`, upserts one
+The importer applies every numbered SQL file in `database/migrations/`, upserts one
 snapshot in dependency order, and verifies the database before marking the run
 successful. A failed or interrupted import can be rerun with the same command.
 The original compressed archives remain the source of truth until the provider

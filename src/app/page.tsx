@@ -52,7 +52,7 @@ export default async function Home() {
                   <div className="rounded-xl bg-black/15 p-4"><p className="text-2xl font-black text-[var(--gold)]">{formatCount(stats.reviews)}</p><p className="mt-1 text-xs text-white/52">evaluations</p></div>
                   <div className="rounded-xl bg-black/15 p-4"><p className="text-2xl font-black text-[var(--gold)]">{formatCount(stats.comments)}</p><p className="mt-1 text-xs text-white/52">comments</p></div>
                 </div>
-                <Link href="/about" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-white hover:text-[var(--gold)]">How it was recovered <ArrowIcon className="size-4" /></Link>
+                <Link href="/evaluations" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-white hover:text-[var(--gold)]">Browse every evaluation <ArrowIcon className="size-4" /></Link>
               </div>
             </aside>
           </div>
@@ -95,9 +95,9 @@ export default async function Home() {
             <div>
               <p className="eyebrow text-[var(--gold)]">Built to stay useful</p>
               <h2 className="mt-3 max-w-2xl font-serif text-3xl font-bold tracking-[-0.03em] sm:text-4xl">A student resource should outlast its first graduating class.</h2>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-white/62">EagleEvals is a read-only archive today. That keeps the recovered information accessible while a responsible system for new submissions and moderation is designed.</p>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-white/62">Browse every recovered evaluation, then add your own ratings and comment without creating an account or attaching your identity.</p>
             </div>
-            <Link href="/about" className="button-gold mt-7 shrink-0 lg:mt-0">Read the project story <ArrowIcon className="size-4" /></Link>
+            <Link href="/review" className="button-gold mt-7 shrink-0 lg:mt-0">Write an anonymous review <ArrowIcon className="size-4" /></Link>
           </div>
         </section>
       </main>

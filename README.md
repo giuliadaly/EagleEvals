@@ -16,17 +16,16 @@ Production domain: [eagleevals.com](https://eagleevals.com)
 
 ## Current product
 
-The first production release is intentionally read-only. It includes:
+The production application includes:
 
 - live autocomplete across course codes, titles, subjects, and professor names
 - paginated course and professor directories
+- a paginated, searchable view of every public historical evaluation row
+- a paginated, searchable view of every public written comment
 - course ratings, workload estimates, instructor comparisons, comments, and semester history
 - professor ratings, course history, public faculty details, and comments
+- fully anonymous review submission with no account or identity fields
 - recovery context, privacy information, terms, loading, error, and missing-record states
-
-Accounts and new review submission are out of scope until authentication,
-moderation, abuse prevention, corrections, and updated privacy controls are in
-place.
 
 ## Local development
 
@@ -45,6 +44,7 @@ Then open [http://localhost:3000](http://localhost:3000).
 pnpm lint
 pnpm build
 pnpm test:migration
+pnpm db:migrate:schema
 ```
 
 ## Data migration boundary
@@ -83,6 +83,14 @@ Successful migration writes `manifests/database-verification.json` into the
 recovery snapshot and marks only the database-migration gate as verified. The
 snapshot remains blocked from deletion until the independent provider backup,
 restore test, and deployed-page checks also pass.
+
+### Anonymous submissions
+
+The application stores new ratings, metric responses, and written comments in
+the same normalized tables while keeping them distinguishable from recovered
+legacy rows. It does not request or persist a name, account, email, student ID,
+IP address, user agent, cookie identifier, or browser fingerprint with a
+review. Exact duplicate payloads are rejected with a content-only fingerprint.
 
 ## Deployment
 

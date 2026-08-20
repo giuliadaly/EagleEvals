@@ -1,4 +1,8 @@
 import { neon } from '@neondatabase/serverless';
+import { readdir, readFile } from 'node:fs/promises';
+import path from 'node:path';
+
+import { sqlStatements } from './recovery-snapshot.mjs';
 
 export function databaseUrl() {
   const value = process.env.DATABASE_URL;
@@ -28,6 +32,17 @@ export async function applySchema(sql, statements) {
       throw new Error(`Database schema statement ${index + 1} failed: ${error.message}`, { cause: error });
     }
   }
+}
+
+export async function applyMigrations(sql, migrationsPath) {
+  const files = (await readdir(migrationsPath))
+    .filter((file) => /^\d+.*\.sql$/.test(file))
+    .sort();
+  for (const file of files) {
+    const source = await readFile(path.join(migrationsPath, file), 'utf8');
+    await applySchema(sql, sqlStatements(source));
+  }
+  return files;
 }
 
 export async function importBatches({ sql, query, records, snapshotId, label, batchSize = 250 }) {

@@ -1,13 +1,12 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import test from 'node:test';
 
 import { PGlite } from '@electric-sql/pglite';
 import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm';
 
-import { applySchema, importBatches } from './lib/database.mjs';
+import { applyMigrations, importBatches } from './lib/database.mjs';
 import { verifyDatabase } from './lib/database-verification.mjs';
-import { sqlStatements } from './lib/recovery-snapshot.mjs';
 import {
   commentQuery,
   courseQuery,
@@ -102,11 +101,7 @@ test('executes the schema, importer, views, and verifier against Postgres', asyn
     query: async (text, parameters = []) => (await pg.query(text, parameters)).rows,
   };
 
-  const schema = await readFile(
-    new URL('../database/migrations/001_initial.sql', import.meta.url),
-    'utf8',
-  );
-  await applySchema(sql, sqlStatements(schema));
+  await applyMigrations(sql, path.join(process.cwd(), 'database', 'migrations'));
   await sql.query(
     `INSERT INTO migration_runs
        (snapshot_id, source_url, status, expected_counts, verification_manifest)
@@ -157,4 +152,53 @@ test('executes the schema, importer, views, and verifier against Postgres', asyn
     ['test course'],
   );
   assert.deepEqual(searchResults, [{ code: 'TEST1001' }]);
+
+  const anonymousReviewId = '75c42c5949939741c67fa226';
+  const anonymousMetricId = '75c430be49939741c68d51f3';
+  await sql.query(
+    `INSERT INTO reviews (
+       id, course_id, professor_id, section_code, course_code, professor_name,
+       semester, section, course_overall, instructor_overall, legacy_document,
+       source_snapshot, source, published, submitted_at, submission_fingerprint
+     ) VALUES ($1, $2, $3, 'TEST100102', 'TEST1001', 'Test Professor',
+       'Fall 2026', 2, 5, 5, '{}'::jsonb, NULL,
+       'eagleevals_anonymous', true, now(), 'fixture-fingerprint')`,
+    [anonymousReviewId, ids.course, ids.professor],
+  );
+  await sql.query(
+    `INSERT INTO review_metrics (
+       id, review_id, course_well_organized, instructor_prepared,
+       legacy_document, source_snapshot
+     ) VALUES ($1, $2, 5, 5, '{}'::jsonb, NULL)`,
+    [anonymousMetricId, anonymousReviewId],
+  );
+  await sql.query(
+    `INSERT INTO student_comments (
+       professor_id, course_id, message, would_take_again, source,
+       published, legacy_document, source_snapshot
+     ) VALUES ($1, $2, 'New anonymous fixture review', true,
+       'eagleevals_anonymous', true, '{}'::jsonb, NULL)`,
+    [ids.professor, ids.course],
+  );
+
+  const [updatedCourseSummary] = await sql.query('SELECT * FROM course_summaries WHERE id = $1', [ids.course]);
+  assert.equal(updatedCourseSummary.review_count, 2);
+  assert.equal(updatedCourseSummary.comment_count, 2);
+
+  const verifiedAfterAnonymousSubmission = await verifyDatabase({ sql, snapshotId, verification });
+  assert.equal(verifiedAfterAnonymousSubmission.passed, true);
+  assert.deepEqual(verifiedAfterAnonymousSubmission.counts, report.counts);
+
+  await assert.rejects(
+    sql.query(
+      `INSERT INTO reviews (
+         id, course_id, professor_id, section_code, course_code, professor_name,
+         semester, section, course_overall, instructor_overall, legacy_document,
+         source, published, submission_fingerprint
+       ) VALUES ('85c42c5949939741c67fa226', $1, $2, 'TEST100103', 'TEST1001',
+         'Test Professor', 'Fall 2026', 3, 5, 5, '{}'::jsonb,
+         'eagleevals_anonymous', true, 'fixture-fingerprint')`,
+      [ids.course, ids.professor],
+    ),
+  );
 });

@@ -1,12 +1,11 @@
-import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { PGlite } from '@electric-sql/pglite';
 import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm';
 
-import { applySchema, importBatches } from './lib/database.mjs';
+import { applyMigrations, importBatches } from './lib/database.mjs';
 import { verifyDatabase } from './lib/database-verification.mjs';
-import { loadAndValidateSnapshot, parseSnapshotArgument, sqlStatements } from './lib/recovery-snapshot.mjs';
+import { loadAndValidateSnapshot, parseSnapshotArgument } from './lib/recovery-snapshot.mjs';
 import { migrationJobs } from './migrate-recovered-data.mjs';
 
 async function run() {
@@ -18,8 +17,7 @@ async function run() {
   };
 
   try {
-    const schemaPath = path.join(process.cwd(), 'database', 'migrations', '001_initial.sql');
-    await applySchema(sql, sqlStatements(await readFile(schemaPath, 'utf8')));
+    await applyMigrations(sql, path.join(process.cwd(), 'database', 'migrations'));
     await sql.query(
       `INSERT INTO migration_runs
          (snapshot_id, source_url, status, expected_counts, verification_manifest)

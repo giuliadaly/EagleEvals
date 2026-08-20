@@ -11,8 +11,8 @@ const integrityQuery = `
   SELECT
     (SELECT count(*) FROM courses WHERE legacy_document->>'_id' IS DISTINCT FROM id)::text AS course_id_mismatches,
     (SELECT count(*) FROM professors WHERE legacy_document->>'_id' IS DISTINCT FROM id)::text AS professor_id_mismatches,
-    (SELECT count(*) FROM reviews WHERE legacy_document->>'_id' IS DISTINCT FROM id)::text AS review_id_mismatches,
-    (SELECT count(*) FROM review_metrics WHERE legacy_document->>'_id' IS DISTINCT FROM id)::text AS metric_id_mismatches,
+    (SELECT count(*) FROM reviews WHERE source_snapshot IS NOT NULL AND legacy_document->>'_id' IS DISTINCT FROM id)::text AS review_id_mismatches,
+    (SELECT count(*) FROM review_metrics WHERE source_snapshot IS NOT NULL AND legacy_document->>'_id' IS DISTINCT FROM id)::text AS metric_id_mismatches,
     (SELECT count(*) FROM student_comments WHERE source = 'legacy_eagleeval' AND legacy_document->>'_id' IS DISTINCT FROM id)::text AS comment_id_mismatches,
     (SELECT count(*) FROM faculty_directory_entries WHERE source_document->>'profilePath' IS DISTINCT FROM profile_path)::text AS faculty_path_mismatches,
     (SELECT count(*) FROM student_comments WHERE legacy_document ? 'user_id')::text AS comments_containing_user_id,

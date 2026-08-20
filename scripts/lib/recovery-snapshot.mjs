@@ -105,7 +105,10 @@ export async function loadAndValidateSnapshot(snapshotPath) {
     readJson(inventoryPath),
   ]);
 
-  invariant(inventory.localDeletionStatus === 'blocked', 'Recovery snapshot is not marked as protected from deletion');
+  invariant(
+    ['blocked', 'eligible-retained'].includes(inventory.localDeletionStatus),
+    'Recovery snapshot is not retained locally',
+  );
   invariant(verification.integrity?.privacy?.commentsContainingUserId === 0, 'Verification manifest reports comment user IDs');
 
   const records = {};

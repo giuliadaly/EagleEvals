@@ -6,12 +6,14 @@ import { semesterSortValue } from "@/data/format";
 import type {
   CourseDetail,
   CourseSummary,
+  EvaluationRecord,
   InstructorCourseRow,
   MetricValue,
   PaginatedResult,
   ProfessorCourseRow,
   ProfessorDetail,
   ProfessorSummary,
+  ReviewSelection,
   SearchResults,
   SemesterSummary,
   SiteStats,
@@ -19,6 +21,7 @@ import type {
 } from "@/data/types";
 
 const PAGE_SIZE = 24;
+const EVALUATION_PAGE_SIZE = 30;
 
 type DbRow = Record<string, unknown>;
 
@@ -84,7 +87,7 @@ export const getSiteStats = cache(async (): Promise<SiteStats> => {
     SELECT
       (SELECT count(*)::integer FROM courses) AS courses,
       (SELECT count(*)::integer FROM professors) AS professors,
-      (SELECT count(*)::integer FROM reviews) AS reviews,
+      (SELECT count(*)::integer FROM reviews WHERE published) AS reviews,
       (SELECT count(*)::integer FROM student_comments WHERE published) AS comments
   `) as DbRow[];
   const row = rows[0] ?? {};
@@ -225,6 +228,181 @@ function mapComment(row: DbRow): StudentComment {
     courseId: row.course_id ? String(row.course_id) : null,
     courseCode: row.course_code ? String(row.course_code) : null,
     courseTitle: row.course_title ? String(row.course_title) : null,
+    source: String(row.source ?? "legacy_eagleeval"),
+  };
+}
+
+function mapEvaluation(row: DbRow): EvaluationRecord {
+  return {
+    id: String(row.id),
+    semester: String(row.semester),
+    section: asCount(row.section),
+    sectionCode: String(row.section_code),
+    courseOverall: asNumber(row.course_overall),
+    instructorOverall: asNumber(row.instructor_overall),
+    courseId: row.course_id ? String(row.course_id) : null,
+    courseCode: String(row.course_code),
+    courseTitle: row.course_title ? String(row.course_title) : null,
+    professorId: row.professor_id ? String(row.professor_id) : null,
+    professorName: String(row.professor_name),
+    source: String(row.source ?? "legacy_eagleeval"),
+    submittedAt: row.submitted_at ? new Date(String(row.submitted_at)).toISOString() : null,
+    metrics: [
+      { label: "Organization", value: asNumber(row.course_well_organized) },
+      { label: "Challenge", value: asNumber(row.course_intellectually_challenging) },
+      { label: "Attendance", value: asNumber(row.attendance_necessary) },
+      { label: "Assignments", value: asNumber(row.assignments_helpful) },
+      { label: "Prepared", value: asNumber(row.instructor_prepared) },
+      { label: "Clear explanations", value: asNumber(row.instructor_clear_explanations) },
+      { label: "Available for help", value: asNumber(row.available_for_help_outside_class) },
+      { label: "Stimulated interest", value: asNumber(row.stimulated_interest) },
+      { label: "Weekly effort", value: asNumber(row.effort_average_hours_weekly) },
+    ],
+  };
+}
+
+const evaluationSelect = `
+  SELECT r.id, r.semester, r.section, r.section_code,
+    r.course_overall, r.instructor_overall, r.course_id, r.course_code,
+    c.title AS course_title, r.professor_id, r.professor_name,
+    r.source, r.submitted_at,
+    m.attendance_necessary, m.available_for_help_outside_class,
+    m.course_intellectually_challenging, m.course_well_organized,
+    m.instructor_clear_explanations, m.instructor_prepared,
+    m.stimulated_interest, m.assignments_helpful,
+    m.effort_average_hours_weekly
+  FROM reviews r
+  LEFT JOIN courses c ON c.id = r.course_id
+  LEFT JOIN review_metrics m ON m.review_id = r.id
+`;
+
+export async function getEvaluationsPage(rawQuery: string, rawPage: number): Promise<PaginatedResult<EvaluationRecord>> {
+  const query = normalizeQuery(rawQuery);
+  const page = normalizePage(rawPage);
+  const offset = (page - 1) * EVALUATION_PAGE_SIZE;
+  const sql = database();
+  let rows: DbRow[];
+  let countRows: DbRow[];
+  const order = `
+    ORDER BY
+      CASE WHEN r.source = 'eagleevals_anonymous' THEN 0 ELSE 1 END,
+      r.submitted_at DESC NULLS LAST,
+      NULLIF(substring(r.semester from '([0-9]{4})'), '')::integer DESC NULLS LAST,
+      CASE
+        WHEN r.semester ILIKE 'Fall%' THEN 3
+        WHEN r.semester ILIKE 'Summer%' THEN 2
+        WHEN r.semester ILIKE 'Spring%' THEN 1
+        ELSE 0
+      END DESC,
+      r.course_code ASC,
+      r.section ASC
+  `;
+
+  if (query) {
+    const pattern = `%${query}%`;
+    [rows, countRows] = (await Promise.all([
+      sql.query(`${evaluationSelect}
+        WHERE r.published AND (
+          r.course_code ILIKE $1 OR c.title ILIKE $1 OR
+          r.professor_name ILIKE $1 OR r.semester ILIKE $1
+        )
+        ${order}
+        LIMIT $2 OFFSET $3`, [pattern, EVALUATION_PAGE_SIZE, offset]),
+      sql.query(`SELECT count(*)::integer AS total
+        FROM reviews r
+        LEFT JOIN courses c ON c.id = r.course_id
+        WHERE r.published AND (
+          r.course_code ILIKE $1 OR c.title ILIKE $1 OR
+          r.professor_name ILIKE $1 OR r.semester ILIKE $1
+        )`, [pattern]),
+    ])) as [DbRow[], DbRow[]];
+  } else {
+    [rows, countRows] = (await Promise.all([
+      sql.query(`${evaluationSelect} WHERE r.published ${order} LIMIT $1 OFFSET $2`, [EVALUATION_PAGE_SIZE, offset]),
+      sql`SELECT count(*)::integer AS total FROM reviews WHERE published`,
+    ])) as [DbRow[], DbRow[]];
+  }
+
+  const total = asCount(countRows[0]?.total);
+  return {
+    items: rows.map(mapEvaluation),
+    page,
+    pageSize: EVALUATION_PAGE_SIZE,
+    total,
+    totalPages: Math.max(1, Math.ceil(total / EVALUATION_PAGE_SIZE)),
+    query,
+  };
+}
+
+export async function getCommentsPage(rawQuery: string, rawPage: number): Promise<PaginatedResult<StudentComment>> {
+  const query = normalizeQuery(rawQuery);
+  const page = normalizePage(rawPage);
+  const offset = (page - 1) * EVALUATION_PAGE_SIZE;
+  const sql = database();
+  const select = `
+    SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source,
+      sc.professor_id, p.name AS professor_name,
+      sc.course_id, c.code AS course_code, c.title AS course_title
+    FROM student_comments sc
+    JOIN professors p ON p.id = sc.professor_id
+    LEFT JOIN courses c ON c.id = sc.course_id
+  `;
+  let rows: DbRow[];
+  let countRows: DbRow[];
+
+  if (query) {
+    const pattern = `%${query}%`;
+    [rows, countRows] = (await Promise.all([
+      sql.query(`${select}
+        WHERE sc.published AND (
+          sc.message ILIKE $1 OR p.name ILIKE $1 OR
+          c.code ILIKE $1 OR c.title ILIKE $1
+        )
+        ORDER BY sc.created_at DESC, sc.id DESC
+        LIMIT $2 OFFSET $3`, [pattern, EVALUATION_PAGE_SIZE, offset]),
+      sql.query(`SELECT count(*)::integer AS total
+        FROM student_comments sc
+        JOIN professors p ON p.id = sc.professor_id
+        LEFT JOIN courses c ON c.id = sc.course_id
+        WHERE sc.published AND (
+          sc.message ILIKE $1 OR p.name ILIKE $1 OR
+          c.code ILIKE $1 OR c.title ILIKE $1
+        )`, [pattern]),
+    ])) as [DbRow[], DbRow[]];
+  } else {
+    [rows, countRows] = (await Promise.all([
+      sql.query(`${select} WHERE sc.published ORDER BY sc.created_at DESC, sc.id DESC LIMIT $1 OFFSET $2`, [EVALUATION_PAGE_SIZE, offset]),
+      sql`SELECT count(*)::integer AS total FROM student_comments WHERE published`,
+    ])) as [DbRow[], DbRow[]];
+  }
+
+  const total = asCount(countRows[0]?.total);
+  return {
+    items: rows.map(mapComment),
+    page,
+    pageSize: EVALUATION_PAGE_SIZE,
+    total,
+    totalPages: Math.max(1, Math.ceil(total / EVALUATION_PAGE_SIZE)),
+    query,
+  };
+}
+
+export async function getReviewSelections(courseId?: string, professorId?: string): Promise<{ course: ReviewSelection | null; professor: ReviewSelection | null }> {
+  const validCourseId = courseId && /^[0-9a-f]{24}$/.test(courseId) ? courseId : null;
+  const validProfessorId = professorId && /^[0-9a-f]{24}$/.test(professorId) ? professorId : null;
+  const sql = database();
+  const [courseRows, professorRows] = (await Promise.all([
+    validCourseId ? sql`SELECT id, code, title FROM courses WHERE id = ${validCourseId} LIMIT 1` : Promise.resolve([]),
+    validProfessorId ? sql`SELECT id, name, titles FROM professors WHERE id = ${validProfessorId} LIMIT 1` : Promise.resolve([]),
+  ])) as [DbRow[], DbRow[]];
+
+  return {
+    course: courseRows[0]
+      ? { id: String(courseRows[0].id), primary: String(courseRows[0].code), secondary: String(courseRows[0].title) }
+      : null,
+    professor: professorRows[0]
+      ? { id: String(professorRows[0].id), primary: String(professorRows[0].name), secondary: asStringArray(professorRows[0].titles)[0] ?? "Boston College faculty" }
+      : null,
   };
 }
 
@@ -242,7 +420,7 @@ export const getCourseDetail = cache(async (id: string): Promise<CourseDetail | 
         avg(m.effort_average_hours_weekly) AS effort
       FROM reviews r
       JOIN review_metrics m ON m.review_id = r.id
-      WHERE r.course_id = ${id}
+      WHERE r.published AND r.course_id = ${id}
     `,
     sql`
       SELECT p.id, p.name, p.titles, count(r.id)::integer AS review_count,
@@ -250,13 +428,13 @@ export const getCourseDetail = cache(async (id: string): Promise<CourseDetail | 
         avg(r.instructor_overall) AS instructor_overall
       FROM reviews r
       JOIN professors p ON p.id = r.professor_id
-      WHERE r.course_id = ${id}
+      WHERE r.published AND r.course_id = ${id}
       GROUP BY p.id, p.name, p.titles
       ORDER BY review_count DESC, p.name ASC
       LIMIT 60
     `,
     sql`
-      SELECT sc.id, sc.message, sc.would_take_again, sc.created_at,
+      SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source,
         sc.professor_id, p.name AS professor_name,
         sc.course_id, c.code AS course_code, c.title AS course_title
       FROM student_comments sc
@@ -271,7 +449,7 @@ export const getCourseDetail = cache(async (id: string): Promise<CourseDetail | 
         avg(course_overall) AS course_overall,
         avg(instructor_overall) AS instructor_overall
       FROM reviews
-      WHERE course_id = ${id}
+      WHERE published AND course_id = ${id}
       GROUP BY semester
     `,
   ])) as [DbRow[], DbRow[], DbRow[], DbRow[], DbRow[]];
@@ -321,7 +499,7 @@ export const getProfessorDetail = cache(async (id: string): Promise<ProfessorDet
         avg(m.stimulated_interest) AS stimulated_interest
       FROM reviews r
       JOIN review_metrics m ON m.review_id = r.id
-      WHERE r.professor_id = ${id}
+      WHERE r.published AND r.professor_id = ${id}
     `,
     sql`
       SELECT c.id, c.code, c.title, c.subject, count(r.id)::integer AS review_count,
@@ -329,13 +507,13 @@ export const getProfessorDetail = cache(async (id: string): Promise<ProfessorDet
         avg(r.instructor_overall) AS instructor_overall
       FROM reviews r
       JOIN courses c ON c.id = r.course_id
-      WHERE r.professor_id = ${id}
+      WHERE r.published AND r.professor_id = ${id}
       GROUP BY c.id, c.code, c.title, c.subject
       ORDER BY review_count DESC, c.code ASC
       LIMIT 60
     `,
     sql`
-      SELECT sc.id, sc.message, sc.would_take_again, sc.created_at,
+      SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source,
         sc.professor_id, p.name AS professor_name,
         sc.course_id, c.code AS course_code, c.title AS course_title
       FROM student_comments sc
