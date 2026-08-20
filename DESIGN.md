@@ -229,7 +229,7 @@ Professor dossiers are flat. Depth comes from paper tones, strong opening rules,
 
 The core form language uses compact `0.375rem` corners for marks, controls, cards, rating badges, and the record rail. The directory filter groups related controls inside a `0.75rem` container. Larger `1rem` information panels remain a secondary legacy-compatible treatment and should not spread into the dossier.
 
-Pills are reserved for compact binary or source statuses such as “Would take again,” never for general navigation or every metadata item. The EE mark and dossier avatars stay square rather than circular.
+Pills are reserved for compact binary or source statuses such as “Would take again,” never for general navigation or every metadata item. The eagle-E mark and dossier avatars stay square rather than circular. The original gold eagle silhouette forms the letter’s middle arm and remains simple enough to read at favicon size.
 
 **The Square Record Rule.** Professor records should read as documents, not soft lifestyle cards. Avoid inflated radii and repeated pill containers.
 
@@ -256,7 +256,7 @@ Pills are reserved for compact binary or source statuses such as “Would take a
 
 ### Navigation
 
-- **Global Header:** Sticky raised-paper header with the square EE mark, optional desktop search, Courses, Professors, desktop-only Evaluations, and a compact gold review action.
+- **Global Header:** Sticky raised-paper header with the eagle-E mark, optional desktop search, Courses, Professors, desktop-only Evaluations, and a compact gold review action.
 - **Desktop Record Index:** Sticky at `64rem`, numbered in IBM Plex Mono, and ordered exactly like the visible dossier. It is hidden below the desktop breakpoint.
 
 ### Decision Summary
