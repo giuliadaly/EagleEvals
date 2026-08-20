@@ -231,7 +231,7 @@ export function AnonymousReviewForm({
 
       <div>
         <h2 className="font-serif text-2xl font-bold text-[var(--navy)]">2. Rate the experience</h2>
-        <p className="mt-2 text-sm text-[var(--muted)]">Use the same five-point scale as the recovered evaluations.</p>
+        <p className="mt-2 text-sm text-[var(--muted)]">Use the same five-point scale used throughout EagleEvals.</p>
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <RatingField name="courseOverall" label="Course overall" />
           <RatingField name="instructorOverall" label="Instructor overall" />

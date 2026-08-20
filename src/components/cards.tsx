@@ -98,7 +98,7 @@ export function EvaluationCard({ evaluation }: { evaluation: EvaluationRecord })
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
-            <span className={`rounded-full px-3 py-1 ${evaluation.source === "eagleevals_anonymous" ? "bg-[var(--green-pale)] text-[var(--green)]" : "bg-[var(--wash)] text-[var(--muted)]"}`}>{evaluation.source === "eagleevals_anonymous" ? "New anonymous review" : "Recovered evaluation"}</span>
+            <span className={`rounded-full px-3 py-1 ${evaluation.source === "eagleevals_anonymous" ? "bg-[var(--green-pale)] text-[var(--green)]" : "bg-[var(--wash)] text-[var(--muted)]"}`}>{evaluation.source === "eagleevals_anonymous" ? "New anonymous review" : "Historical evaluation"}</span>
             <span className="text-[var(--muted)]">{evaluation.semester} · Section {evaluation.section}</span>
             {evaluation.submittedAt ? <span className="text-[var(--muted)]">· {formatDate(evaluation.submittedAt)}</span> : null}
           </div>
@@ -109,7 +109,7 @@ export function EvaluationCard({ evaluation }: { evaluation: EvaluationRecord })
         </div>
         <div className="flex gap-3"><RatingBadge value={evaluation.courseOverall} label="course" /><RatingBadge value={evaluation.instructorOverall} label="instructor" /></div>
       </div>
-      {availableMetrics.length ? <div className="mt-5 grid gap-2 border-t border-[var(--line)] pt-5 sm:grid-cols-3 lg:grid-cols-5">{availableMetrics.map((metric) => <div key={metric.label} className="rounded-lg bg-[var(--wash)] px-3 py-2"><p className="text-[0.68rem] font-bold uppercase tracking-[.08em] text-[var(--muted)]">{metric.label}</p><p className="mt-1 font-black text-[var(--navy)]">{formatRating(metric.value)} / 5</p></div>)}</div> : <p className="mt-5 border-t border-[var(--line)] pt-5 text-xs text-[var(--muted)]">No category-level metrics were available for this recovered section.</p>}
+      {availableMetrics.length ? <div className="mt-5 grid gap-2 border-t border-[var(--line)] pt-5 sm:grid-cols-3 lg:grid-cols-5">{availableMetrics.map((metric) => <div key={metric.label} className="rounded-lg bg-[var(--wash)] px-3 py-2"><p className="text-[0.68rem] font-bold uppercase tracking-[.08em] text-[var(--muted)]">{metric.label}</p><p className="mt-1 font-black text-[var(--navy)]">{formatRating(metric.value)} / 5</p></div>)}</div> : <p className="mt-5 border-t border-[var(--line)] pt-5 text-xs text-[var(--muted)]">No category-level metrics were available for this section.</p>}
       {evaluation.courseId && evaluation.professorId ? <div className="mt-5 border-t border-[var(--line)] pt-4"><Link className="text-sm font-bold text-[var(--blue)] hover:text-[var(--navy)]" href={`/review?course=${evaluation.courseId}&professor=${evaluation.professorId}`}>Review this course and professor</Link></div> : null}
     </article>
   );
@@ -121,7 +121,7 @@ export function CommentArchiveCard({ comment }: { comment: StudentComment }) {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
-            <span className={`rounded-full px-3 py-1 ${comment.source === "eagleevals_anonymous" ? "bg-[var(--green-pale)] text-[var(--green)]" : "bg-[var(--wash)] text-[var(--muted)]"}`}>{comment.source === "eagleevals_anonymous" ? "New anonymous review" : "Recovered comment"}</span>
+            <span className={`rounded-full px-3 py-1 ${comment.source === "eagleevals_anonymous" ? "bg-[var(--green-pale)] text-[var(--green)]" : "bg-[var(--wash)] text-[var(--muted)]"}`}>{comment.source === "eagleevals_anonymous" ? "New anonymous review" : "Historical review"}</span>
             <span className="text-[var(--muted)]">{formatDate(comment.createdAt)}</span>
           </div>
           <p className="mt-3 font-bold text-[var(--navy)]"><Link href={`/professors/${comment.professorId}`} className="hover:text-[var(--blue)]">{comment.professorName}</Link></p>

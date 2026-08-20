@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { InfoPage } from "@/components/info-page";
 
-export const metadata: Metadata = { title: "Terms", description: "Terms for using the EagleEvals historical evaluation archive." };
+export const metadata: Metadata = { title: "Terms", description: "Terms for using EagleEvals course and professor information." };
 
 export default function TermsPage() {
   return (
-    <InfoPage eyebrow="Policy" title="Terms of use" intro="These terms explain the limits of this independent historical course-planning resource.">
-      <p><strong>Last updated: August 19, 2026.</strong></p>
+    <InfoPage eyebrow="Policy" title="Terms of use" intro="These terms explain the limits of this independent course-planning resource for Boston College students.">
+      <p><strong>Last updated: August 20, 2026.</strong></p>
       <h2>Informational use</h2>
       <p>EagleEvals is provided for general course-planning information. Ratings and comments describe historical experiences and may be incomplete, outdated, or unrepresentative of a current or future section. You remain responsible for confirming official course requirements, schedules, prerequisites, and faculty assignments.</p>
       <h2>Respectful use</h2>
@@ -16,7 +16,7 @@ export default function TermsPage() {
       <h2>Independence</h2>
       <p>EagleEvals is independent and student-run. It is not an official Boston College service and is not endorsed by or affiliated with Boston College.</p>
       <h2>Availability</h2>
-      <p>The archive is provided as available. Records may be corrected, withheld, or removed when necessary, and the service may change as the recovery is improved.</p>
+      <p>EagleEvals is provided as available. Records may be corrected, withheld, or removed when necessary, and the service may change as its information and features improve.</p>
     </InfoPage>
   );
 }

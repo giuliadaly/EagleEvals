@@ -100,8 +100,8 @@ function FilterControls({ id, sortMode, setSortMode, ratingFloor, setRatingFloor
       <label htmlFor={`${id}-sort`}><span>Sort by</span><select id={`${id}-sort`} value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)}><option value="instructor">Instructor rating</option><option value="course">Course rating</option><option value="evidence">Most evidence</option><option value="name">Professor name</option></select></label>
       <label htmlFor={`${id}-rating`}><span>Minimum instructor rating</span><select id={`${id}-rating`} value={ratingFloor} onChange={(event) => setRatingFloor(event.target.value as RatingFloor)}><option value="any">Any rating</option><option value="4.5">4.5 or higher</option><option value="4.8">4.8 or higher</option></select></label>
       <label htmlFor={`${id}-evidence`}><span>Evidence</span><select id={`${id}-evidence`} value={evidenceFloor} onChange={(event) => setEvidenceFloor(event.target.value as EvidenceFloor)}><option value="any">Any count</option><option value="5">5+ evaluations</option><option value="10">10+ evaluations</option></select></label>
-      <label htmlFor={`${id}-recency`}><span>Recency</span><select id={`${id}-recency`} value={recencyMode} onChange={(event) => setRecencyMode(event.target.value as RecencyMode)}><option value="all">All recovered years</option><option value="2023">Evaluated since 2023</option></select></label>
-      <p className={styles.sourceStatus}><span aria-hidden="true" />Source: recovered EagleEval archive · through Spring 2025</p>
+      <label htmlFor={`${id}-recency`}><span>Recency</span><select id={`${id}-recency`} value={recencyMode} onChange={(event) => setRecencyMode(event.target.value as RecencyMode)}><option value="all">All available years</option><option value="2023">Evaluated since 2023</option></select></label>
+      <p className={styles.sourceStatus}><span aria-hidden="true" />EagleEvals history · through Spring 2025</p>
     </div>
   );
 }
@@ -313,7 +313,7 @@ function DeskConcept({ items, selectedIds, toggle, query, setQuery, clearFilters
             <FilterControls id="desk" {...filterControlProps({ sortMode, setSortMode, ratingFloor, setRatingFloor, evidenceFloor, setEvidenceFloor, recencyMode, setRecencyMode })} />
             <div className={styles.filterNote}>
               <strong>What you can trust here</strong>
-              <p>Every number in this prototype comes from the recovered historical course record.</p>
+              <p>Every number in this prototype comes from available EagleEvals course records.</p>
             </div>
           </aside>
           <section className={styles.tablePanel} aria-labelledby="desk-heading">
@@ -339,7 +339,7 @@ function DeskConcept({ items, selectedIds, toggle, query, setQuery, clearFilters
           </section>
         </div>
       </main>
-      <footer className={styles.deskFooter}><span>EagleEvals · independent and student-run</span><span>Recovered evidence. Anonymous new reviews.</span></footer>
+      <footer className={styles.deskFooter}><span>EagleEvals · independent and student-run</span><span>BC student input, past and present.</span></footer>
     </div>
   );
 }
@@ -387,7 +387,7 @@ function GuideConcept({ items, selectedIds, toggle, query, setQuery, clearFilter
           </div>
         </section>
       </main>
-      <footer className={styles.guideFooter}><p>EagleEvals preserves the public evaluation archive and accepts new anonymous reviews.</p><span>Not affiliated with Boston College.</span></footer>
+      <footer className={styles.guideFooter}><p>EagleEvals combines course and professor information with anonymous reviews from BC students.</p><span>Not affiliated with Boston College.</span></footer>
     </div>
   );
 }

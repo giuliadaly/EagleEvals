@@ -104,7 +104,7 @@ export default async function ProfessorDetailPage({ params }: { params: Promise<
                       <div className={styles.commentMeta}>
                         <span>{formatDate(comment.createdAt)}</span>
                         {comment.courseId && comment.courseCode ? <Link href={`/courses/${comment.courseId}`}>{comment.courseCode}</Link> : <span>Course unavailable</span>}
-                        <span>{comment.source === "eagleevals_anonymous" ? "New anonymous review" : "Recovered comment"}</span>
+                        <span>{comment.source === "eagleevals_anonymous" ? "New anonymous review" : "Historical review"}</span>
                         <strong>{comment.wouldTakeAgain ? "Would take again" : "Would not take again"}</strong>
                       </div>
                       <p>{comment.message}</p>
