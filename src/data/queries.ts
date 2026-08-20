@@ -12,6 +12,7 @@ import type {
   PaginatedResult,
   ProfessorCourseRow,
   ProfessorDetail,
+  ProfessorEvaluationRow,
   ProfessorSummary,
   ReviewSelection,
   SearchResults,
@@ -157,61 +158,61 @@ export async function searchCatalog(rawQuery: string, limit = 12): Promise<Searc
   };
 }
 
-export async function getCoursesPage(rawQuery: string, rawPage: number): Promise<PaginatedResult<CourseSummary>> {
+export async function getCoursesPage(rawQuery: string, rawPage: number, rawSort = "evidence", rawMinRating = 0): Promise<PaginatedResult<CourseSummary>> {
   const query = normalizeQuery(rawQuery);
   const page = normalizePage(rawPage);
   const offset = (page - 1) * PAGE_SIZE;
   const sql = database();
-  let rows: DbRow[];
-  let countRows: DbRow[];
-
-  if (query) {
-    const pattern = `%${query}%`;
-    [rows, countRows] = (await Promise.all([
-      sql`
-        SELECT * FROM course_summaries
-        WHERE (code || ' ' || title || ' ' || subject) ILIKE ${pattern}
-        ORDER BY review_count DESC, code ASC
-        LIMIT ${PAGE_SIZE} OFFSET ${offset}
-      `,
-      sql`SELECT count(*)::integer AS total FROM courses WHERE (code || ' ' || title || ' ' || subject) ILIKE ${pattern}`,
-    ])) as [DbRow[], DbRow[]];
-  } else {
-    [rows, countRows] = (await Promise.all([
-      sql`SELECT * FROM course_summaries ORDER BY review_count DESC, code ASC LIMIT ${PAGE_SIZE} OFFSET ${offset}`,
-      sql`SELECT count(*)::integer AS total FROM courses`,
-    ])) as [DbRow[], DbRow[]];
-  }
+  const sort = ["rating", "instructor", "name"].includes(rawSort) ? rawSort : "evidence";
+  const minRating = [4, 4.5].includes(rawMinRating) ? rawMinRating : 0;
+  const pattern = `%${query}%`;
+  const order = sort === "rating"
+    ? "ORDER BY course_overall DESC NULLS LAST, review_count DESC, code ASC"
+    : sort === "instructor"
+      ? "ORDER BY instructor_overall DESC NULLS LAST, review_count DESC, code ASC"
+      : sort === "name"
+        ? "ORDER BY code ASC"
+        : "ORDER BY review_count DESC, code ASC";
+  const [rows, countRows] = (await Promise.all([
+    sql.query(`SELECT * FROM course_summaries
+      WHERE ($1 = '' OR (code || ' ' || title || ' ' || subject) ILIKE $2)
+        AND ($3::numeric = 0 OR course_overall >= $3::numeric)
+      ${order}
+      LIMIT $4 OFFSET $5`, [query, pattern, minRating, PAGE_SIZE, offset]),
+    sql.query(`SELECT count(*)::integer AS total FROM course_summaries
+      WHERE ($1 = '' OR (code || ' ' || title || ' ' || subject) ILIKE $2)
+        AND ($3::numeric = 0 OR course_overall >= $3::numeric)`, [query, pattern, minRating]),
+  ])) as [DbRow[], DbRow[]];
 
   const total = asCount(countRows[0]?.total);
   return { items: rows.map(mapCourse), page, pageSize: PAGE_SIZE, total, totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)), query };
 }
 
-export async function getProfessorsPage(rawQuery: string, rawPage: number): Promise<PaginatedResult<ProfessorSummary>> {
+export async function getProfessorsPage(rawQuery: string, rawPage: number, rawSort = "evidence", rawMinRating = 0): Promise<PaginatedResult<ProfessorSummary>> {
   const query = normalizeQuery(rawQuery);
   const page = normalizePage(rawPage);
   const offset = (page - 1) * PAGE_SIZE;
   const sql = database();
-  let rows: DbRow[];
-  let countRows: DbRow[];
-
-  if (query) {
-    const pattern = `%${query}%`;
-    [rows, countRows] = (await Promise.all([
-      sql`
-        SELECT * FROM professor_summaries
-        WHERE name ILIKE ${pattern}
-        ORDER BY review_count DESC, name ASC
-        LIMIT ${PAGE_SIZE} OFFSET ${offset}
-      `,
-      sql`SELECT count(*)::integer AS total FROM professors WHERE name ILIKE ${pattern}`,
-    ])) as [DbRow[], DbRow[]];
-  } else {
-    [rows, countRows] = (await Promise.all([
-      sql`SELECT * FROM professor_summaries ORDER BY review_count DESC, name ASC LIMIT ${PAGE_SIZE} OFFSET ${offset}`,
-      sql`SELECT count(*)::integer AS total FROM professors`,
-    ])) as [DbRow[], DbRow[]];
-  }
+  const sort = ["rating", "course", "name"].includes(rawSort) ? rawSort : "evidence";
+  const minRating = [4, 4.5].includes(rawMinRating) ? rawMinRating : 0;
+  const pattern = `%${query}%`;
+  const order = sort === "rating"
+    ? "ORDER BY instructor_overall DESC NULLS LAST, review_count DESC, name ASC"
+    : sort === "course"
+      ? "ORDER BY course_overall DESC NULLS LAST, review_count DESC, name ASC"
+      : sort === "name"
+        ? "ORDER BY name ASC"
+        : "ORDER BY review_count DESC, name ASC";
+  const [rows, countRows] = (await Promise.all([
+    sql.query(`SELECT * FROM professor_summaries
+      WHERE ($1 = '' OR name ILIKE $2)
+        AND ($3::numeric = 0 OR instructor_overall >= $3::numeric)
+      ${order}
+      LIMIT $4 OFFSET $5`, [query, pattern, minRating, PAGE_SIZE, offset]),
+    sql.query(`SELECT count(*)::integer AS total FROM professor_summaries
+      WHERE ($1 = '' OR name ILIKE $2)
+        AND ($3::numeric = 0 OR instructor_overall >= $3::numeric)`, [query, pattern, minRating]),
+  ])) as [DbRow[], DbRow[]];
 
   const total = asCount(countRows[0]?.total);
   return { items: rows.map(mapProfessor), page, pageSize: PAGE_SIZE, total, totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)), query };
@@ -489,14 +490,28 @@ export const getCourseDetail = cache(async (id: string): Promise<CourseDetail | 
 export const getProfessorDetail = cache(async (id: string): Promise<ProfessorDetail | null> => {
   if (!/^[0-9a-f]{24}$/.test(id)) return null;
   const sql = database();
-  const [professorRows, metricRows, courseRows, commentRows] = (await Promise.all([
+  const [professorRows, metricRows, courseRows, commentRows, evaluationRows] = (await Promise.all([
     sql`SELECT * FROM professor_summaries WHERE id = ${id} LIMIT 1`,
     sql`
       SELECT
-        avg(m.instructor_prepared) AS prepared,
-        avg(m.instructor_clear_explanations) AS clear_explanations,
+        avg(m.attendance_necessary) AS attendance,
+        count(m.attendance_necessary)::integer AS attendance_count,
         avg(m.available_for_help_outside_class) AS available,
-        avg(m.stimulated_interest) AS stimulated_interest
+        count(m.available_for_help_outside_class)::integer AS available_count,
+        avg(m.course_intellectually_challenging) AS challenging,
+        count(m.course_intellectually_challenging)::integer AS challenging_count,
+        avg(m.course_well_organized) AS organized,
+        count(m.course_well_organized)::integer AS organized_count,
+        avg(m.instructor_prepared) AS prepared,
+        count(m.instructor_prepared)::integer AS prepared_count,
+        avg(m.instructor_clear_explanations) AS clear_explanations,
+        count(m.instructor_clear_explanations)::integer AS clear_explanations_count,
+        avg(m.stimulated_interest) AS stimulated_interest,
+        count(m.stimulated_interest)::integer AS stimulated_interest_count,
+        avg(m.assignments_helpful) AS assignments,
+        count(m.assignments_helpful)::integer AS assignments_count,
+        avg(m.effort_average_hours_weekly) AS effort,
+        count(m.effort_average_hours_weekly)::integer AS effort_count
       FROM reviews r
       JOIN review_metrics m ON m.review_id = r.id
       WHERE r.published AND r.professor_id = ${id}
@@ -510,7 +525,6 @@ export const getProfessorDetail = cache(async (id: string): Promise<ProfessorDet
       WHERE r.published AND r.professor_id = ${id}
       GROUP BY c.id, c.code, c.title, c.subject
       ORDER BY review_count DESC, c.code ASC
-      LIMIT 60
     `,
     sql`
       SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source,
@@ -521,17 +535,29 @@ export const getProfessorDetail = cache(async (id: string): Promise<ProfessorDet
       LEFT JOIN courses c ON c.id = sc.course_id
       WHERE sc.published AND sc.professor_id = ${id}
       ORDER BY sc.created_at DESC
-      LIMIT 40
     `,
-  ])) as [DbRow[], DbRow[], DbRow[], DbRow[]];
+    sql`
+      SELECT r.id, r.semester, r.section, r.course_id, r.course_code,
+        c.title AS course_title, r.course_overall, r.instructor_overall,
+        r.source, r.submitted_at
+      FROM reviews r
+      LEFT JOIN courses c ON c.id = r.course_id
+      WHERE r.published AND r.professor_id = ${id}
+    `,
+  ])) as [DbRow[], DbRow[], DbRow[], DbRow[], DbRow[]];
 
   if (!professorRows[0]) return null;
   const metric = metricRows[0] ?? {};
   const metrics: MetricValue[] = [
-    { label: "Prepared", value: asNumber(metric.prepared), description: "Came prepared for class" },
-    { label: "Clear", value: asNumber(metric.clear_explanations), description: "Gave clear explanations" },
-    { label: "Available", value: asNumber(metric.available), description: "Available for help outside class" },
-    { label: "Engaging", value: asNumber(metric.stimulated_interest), description: "Stimulated interest in the subject" },
+    { label: "Available for help outside class", value: asNumber(metric.available), sampleCount: asCount(metric.available_count) },
+    { label: "Course well organized", value: asNumber(metric.organized), sampleCount: asCount(metric.organized_count) },
+    { label: "Stimulated interest", value: asNumber(metric.stimulated_interest), sampleCount: asCount(metric.stimulated_interest_count) },
+    { label: "Assignments helpful", value: asNumber(metric.assignments), sampleCount: asCount(metric.assignments_count) },
+    { label: "Attendance necessary", value: asNumber(metric.attendance), sampleCount: asCount(metric.attendance_count) },
+    { label: "Course intellectually challenging", value: asNumber(metric.challenging), sampleCount: asCount(metric.challenging_count), description: "Higher means more challenging" },
+    { label: "Average weekly effort", value: asNumber(metric.effort), sampleCount: asCount(metric.effort_count), kind: "hours", description: "Reported time outside class" },
+    { label: "Instructor prepared", value: asNumber(metric.prepared), sampleCount: asCount(metric.prepared_count) },
+    { label: "Clear explanations", value: asNumber(metric.clear_explanations), sampleCount: asCount(metric.clear_explanations_count) },
   ];
   const courses: ProfessorCourseRow[] = courseRows.map((row) => ({
     id: String(row.id),
@@ -543,5 +569,26 @@ export const getProfessorDetail = cache(async (id: string): Promise<ProfessorDet
     instructorOverall: asNumber(row.instructor_overall),
   }));
 
-  return { professor: mapProfessor(professorRows[0]), metrics, courses, comments: commentRows.map(mapComment) };
+  const evaluations: ProfessorEvaluationRow[] = evaluationRows
+    .map((row) => ({
+      id: String(row.id),
+      semester: String(row.semester),
+      section: asCount(row.section),
+      courseId: row.course_id ? String(row.course_id) : null,
+      courseCode: String(row.course_code),
+      courseTitle: row.course_title ? String(row.course_title) : null,
+      courseOverall: asNumber(row.course_overall),
+      instructorOverall: asNumber(row.instructor_overall),
+      source: String(row.source ?? "legacy_eagleeval"),
+      submittedAt: row.submitted_at ? new Date(String(row.submitted_at)).toISOString() : null,
+    }))
+    .sort((a, b) => {
+      const semesterDifference = semesterSortValue(b.semester) - semesterSortValue(a.semester);
+      if (semesterDifference !== 0) return semesterDifference;
+      if (a.source === "eagleevals_anonymous" && b.source !== "eagleevals_anonymous") return -1;
+      if (b.source === "eagleevals_anonymous" && a.source !== "eagleevals_anonymous") return 1;
+      return a.courseCode.localeCompare(b.courseCode) || a.section - b.section;
+    });
+
+  return { professor: mapProfessor(professorRows[0]), metrics, courses, comments: commentRows.map(mapComment), evaluations };
 });

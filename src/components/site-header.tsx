@@ -4,11 +4,11 @@ import { SearchBox } from "@/components/search-box";
 export function Brand({ light = false }: { light?: boolean }) {
   return (
     <Link href="/" className="group flex shrink-0 items-center gap-2.5" aria-label="EagleEvals home">
-      <span className={`grid size-9 place-items-center rounded-full border-2 font-serif text-lg font-bold transition-transform group-hover:-rotate-6 ${light ? "border-[var(--gold)] text-[var(--gold)]" : "border-[var(--navy)] text-[var(--navy)]"}`}>
-        E
+      <span className={`grid size-9 place-items-center rounded-[.375rem] border font-mono text-sm font-semibold transition-colors ${light ? "border-[var(--gold)] bg-[var(--gold)] text-[var(--maroon-deep)]" : "border-[var(--maroon-deep)] bg-[var(--maroon-deep)] text-[var(--on-maroon)]"}`}>
+        EE
       </span>
-      <span className={`brand-word text-lg font-bold tracking-[-0.025em] ${light ? "text-white" : "text-[var(--navy)]"}`}>
-        Eagle<span className="text-[var(--gold-dark)]">Evals</span>
+      <span className={`brand-word font-serif text-lg font-semibold tracking-[-0.03em] ${light ? "text-white" : "text-[var(--ink)]"}`}>
+        Eagle<span className={light ? "text-[var(--gold-light)]" : "text-[var(--maroon)]"}>Evals</span>
       </span>
     </Link>
   );
@@ -16,7 +16,7 @@ export function Brand({ light = false }: { light?: boolean }) {
 
 export function SiteHeader({ showSearch = true }: { showSearch?: boolean }) {
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--cream)]/95 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-[var(--line-strong)] bg-[var(--paper-raised)]/96 backdrop-blur-md">
       <div className="page-shell flex h-16 items-center gap-5">
         <Brand />
         {showSearch ? (

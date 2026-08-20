@@ -42,6 +42,8 @@ export type MetricValue = {
   label: string;
   value: number | null;
   description?: string;
+  kind?: "rating" | "hours";
+  sampleCount?: number;
 };
 
 export type InstructorCourseRow = {
@@ -61,6 +63,19 @@ export type ProfessorCourseRow = {
   reviewCount: number;
   courseOverall: number | null;
   instructorOverall: number | null;
+};
+
+export type ProfessorEvaluationRow = {
+  id: string;
+  semester: string;
+  section: number;
+  courseId: string | null;
+  courseCode: string;
+  courseTitle: string | null;
+  courseOverall: number | null;
+  instructorOverall: number | null;
+  source: string;
+  submittedAt: string | null;
 };
 
 export type StudentComment = {
@@ -120,6 +135,7 @@ export type ProfessorDetail = {
   metrics: MetricValue[];
   courses: ProfessorCourseRow[];
   comments: StudentComment[];
+  evaluations: ProfessorEvaluationRow[];
 };
 
 export type PaginatedResult<T> = {

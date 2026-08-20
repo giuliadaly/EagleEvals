@@ -3,7 +3,7 @@ import { Brand } from "@/components/site-header";
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto bg-[var(--navy)] text-white">
+    <footer className="mt-auto bg-[var(--maroon-deep)] text-white">
       <div className="page-shell grid gap-10 py-12 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
           <Brand light />

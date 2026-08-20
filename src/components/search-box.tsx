@@ -16,6 +16,7 @@ export function SearchBox({ compact = false, autoFocus = false }: { compact?: bo
   const [results, setResults] = useState<QuickResults>({ courses: [], professors: [] });
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -32,6 +33,7 @@ export function SearchBox({ compact = false, autoFocus = false }: { compact?: bo
         if (!response.ok) throw new Error("Search unavailable");
         const payload = (await response.json()) as QuickResults;
         setResults(payload);
+        setActiveIndex(-1);
         setOpen(true);
       } catch (error) {
         if (!(error instanceof DOMException && error.name === "AbortError")) {
@@ -58,6 +60,19 @@ export function SearchBox({ compact = false, autoFocus = false }: { compact?: bo
 
   const hasResults = results.courses.length > 0 || results.professors.length > 0;
   const showPanel = open && query.trim().length >= 2;
+  const flatResults = [
+    ...results.courses.map((course) => ({ href: `/courses/${course.id}` })),
+    ...results.professors.map((professor) => ({ href: `/professors/${professor.id}` })),
+  ];
+
+  function moveActive(direction: 1 | -1) {
+    if (!flatResults.length) return;
+    setOpen(true);
+    setActiveIndex((current) => {
+      if (current < 0) return direction === 1 ? 0 : flatResults.length - 1;
+      return (current + direction + flatResults.length) % flatResults.length;
+    });
+  }
 
   return (
     <div className="relative w-full">
@@ -74,35 +89,55 @@ export function SearchBox({ compact = false, autoFocus = false }: { compact?: bo
               setOpen(false);
               setResults({ courses: [], professors: [] });
             }
+            setActiveIndex(-1);
           }}
           onFocus={() => query.trim().length >= 2 && setOpen(true)}
           onBlur={() => { blurTimer.current = setTimeout(() => setOpen(false), 120); }}
-          onKeyDown={(event) => { if (event.key === "Escape") setOpen(false); }}
+          onKeyDown={(event) => {
+            if (event.key === "ArrowDown") {
+              event.preventDefault();
+              moveActive(1);
+            } else if (event.key === "ArrowUp") {
+              event.preventDefault();
+              moveActive(-1);
+            } else if (event.key === "Enter" && showPanel && activeIndex >= 0) {
+              event.preventDefault();
+              const active = flatResults[activeIndex];
+              if (active) {
+                setOpen(false);
+                router.push(active.href);
+              }
+            } else if (event.key === "Escape") {
+              setOpen(false);
+              setActiveIndex(-1);
+            }
+          }}
           autoFocus={autoFocus}
           autoComplete="off"
           role="combobox"
           aria-autocomplete="list"
           aria-controls={`${listId}-results`}
           aria-expanded={showPanel}
+          aria-activedescendant={showPanel && activeIndex >= 0 ? `${listId}-option-${activeIndex}` : undefined}
           placeholder="Search a course, code, subject, or professor"
-          className={`w-full border bg-white text-[var(--ink)] shadow-sm outline-none transition focus:border-[var(--gold-dark)] focus:ring-4 focus:ring-[var(--gold)]/18 ${compact ? "h-10 rounded-xl pl-11 pr-4 text-sm" : "h-16 rounded-2xl pl-13 pr-28 text-base sm:text-lg"}`}
+          className={`w-full border border-[var(--line-strong)] bg-[var(--paper-raised)] text-[var(--ink)] shadow-sm outline-none transition focus:border-[var(--maroon)] focus:ring-4 focus:ring-[var(--gold)]/18 ${compact ? "h-10 rounded-[.375rem] pl-11 pr-4 text-sm" : "h-16 rounded-[.375rem] pl-13 pr-28 text-base sm:text-lg"}`}
         />
         {!compact ? (
-          <button type="submit" className="absolute right-2 top-2 h-12 rounded-xl bg-[var(--gold)] px-5 text-sm font-bold text-[var(--navy)] transition hover:bg-[var(--gold-light)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+          <button type="submit" className="absolute right-2 top-2 h-12 rounded-[.375rem] bg-[var(--maroon-deep)] px-5 text-sm font-bold text-[var(--on-maroon)] transition hover:bg-[var(--maroon)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--gold)]">
             Search
           </button>
         ) : null}
       </form>
 
       {showPanel ? (
-        <div id={`${listId}-results`} role="listbox" className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[28rem] overflow-y-auto rounded-2xl border border-[var(--line)] bg-white p-2 text-left shadow-2xl shadow-[var(--navy)]/14">
+        <div id={`${listId}-results`} role="listbox" className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[28rem] overflow-y-auto rounded-[.375rem] border border-[var(--line-strong)] bg-[var(--paper-raised)] p-2 text-left shadow-xl shadow-black/10">
           {loading && !hasResults ? <p className="px-4 py-5 text-sm text-[var(--muted)]">Searching…</p> : null}
           {!loading && !hasResults ? <p className="px-4 py-5 text-sm text-[var(--muted)]">No matching courses or professors found.</p> : null}
           {results.courses.length > 0 ? (
             <div>
               <p className="px-3 pb-1 pt-2 text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Courses</p>
-              {results.courses.map((course) => (
-                <Link key={course.id} role="option" aria-selected="false" href={`/courses/${course.id}`} className="result-row" onMouseDown={(event) => event.preventDefault()} onClick={() => setOpen(false)}>
+              {results.courses.map((course, index) => (
+                <Link key={course.id} id={`${listId}-option-${index}`} role="option" aria-selected={activeIndex === index} tabIndex={-1} href={`/courses/${course.id}`} className={`result-row ${activeIndex === index ? "bg-[var(--paper-ledger)]" : ""}`} onMouseEnter={() => setActiveIndex(index)} onMouseDown={(event) => event.preventDefault()} onClick={() => setOpen(false)}>
                   <span className="result-icon"><BookIcon className="size-4" /></span>
                   <span className="min-w-0"><strong className="block truncate text-sm text-[var(--ink)]">{course.code} · {course.title}</strong><span className="block truncate text-xs text-[var(--muted)]">{course.subject}</span></span>
                 </Link>
@@ -112,12 +147,15 @@ export function SearchBox({ compact = false, autoFocus = false }: { compact?: bo
           {results.professors.length > 0 ? (
             <div className={results.courses.length ? "mt-2 border-t border-[var(--line)] pt-2" : ""}>
               <p className="px-3 pb-1 pt-2 text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Professors</p>
-              {results.professors.map((professor) => (
-                <Link key={professor.id} role="option" aria-selected="false" href={`/professors/${professor.id}`} className="result-row" onMouseDown={(event) => event.preventDefault()} onClick={() => setOpen(false)}>
+              {results.professors.map((professor, index) => {
+                const optionIndex = results.courses.length + index;
+                return (
+                <Link key={professor.id} id={`${listId}-option-${optionIndex}`} role="option" aria-selected={activeIndex === optionIndex} tabIndex={-1} href={`/professors/${professor.id}`} className={`result-row ${activeIndex === optionIndex ? "bg-[var(--paper-ledger)]" : ""}`} onMouseEnter={() => setActiveIndex(optionIndex)} onMouseDown={(event) => event.preventDefault()} onClick={() => setOpen(false)}>
                   <span className="result-icon"><PersonIcon className="size-4" /></span>
                   <span className="min-w-0"><strong className="block truncate text-sm text-[var(--ink)]">{professor.name}</strong>{professor.title ? <span className="block truncate text-xs text-[var(--muted)]">{professor.title}</span> : null}</span>
                 </Link>
-              ))}
+                );
+              })}
             </div>
           ) : null}
           {hasResults ? (

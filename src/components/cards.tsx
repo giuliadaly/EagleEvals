@@ -5,7 +5,7 @@ import type { CourseSummary, EvaluationRecord, MetricValue, ProfessorSummary, St
 
 export function RatingBadge({ value, label = "Overall", large = false }: { value: number | null; label?: string; large?: boolean }) {
   return (
-    <div className={`shrink-0 rounded-2xl border border-[var(--gold)]/40 bg-[var(--gold-pale)] text-center ${large ? "min-w-28 px-5 py-4" : "min-w-17 px-3 py-2.5"}`}>
+    <div className={`shrink-0 rounded-[.375rem] border border-[var(--line-strong)] bg-[var(--gold-pale)] text-center ${large ? "min-w-28 px-5 py-4" : "min-w-17 px-3 py-2.5"}`}>
       <div className={`${large ? "text-3xl" : "text-lg"} font-black tracking-[-0.04em] text-[var(--navy)]`}>{formatRating(value)}</div>
       <div className="mt-0.5 text-[0.62rem] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">{value === null ? "No rating" : `${label} / 5`}</div>
     </div>
@@ -34,7 +34,7 @@ export function ProfessorCard({ professor }: { professor: ProfessorSummary }) {
   return (
     <Link href={`/professors/${professor.id}`} className="card group flex h-full flex-col p-5 sm:p-6">
       <div className="flex items-start justify-between gap-4">
-        <span className="grid size-11 place-items-center rounded-full bg-[var(--navy)] font-bold text-[var(--gold)]">{initials(professor.name)}</span>
+        <span className="grid size-11 place-items-center rounded-[.375rem] bg-[var(--maroon-deep)] font-mono text-sm font-semibold text-[var(--on-maroon)]">{initials(professor.name)}</span>
         <RatingBadge value={professor.instructorOverall} />
       </div>
       <h3 className="mt-5 text-xl font-bold leading-tight tracking-[-0.025em] text-[var(--navy)] group-hover:text-[var(--blue)]">{professor.name}</h3>
@@ -53,7 +53,7 @@ export function MetricGrid({ metrics }: { metrics: MetricValue[] }) {
       {metrics.map((metric) => {
         const percent = metric.value === null ? 0 : Math.max(0, Math.min(100, metric.value * 20));
         return (
-          <div key={metric.label} className="rounded-2xl border border-[var(--line)] bg-white p-5">
+          <div key={metric.label} className="rounded-[.375rem] border border-[var(--line-strong)] bg-[var(--paper-raised)] p-5">
             <div className="flex items-baseline justify-between gap-3">
               <p className="font-bold text-[var(--navy)]">{metric.label}</p>
               <p className="text-lg font-black text-[var(--navy)]">{formatRating(metric.value)}<span className="text-xs font-semibold text-[var(--muted)]"> / 5</span></p>
@@ -73,7 +73,7 @@ export function CommentCard({ comment, context }: { comment: StudentComment; con
   const href = context === "course" ? `/professors/${comment.professorId}` : comment.courseId ? `/courses/${comment.courseId}` : null;
   const title = context === "course" ? comment.professorName : comment.courseCode ? `${comment.courseCode} · ${comment.courseTitle}` : "General comment";
   return (
-    <article className="rounded-2xl border border-[var(--line)] bg-white p-5 sm:p-6">
+    <article className="rounded-[.375rem] border border-[var(--line-strong)] bg-[var(--paper-raised)] p-5 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <span className="result-icon">{context === "course" ? <PersonIcon className="size-4" /> : <BookIcon className="size-4" />}</span>
