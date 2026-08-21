@@ -37,9 +37,9 @@ export const metadata: Metadata = {
     title: "EagleEvals · Choose classes with the full picture",
     description: "Course and professor evaluations from Boston College students past and present.",
     url: "/",
-    images: [{ url: "/opengraph-image.png", width: 1200, height: 630, type: "image/png", alt: "EagleEvals circular maroon E logo and wordmark on a warm ivory background" }],
+    images: [{ url: "/eagleevals-logo-card.png", width: 1200, height: 630, type: "image/png", alt: "EagleEvals circular maroon E logo and wordmark on a warm ivory background" }],
   },
-  twitter: { card: "summary_large_image", title: "EagleEvals", description: "Choose classes with the full picture.", images: [{ url: "/opengraph-image.png", alt: "EagleEvals circular maroon E logo and wordmark" }] },
+  twitter: { card: "summary_large_image", title: "EagleEvals", description: "Choose classes with the full picture.", images: [{ url: "/eagleevals-logo-card.png", alt: "EagleEvals circular maroon E logo and wordmark" }] },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
