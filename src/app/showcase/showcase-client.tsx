@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { EagleMark } from "@/components/eagle-mark";
+import { BrandMark } from "@/components/brand-mark";
 import styles from "./showcase.module.css";
 
 type Concept = "stack" | "desk" | "guide";
@@ -58,7 +58,7 @@ function Icon({ name }: { name: "search" | "arrow-left" | "arrow-right" | "compa
 function Brand({ compact = false }: { compact?: boolean }) {
   return (
     <div className={styles.brand} aria-label="EagleEvals">
-      <span className={styles.brandMark} aria-hidden="true"><EagleMark /></span>
+      <span className={styles.brandMark} aria-hidden="true"><BrandMark /></span>
       {!compact && <span className={styles.brandName}>EagleEvals</span>}
     </div>
   );

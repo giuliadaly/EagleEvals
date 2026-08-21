@@ -56,6 +56,11 @@ typography:
     fontSize: "1.05rem"
     fontWeight: 600
     lineHeight: 1.45
+  brand-glyph:
+    fontFamily: "Georgia, Times New Roman, serif"
+    fontSize: "1.95rem"
+    fontWeight: 700
+    lineHeight: 1
 rounded:
   control: "0.375rem"
   filter-panel: "0.75rem"
@@ -132,7 +137,7 @@ The system moves from a filterable directory into a professor dossier. The direc
 
 - Warm ivory paper with dark, high-legibility ink.
 - BC maroon for identity and primary actions; muted gold for contextual emphasis.
-- Square identity marks, gently rounded controls, and flat ruled records.
+- A circular maroon E brand mark, gently rounded controls, and flat ruled records.
 - Geometric display type, hyperlegible body type, and monospaced data.
 - Dense evidence that linearizes cleanly without losing meaning on mobile.
 
@@ -179,6 +184,7 @@ The production palette is a warm paper system with exact hex values, anchored by
 **Display Font:** Archivo (with Avenir Next and sans-serif fallbacks)
 **Body Font:** Atkinson Hyperlegible (with Avenir Next and sans-serif fallbacks)
 **Data Font:** IBM Plex Mono (with SFMono-Regular and monospace fallbacks)
+**Brand Glyph:** Georgia (with Times New Roman and serif fallbacks), reserved for the E inside the circular mark
 
 **Character:** Archivo makes professor names and section hierarchy direct without corporate polish. Atkinson Hyperlegible keeps filters, explanations, and comments readable. IBM Plex Mono makes scores, counts, terms, sections, course codes, and index numbers visibly factual.
 
@@ -229,7 +235,7 @@ Professor dossiers are flat. Depth comes from paper tones, strong opening rules,
 
 The core form language uses compact `0.375rem` corners for marks, controls, cards, rating badges, and the record rail. The directory filter groups related controls inside a `0.75rem` container. Larger `1rem` information panels remain a secondary legacy-compatible treatment and should not spread into the dossier.
 
-Pills are reserved for compact binary or source statuses such as “Would take again,” never for general navigation or every metadata item. The eagle-E mark and dossier avatars stay square rather than circular. The original gold eagle silhouette forms the letter’s middle arm and remains simple enough to read at favicon size.
+Pills are reserved for compact binary or source statuses such as “Would take again,” never for general navigation or every metadata item. The brand mark is a circular, outlined serif E in deep BC maroon; dossier avatars stay square so identity and data records remain visually distinct.
 
 **The Square Record Rule.** Professor records should read as documents, not soft lifestyle cards. Avoid inflated radii and repeated pill containers.
 
@@ -256,7 +262,7 @@ Pills are reserved for compact binary or source statuses such as “Would take a
 
 ### Navigation
 
-- **Global Header:** Sticky raised-paper header with the eagle-E mark, optional desktop search, Courses, Professors, desktop-only Evaluations, and a compact gold review action.
+- **Global Header:** Sticky raised-paper header with the circular maroon E mark, optional desktop search, Courses, Professors, desktop-only Evaluations, and a compact gold review action.
 - **Desktop Record Index:** Sticky at `64rem`, numbered in IBM Plex Mono, and ordered exactly like the visible dossier. It is hidden below the desktop breakpoint.
 
 ### Decision Summary
