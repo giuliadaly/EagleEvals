@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { EagleMark } from "@/components/eagle-mark";
+import { BrandMark } from "@/components/brand-mark";
 import { SearchBox } from "@/components/search-box";
 
 export function Brand({ light = false }: { light?: boolean }) {
   return (
     <Link href="/" className="group flex shrink-0 items-center gap-2.5" aria-label="EagleEvals home">
-      <EagleMark className={`size-9 shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5 ${light ? "text-white" : "text-[var(--maroon-deep)]"}`} />
-      <span className={`brand-word font-serif text-lg font-semibold tracking-[-0.03em] ${light ? "text-white" : "text-[var(--ink)]"}`}>
-        Eagle<span className={light ? "text-[var(--gold-light)]" : "text-[var(--maroon)]"}>Evals</span>
+      <BrandMark className={`size-9 shrink-0 transition-transform duration-200 group-hover:-rotate-6 ${light ? "text-[var(--gold)]" : "text-[var(--maroon-deep)]"}`} />
+      <span className={`brand-word font-serif text-lg font-semibold tracking-[-0.03em] ${light ? "text-white" : "text-[var(--maroon-deep)]"}`}>
+        Eagle<span className={light ? "text-[var(--gold-light)]" : "text-[var(--gold-dark)]"}>Evals</span>
       </span>
     </Link>
   );
