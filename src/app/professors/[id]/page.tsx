@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/page-parts";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { cleanTitle, formatCount, formatDate, initials } from "@/data/format";
+import { cleanTitle, commentSourceLabel, formatCount, formatDate, initials } from "@/data/format";
 import { getProfessorDetail } from "@/data/queries";
 import type { MetricValue } from "@/data/types";
 import styles from "./professor.module.css";
@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const detail = await getProfessorDetail(id);
   if (!detail) return { title: "Professor not found" };
-  return { title: detail.professor.name, description: `Ratings, courses, evaluation history, and anonymous student comments for ${detail.professor.name} at Boston College.` };
+  return { title: detail.professor.name, description: `Ratings, courses, evaluation history, and anonymous written reviews for ${detail.professor.name} at Boston College.` };
 }
 
 function preciseRating(value: number | null): string {
@@ -51,7 +51,7 @@ export default async function ProfessorDetailPage({ params }: { params: Promise<
                 </div>
               </div>
               <div className={styles.actions}>
-                <Link className="button-secondary" href={`/evaluations?q=${encodeURIComponent(professor.name)}`}>All evaluations</Link>
+                <Link className="button-secondary" href="#comments">Read {formatCount(comments.length)} written review{comments.length === 1 ? "" : "s"}</Link>
                 <Link className="button-primary" href={`/review?professor=${professor.id}`}>Review anonymously</Link>
               </div>
             </div>
@@ -63,12 +63,12 @@ export default async function ProfessorDetailPage({ params }: { params: Promise<
             <p className={styles.recordLabel}>Professor record</p>
             <div className={styles.railCounts}>
               <p><strong>{formatCount(professor.reviewCount)}</strong> structured evaluations</p>
-              <p><strong>{formatCount(comments.length)}</strong> written comments</p>
+              <p><strong>{formatCount(comments.length)}</strong> written reviews</p>
               <p><strong>{formatCount(courses.length)}</strong> course pairing{courses.length === 1 ? "" : "s"}</p>
             </div>
             <nav className={styles.recordIndex} aria-label="Jump to professor data">
               <a href="#decision"><span>01</span><span>Decision summary</span></a>
-              <a href="#comments"><span>02</span><span>Written comments</span></a>
+              <a href="#comments"><span>02</span><span>Written reviews</span></a>
               <a href="#courses"><span>03</span><span>Course pairings</span></a>
               <a href="#metrics"><span>04</span><span>All rating fields</span></a>
               <a href="#history"><span>05</span><span>Term history</span></a>
@@ -80,22 +80,22 @@ export default async function ProfessorDetailPage({ params }: { params: Promise<
             <section className={styles.recordSection} id="decision">
               <div className={styles.sectionHeading}>
                 <h2>The decision in one scan</h2>
-                <p>Start with the overall signal, then use comments and course-level evidence to understand what is behind it.</p>
+                <p>Start with the overall signal, then use written reviews and course-level evidence to understand what is behind it.</p>
               </div>
               <div className={styles.summary} aria-label="Professor rating summary">
                 <div><strong>{preciseRating(professor.instructorOverall)}</strong><span>Instructor rating</span><small>{formatCount(professor.reviewCount)} evaluations</small></div>
                 <div><strong>{preciseRating(professor.courseOverall)}</strong><span>Course rating</span><small>{formatCount(professor.reviewCount)} evaluations</small></div>
                 <div><strong>{formatCount(professor.reviewCount)}</strong><span>Structured evaluations</span><small>{formatCount(courses.length)} courses</small></div>
-                <div><strong>{formatCount(comments.length)}</strong><span>Written comments</span><small>Read separately</small></div>
+                <div><strong>{formatCount(comments.length)}</strong><span>Written reviews</span><small>Read separately</small></div>
                 <div><strong className={styles.termValue}>{latestTerm}</strong><span>Latest evaluation term</span><small>Most recent record</small></div>
               </div>
-              <p className={styles.summaryNote}>Instructor rating and course rating answer different questions. Written comments do not change either average.</p>
+              <p className={styles.summaryNote}>Instructor rating and course rating answer different questions. Written reviews do not change either average.</p>
             </section>
 
             <section className={styles.recordSection} id="comments">
               <div className={styles.sectionHeading}>
-                <h2>Written comments</h2>
-                <p>{comments.length ? `All ${formatCount(comments.length)} public comments attached to this professor, shown without a user identifier.` : "No public written comments are attached to this professor yet."}</p>
+                <h2>Written reviews</h2>
+                <p>{comments.length ? `All ${formatCount(comments.length)} public written reviews attached to this professor, shown without a user identifier.` : "No public written reviews are attached to this professor yet."}</p>
               </div>
               {comments.length ? (
                 <div className={styles.comments}>
@@ -104,7 +104,7 @@ export default async function ProfessorDetailPage({ params }: { params: Promise<
                       <div className={styles.commentMeta}>
                         <span>{formatDate(comment.createdAt)}</span>
                         {comment.courseId && comment.courseCode ? <Link href={`/courses/${comment.courseId}`}>{comment.courseCode}</Link> : <span>Course unavailable</span>}
-                        <span>{comment.source === "eagleevals_anonymous" ? "New anonymous review" : "Historical review"}</span>
+                        <span>{commentSourceLabel(comment.source)}</span>
                         <strong>{comment.wouldTakeAgain ? "Would take again" : "Would not take again"}</strong>
                       </div>
                       <p>{comment.message}</p>

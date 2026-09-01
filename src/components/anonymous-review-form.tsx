@@ -264,7 +264,7 @@ export function AnonymousReviewForm({
 
       <div aria-live="polite">
         {error ? <p className="rounded-[.375rem] border border-[var(--rose)]/25 bg-[var(--rose-pale)] p-4 text-sm font-semibold text-[var(--rose)]">{error}</p> : null}
-        {success ? <div className="rounded-[.375rem] border border-[var(--green)]/25 bg-[var(--green-pale)] p-5 text-sm text-[var(--green)]"><p className="font-bold">{success.message}</p><p className="mt-2">It is now included in the public ratings and anonymous comments.</p><div className="mt-3 flex flex-wrap gap-4 font-bold"><Link href={`/courses/${success.course.id}`}>View {success.course.code}</Link><Link href={`/professors/${success.professor.id}`}>View {success.professor.name}</Link></div></div> : null}
+        {success ? <div className="rounded-[.375rem] border border-[var(--green)]/25 bg-[var(--green-pale)] p-5 text-sm text-[var(--green)]"><p className="font-bold">{success.message}</p><p className="mt-2">It is now included in the public ratings and written reviews.</p><div className="mt-3 flex flex-wrap gap-4 font-bold"><Link href={`/courses/${success.course.id}`}>View {success.course.code}</Link><Link href={`/professors/${success.professor.id}`}>View {success.professor.name}</Link></div></div> : null}
       </div>
 
       <div className="flex flex-col gap-4 rounded-[.75rem] bg-[var(--maroon-deep)] p-6 text-white sm:flex-row sm:items-center sm:justify-between">

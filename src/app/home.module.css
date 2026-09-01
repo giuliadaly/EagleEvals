@@ -84,9 +84,15 @@
   font-variant-numeric: tabular-nums;
 }
 
-.archiveLedger a {
-  justify-self: start;
+.archiveLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem 1.25rem;
   margin-top: 1.1rem;
+}
+
+.archiveLinks a {
+  justify-self: start;
   color: var(--maroon-deep);
   font-weight: 700;
   text-decoration: underline;

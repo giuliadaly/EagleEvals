@@ -2,7 +2,7 @@ import Link from "next/link";
 import { SearchBox } from "@/components/search-box";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { formatCount, formatRating } from "@/data/format";
+import { formatCount, formatRating, formatWrittenReviewCount } from "@/data/format";
 import { getFeaturedCourses, getFeaturedProfessors, getSiteStats } from "@/data/queries";
 import styles from "./home.module.css";
 
@@ -32,32 +32,32 @@ export default async function Home() {
 
           <aside className={styles.archiveLedger} aria-label="EagleEvals data summary">
             <h2>EagleEvals at a glance</h2>
-            <div><span>Structured evaluations</span><strong>{formatCount(stats.reviews)}</strong></div>
+            <div><span>Structured ratings</span><strong>{formatCount(stats.reviews)}</strong></div>
             <div><span>Courses</span><strong>{formatCount(stats.courses)}</strong></div>
             <div><span>Professors</span><strong>{formatCount(stats.professors)}</strong></div>
-            <div><span>Written comments</span><strong>{formatCount(stats.comments)}</strong></div>
-            <Link href="/about">About EagleEvals</Link>
+            <div><span>Written reviews</span><strong>{formatCount(stats.comments)}</strong></div>
+            <nav className={styles.archiveLinks} aria-label="Explore the EagleEvals archive"><Link href="/comments">Browse all written reviews</Link><Link href="/about">About EagleEvals</Link></nav>
           </aside>
         </section>
 
         <div className={styles.trustLine}>
           <div className="page-shell">
             <strong>Independent and student-run.</strong>
-            <span>Read every public evaluation without an account. New reviews are anonymous.</span>
+          <span>Read every public rating and written review without an account. New reviews are anonymous.</span>
           </div>
         </div>
 
         <section className={`page-shell ${styles.directorySection}`}>
           <div className={styles.sectionHeading}>
             <h2>Start with a course</h2>
-            <p>Popular courses with the deepest historical record.</p>
+            <p>Courses with the deepest written-review archive.</p>
             <Link href="/courses">Browse and filter all courses</Link>
           </div>
           <div className={styles.recordList}>
             {courses.map((course) => (
               <Link key={course.id} href={`/courses/${course.id}`} className={styles.recordRow}>
                 <div><span className={styles.code}>{course.code}</span><h3>{course.title}</h3><p>{course.subject}</p></div>
-                <div className={styles.rowEvidence}><span><strong>{formatRating(course.courseOverall)}</strong> course</span><span><strong>{formatCount(course.reviewCount)}</strong> evaluations</span></div>
+                <div className={styles.rowEvidence}><span><strong>{formatRating(course.courseOverall)}</strong> course</span><span><strong>{formatCount(course.reviewCount)}</strong> ratings</span><span><strong>{formatCount(course.commentCount)}</strong> {course.commentCount === 1 ? "written review" : "written reviews"}</span></div>
               </Link>
             ))}
           </div>
@@ -67,14 +67,14 @@ export default async function Home() {
           <div className={`page-shell ${styles.directorySection}`}>
             <div className={styles.sectionHeading}>
               <h2>Then check the professor</h2>
-              <p>Open the record, scan the decision, then read the comments.</p>
+              <p>Professors with the most written student context.</p>
               <Link href="/professors">Browse and filter all professors</Link>
             </div>
             <div className={styles.recordList}>
               {professors.map((professor) => (
                 <Link key={professor.id} href={`/professors/${professor.id}`} className={styles.recordRow}>
                   <div><h3>{professor.name}</h3><p>{professor.titles[0] ?? "Boston College faculty"}</p></div>
-                  <div className={styles.rowEvidence}><span><strong>{formatRating(professor.instructorOverall)}</strong> instructor</span><span><strong>{formatCount(professor.reviewCount)}</strong> evaluations</span></div>
+                  <div className={styles.rowEvidence}><span><strong>{formatRating(professor.instructorOverall)}</strong> instructor</span><span><strong>{formatCount(professor.reviewCount)}</strong> ratings</span><span><strong>{formatWrittenReviewCount(professor.commentCount)}</strong></span></div>
                 </Link>
               ))}
             </div>
