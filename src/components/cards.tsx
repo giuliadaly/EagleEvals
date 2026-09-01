@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowIcon, BookIcon, PersonIcon } from "@/components/icons";
-import { cleanTitle, formatCount, formatDate, formatRating, initials } from "@/data/format";
+import { cleanTitle, commentSourceLabel, formatCount, formatDate, formatRating, formatWrittenReviewCount, initials } from "@/data/format";
 import type { CourseSummary, EvaluationRecord, MetricValue, ProfessorSummary, StudentComment } from "@/data/types";
 
 export function RatingBadge({ value, label = "Overall", large = false }: { value: number | null; label?: string; large?: boolean }) {
@@ -22,8 +22,8 @@ export function CourseCard({ course }: { course: CourseSummary }) {
       <p className="mt-5 text-xs font-black uppercase tracking-[0.14em] text-[var(--gold-dark)]">{course.code}</p>
       <h3 className="mt-1 text-xl font-bold leading-tight tracking-[-0.025em] text-[var(--navy)] group-hover:text-[var(--blue)]">{course.title}</h3>
       <p className="mt-2 text-sm text-[var(--muted)]">{course.subject}</p>
-      <div className="mt-auto flex items-center justify-between border-t border-[var(--line)] pt-5 text-xs text-[var(--muted)]">
-        <span>{formatCount(course.reviewCount)} evaluations</span>
+      <div className="mt-auto flex items-center justify-between gap-3 border-t border-[var(--line)] pt-5 text-xs text-[var(--muted)]">
+        <span className="flex flex-wrap gap-x-3 gap-y-1"><span>{formatCount(course.reviewCount)} ratings</span><span className="font-bold text-[var(--maroon-deep)]">{formatWrittenReviewCount(course.commentCount)}</span></span>
         <ArrowIcon className="size-4 transition-transform group-hover:translate-x-1" />
       </div>
     </Link>
@@ -39,8 +39,8 @@ export function ProfessorCard({ professor }: { professor: ProfessorSummary }) {
       </div>
       <h3 className="mt-5 text-xl font-bold leading-tight tracking-[-0.025em] text-[var(--navy)] group-hover:text-[var(--blue)]">{professor.name}</h3>
       <p className="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-[var(--muted)]">{cleanTitle(professor.titles[0]) ?? "Boston College faculty"}</p>
-      <div className="mt-auto flex items-center justify-between border-t border-[var(--line)] pt-5 text-xs text-[var(--muted)]">
-        <span>{formatCount(professor.reviewCount)} evaluations</span>
+      <div className="mt-auto flex items-center justify-between gap-3 border-t border-[var(--line)] pt-5 text-xs text-[var(--muted)]">
+        <span className="flex flex-wrap gap-x-3 gap-y-1"><span>{formatCount(professor.reviewCount)} ratings</span><span className="font-bold text-[var(--maroon-deep)]">{formatWrittenReviewCount(professor.commentCount)}</span></span>
         <ArrowIcon className="size-4 transition-transform group-hover:translate-x-1" />
       </div>
     </Link>
@@ -79,7 +79,7 @@ export function CommentCard({ comment, context }: { comment: StudentComment; con
           <span className="result-icon">{context === "course" ? <PersonIcon className="size-4" /> : <BookIcon className="size-4" />}</span>
           <div>
             {href ? <Link href={href} className="font-bold text-[var(--navy)] hover:text-[var(--blue)]">{title}</Link> : <p className="font-bold text-[var(--navy)]">{title}</p>}
-            <p className="text-xs text-[var(--muted)]">{formatDate(comment.createdAt)} · {comment.source === "eagleevals_anonymous" ? "New anonymous review" : "Historical comment"}</p>
+            <p className="text-xs text-[var(--muted)]">{formatDate(comment.createdAt)} · {commentSourceLabel(comment.source)}</p>
           </div>
         </div>
         <span className={`rounded-full px-3 py-1 text-xs font-bold ${comment.wouldTakeAgain ? "bg-[var(--green-pale)] text-[var(--green)]" : "bg-[var(--rose-pale)] text-[var(--rose)]"}`}>
@@ -121,7 +121,7 @@ export function CommentArchiveCard({ comment }: { comment: StudentComment }) {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
-            <span className={`rounded-full px-3 py-1 ${comment.source === "eagleevals_anonymous" ? "bg-[var(--green-pale)] text-[var(--green)]" : "bg-[var(--wash)] text-[var(--muted)]"}`}>{comment.source === "eagleevals_anonymous" ? "New anonymous review" : "Historical review"}</span>
+            <span className={`rounded-full px-3 py-1 ${comment.source === "eagleevals_anonymous" ? "bg-[var(--green-pale)] text-[var(--green)]" : "bg-[var(--wash)] text-[var(--muted)]"}`}>{commentSourceLabel(comment.source)}</span>
             <span className="text-[var(--muted)]">{formatDate(comment.createdAt)}</span>
           </div>
           <p className="mt-3 font-bold text-[var(--navy)]"><Link href={`/professors/${comment.professorId}`} className="hover:text-[var(--blue)]">{comment.professorName}</Link></p>

@@ -104,8 +104,8 @@ export const getFeaturedCourses = cache(async (): Promise<CourseSummary[]> => {
   const sql = database();
   const rows = (await sql`
     SELECT * FROM course_summaries
-    WHERE review_count >= 20
-    ORDER BY review_count DESC, code ASC
+    WHERE comment_count > 0
+    ORDER BY comment_count DESC, review_count DESC, code ASC
     LIMIT 4
   `) as DbRow[];
   return rows.map(mapCourse);
@@ -115,8 +115,8 @@ export const getFeaturedProfessors = cache(async (): Promise<ProfessorSummary[]>
   const sql = database();
   const rows = (await sql`
     SELECT * FROM professor_summaries
-    WHERE review_count >= 15
-    ORDER BY review_count DESC, name ASC
+    WHERE comment_count > 0
+    ORDER BY comment_count DESC, review_count DESC, name ASC
     LIMIT 4
   `) as DbRow[];
   return rows.map(mapProfessor);
@@ -193,13 +193,15 @@ export async function getProfessorsPage(rawQuery: string, rawPage: number, rawSo
   const page = normalizePage(rawPage);
   const offset = (page - 1) * PAGE_SIZE;
   const sql = database();
-  const sort = ["rating", "course", "name"].includes(rawSort) ? rawSort : "evidence";
+  const sort = ["rating", "course", "comments", "name"].includes(rawSort) ? rawSort : "evidence";
   const minRating = [4, 4.5].includes(rawMinRating) ? rawMinRating : 0;
   const pattern = `%${query}%`;
   const order = sort === "rating"
     ? "ORDER BY instructor_overall DESC NULLS LAST, review_count DESC, name ASC"
     : sort === "course"
       ? "ORDER BY course_overall DESC NULLS LAST, review_count DESC, name ASC"
+      : sort === "comments"
+        ? "ORDER BY comment_count DESC, review_count DESC, name ASC"
       : sort === "name"
         ? "ORDER BY name ASC"
         : "ORDER BY review_count DESC, name ASC";

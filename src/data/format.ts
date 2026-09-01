@@ -4,6 +4,10 @@ export function formatCount(value: number): string {
   return integerFormatter.format(value);
 }
 
+export function formatWrittenReviewCount(value: number): string {
+  return `${formatCount(value)} written ${value === 1 ? "review" : "reviews"}`;
+}
+
 export function formatRating(value: number | null): string {
   return value === null ? "—" : value.toFixed(1);
 }
@@ -15,6 +19,12 @@ export function formatDate(value: string): string {
     year: "numeric",
     timeZone: "UTC",
   }).format(new Date(value));
+}
+
+export function commentSourceLabel(source: string): string {
+  if (source === "legacy_eagleeval") return "Original EagleEval review";
+  if (source === "eagleevals_anonymous") return "New EagleEvals review";
+  return "Attributed external review";
 }
 
 export function initials(name: string): string {

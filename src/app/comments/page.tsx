@@ -9,7 +9,7 @@ import { getCommentsPage } from "@/data/queries";
 
 export const metadata: Metadata = {
   title: "All written reviews",
-  description: "Browse every public written EagleEval comment and new anonymous review.",
+  description: "Browse every public written review recovered from the original EagleEval and every new anonymous EagleEvals review.",
 };
 
 export default async function CommentsPage({ searchParams }: { searchParams: Promise<{ q?: string; page?: string }> }) {
@@ -23,7 +23,7 @@ export default async function CommentsPage({ searchParams }: { searchParams: Pro
           <div className="page-shell">
             <p className="eyebrow text-[var(--gold-dark)]">Student perspective</p>
             <h1 className="mt-3 font-serif text-4xl font-bold tracking-[-0.04em] text-[var(--navy)] sm:text-5xl">All written reviews</h1>
-            <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--ink-soft)]">Browse anonymous written reviews from BC students past and present. They are displayed as submitted and may describe course formats that have since changed.</p>
+            <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--ink-soft)]">Browse the full written archive: reviews recovered from the original EagleEval plus new anonymous EagleEvals submissions. Every review keeps its source label and may describe a course format that has since changed.</p>
             <form className="mt-7 flex max-w-3xl flex-col gap-3 sm:flex-row" role="search">
               <label className="sr-only" htmlFor="comment-search">Search written reviews</label>
               <input id="comment-search" name="q" defaultValue={result.query} className="form-control flex-1" placeholder="Course, professor, or words in a review" />
