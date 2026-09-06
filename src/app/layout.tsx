@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { Archivo, Atkinson_Hyperlegible, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -45,7 +46,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`h-full scroll-smooth ${archivo.variable} ${atkinson.variable} ${plexMono.variable}`} data-scroll-behavior="smooth">
-      <body suppressHydrationWarning className="min-h-full flex flex-col">{children}</body>
+      <body suppressHydrationWarning className="min-h-full flex flex-col">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
