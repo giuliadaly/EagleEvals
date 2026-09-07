@@ -1,0 +1,7 @@
+.eagle { position: relative; display: block; width: 100%; aspect-ratio: 1; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.eagle:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; border-radius: 8px; }
+.perched { display: block; width: 100%; height: auto; }
+.sprite { position: absolute; inset: 0; background-size: 800% 600%; background-repeat: no-repeat; opacity: 0; }
+.eagle[data-playing="true"] .perched { opacity: 0; }
+.eagle[data-playing="true"] .sprite { opacity: 1; }
+@media(prefers-reduced-motion:reduce) { .eagle[data-playing="true"] .perched { opacity: 1; } .eagle[data-playing="true"] .sprite { opacity: 0; } }
