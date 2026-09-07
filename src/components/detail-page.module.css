@@ -93,7 +93,7 @@
 .numeric { font-variant-numeric: tabular-nums; }
 .filters { display: grid; gap: .85rem; margin-bottom: 1.7rem; }
 .filters label { min-width: 0; }
-.filters select { font-size: .85rem; }
+.filters select { font-size: 1rem; }
 .filterStatus { font-size: .75rem; color: var(--muted); margin-bottom: 1.2rem; }
 .emptyState { font-size: .95rem; color: var(--muted); line-height: 1.8; padding-block: .5rem 2rem; }
 
