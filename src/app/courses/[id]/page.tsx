@@ -36,7 +36,7 @@ export default async function CourseDetailPage({ params, searchParams }: { param
     <>
       <SiteHeader />
       <main className="flex-1">
-        <section className="border-b border-[var(--line)] bg-white py-8 sm:py-12">
+        <section className="page-intro">
           <div className="page-shell">
             <Breadcrumbs items={[{ label: "Courses", href: "/courses" }, { label: course.code }]} />
             <div className="mt-7 flex flex-col gap-7 md:flex-row md:items-start md:justify-between">

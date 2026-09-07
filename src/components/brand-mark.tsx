@@ -1,26 +1,7 @@
 export function BrandMark({ className }: { className?: string }) {
   return (
-    <svg
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      focusable="false"
-      viewBox="0 0 64 64"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle cx="32" cy="32" r="27" stroke="currentColor" strokeWidth="3.5" />
-      <text
-        x="32"
-        y="34"
-        dominantBaseline="middle"
-        fill="currentColor"
-        fontFamily="Georgia, 'Times New Roman', serif"
-        fontSize="31"
-        fontWeight="700"
-        textAnchor="middle"
-      >
-        E
-      </text>
+    <svg aria-hidden="true" className={className} focusable="false" viewBox="0 0 36 32" fill="currentColor">
+      <path d="M7 3h29l-7 6H5.7L7 3ZM4.8 13h24l-6.5 6H3.5l1.3-6ZM2.6 23h18.5l-6 6H1.3l1.3-6Z" />
     </svg>
   );
 }

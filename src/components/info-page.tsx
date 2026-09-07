@@ -8,7 +8,7 @@ export function InfoPage({ eyebrow, title, intro, children }: { eyebrow: string;
     <>
       <SiteHeader />
       <main className="flex-1">
-        <section className="border-b border-[var(--line)] bg-white py-10 sm:py-14">
+        <section className="page-intro">
           <div className="page-shell max-w-4xl">
             <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: title }]} />
             <p className="eyebrow mt-8 text-[var(--gold-dark)]">{eyebrow}</p>

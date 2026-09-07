@@ -1,25 +1,18 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
-import { Archivo, Atkinson_Hyperlegible, IBM_Plex_Mono } from "next/font/google";
+import { DM_Sans, Patrick_Hand } from "next/font/google";
 import "./globals.css";
 
-const archivo = Archivo({
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-display",
-  display: "swap",
-});
-
-const atkinson = Atkinson_Hyperlegible({
-  subsets: ["latin"],
-  weight: ["400", "700"],
   variable: "--font-body",
   display: "swap",
 });
 
-const plexMono = IBM_Plex_Mono({
+const patrickHand = Patrick_Hand({
   subsets: ["latin"],
-  weight: ["500", "600"],
-  variable: "--font-data",
+  weight: "400",
+  variable: "--font-hand",
   display: "swap",
 });
 
@@ -35,17 +28,17 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "EagleEvals",
-    title: "EagleEvals · Choose classes with the full picture",
+    title: "EagleEvals · A little advice before you register",
     description: "Course and professor evaluations from Boston College students past and present.",
     url: "/",
-    images: [{ url: "/eagleevals-logo-card.png", width: 1200, height: 630, type: "image/png", alt: "EagleEvals circular maroon E logo and wordmark on a warm ivory background" }],
+    images: [{ url: "/eagleevals-logo-card.png", width: 1200, height: 630, type: "image/png", alt: "EagleEvals gold wing mark and wordmark on maroon" }],
   },
-  twitter: { card: "summary_large_image", title: "EagleEvals", description: "Choose classes with the full picture.", images: [{ url: "/eagleevals-logo-card.png", alt: "EagleEvals circular maroon E logo and wordmark" }] },
+  twitter: { card: "summary_large_image", title: "EagleEvals", description: "A little advice before you register.", images: [{ url: "/eagleevals-logo-card.png", alt: "EagleEvals gold wing mark and wordmark on maroon" }] },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`h-full scroll-smooth ${archivo.variable} ${atkinson.variable} ${plexMono.variable}`} data-scroll-behavior="smooth">
+    <html lang="en" className={`h-full scroll-smooth ${dmSans.variable} ${patrickHand.variable}`} data-scroll-behavior="smooth">
       <body suppressHydrationWarning className="min-h-full flex flex-col">
         {children}
         <Analytics />
