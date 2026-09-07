@@ -1,0 +1,12 @@
+.footer { margin-top: auto; background: var(--maroon-deep); color: var(--on-maroon); }
+.inner { padding-block: 2.3rem 1.3rem; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
+.top p { font-family: var(--font-hand), cursive; font-size: clamp(1.3rem,2.4vw,1.8rem); color: var(--gold); }
+.top nav { display: flex; gap: 1.8rem; font-size: .8rem; }
+.brand { display: grid; grid-template-columns: minmax(0,1fr) 23%; align-items: center; gap: 1rem; margin-block: 1rem; }
+.brand > span { font-size: clamp(3rem,11.2vw,9.2rem); letter-spacing: -.075em; font-weight: 800; line-height: 1.2; }
+.bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .8rem 1.5rem; border-top: 1px solid #934753; padding-top: 1rem; color: #dfbbc2; font-size: .7rem; }
+.bottom nav { display: flex; gap: 1rem; }
+.footer a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.footer a:focus-visible { outline-color: var(--gold); }
+@media(max-width:600px) { .top { align-items: flex-start; flex-direction: column; gap: 1rem; } .top nav { gap: 1.5rem; } .brand { grid-template-columns: minmax(0,1fr) 25%; gap: 0; margin-block: 1.1rem; } .brand > span { font-size: clamp(2.5rem,11.2vw,4.2rem); } .bottom { flex-direction: column; gap: .6rem; } }

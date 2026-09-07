@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useId, useRef, useState } from "react";
 import { BookIcon, PersonIcon, SearchIcon } from "@/components/icons";
 import { formatWrittenReviewCount } from "@/data/format";
+import styles from "./search-box.module.css";
 
 type QuickCourse = { id: string; code: string; title: string; subject: string; commentCount: number };
 type QuickProfessor = { id: string; name: string; title: string | null; commentCount: number };
 type QuickResults = { courses: QuickCourse[]; professors: QuickProfessor[] };
 
-export function SearchBox({ compact = false, autoFocus = false }: { compact?: boolean; autoFocus?: boolean }) {
+export function SearchBox({ compact = false, autoFocus = false, hero = false }: { compact?: boolean; autoFocus?: boolean; hero?: boolean }) {
   const router = useRouter();
   const listId = useId();
   const [query, setQuery] = useState("");
@@ -77,7 +78,7 @@ export function SearchBox({ compact = false, autoFocus = false }: { compact?: bo
 
   return (
     <div className="relative w-full">
-      <form onSubmit={submit} role="search" className="relative">
+      <form onSubmit={submit} role="search" className={`relative ${hero ? styles.hero : ""}`}>
         <SearchIcon className={`pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 ${compact ? "size-4" : "size-5"} text-[var(--muted)]`} />
         <label className="sr-only" htmlFor={listId}>Search courses and professors</label>
         <input
@@ -120,12 +121,12 @@ export function SearchBox({ compact = false, autoFocus = false }: { compact?: bo
           aria-controls={`${listId}-results`}
           aria-expanded={showPanel}
           aria-activedescendant={showPanel && activeIndex >= 0 ? `${listId}-option-${activeIndex}` : undefined}
-          placeholder="Search a course, code, subject, or professor"
+          placeholder={hero ? "Course or professor" : compact ? "Course or professor" : "Search a course, code, subject, or professor"}
           className={`w-full border border-[var(--line-strong)] bg-[var(--paper-raised)] text-[var(--ink)] shadow-sm outline-none transition focus:border-[var(--maroon)] focus:ring-4 focus:ring-[var(--gold)]/18 ${compact ? "h-10 rounded-[.375rem] pl-11 pr-4 text-sm" : "h-16 rounded-[.375rem] pl-13 pr-28 text-base sm:text-lg"}`}
         />
         {!compact ? (
           <button type="submit" className="absolute right-2 top-2 h-12 rounded-[.375rem] bg-[var(--maroon-deep)] px-5 text-sm font-bold text-[var(--on-maroon)] transition hover:bg-[var(--maroon)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--gold)]">
-            Search
+            {hero ? <>Find out <span aria-hidden="true">↗</span></> : "Search"}
           </button>
         ) : null}
       </form>

@@ -1,93 +1,60 @@
+import Image from "next/image";
 import Link from "next/link";
 import { SearchBox } from "@/components/search-box";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { formatCount, formatRating, formatWrittenReviewCount } from "@/data/format";
-import { getFeaturedCourses, getFeaturedProfessors, getSiteStats } from "@/data/queries";
+import { getFeaturedCourses, getSiteStats } from "@/data/queries";
 import styles from "./home.module.css";
 
 export const revalidate = 3600;
 
 export default async function Home() {
-  const [stats, courses, professors] = await Promise.all([
-    getSiteStats(),
-    getFeaturedCourses(),
-    getFeaturedProfessors(),
-  ]);
-
+  const [stats, courses] = await Promise.all([getSiteStats(), getFeaturedCourses()]);
   return (
     <>
       <SiteHeader showSearch={false} />
       <main className={styles.main}>
-        <section className={`page-shell ${styles.hero}`}>
-          <div className={styles.heroCopy}>
-            <h1>Choose the class.<br />Know the professor.</h1>
-            <p>Explore course and professor evaluations from BC students past and present, understand the tradeoffs behind a rating, and add a fully anonymous review after the semester.</p>
-            <div className={styles.searchBlock}>
-              <span>What are you considering?</span>
-              <SearchBox />
-              <small>Start with a course code when you have one. It is the fastest route to comparable instructors.</small>
+        <section className={styles.heroBand}>
+          <div className={`page-shell ${styles.hero}`}>
+            <div className={styles.heroCopy}>
+              <p className={styles.overline}>For BC students, by BC students.</p>
+              <h1>A little advice<br /><span>before you register.</span></h1>
+              <p className={styles.intro}>Course reviews from people who’ve<br className={styles.desktopBreak} /> actually taken the class.</p>
+              <div className={styles.search}><SearchBox hero /></div>
+              <div className={styles.searchCaption}><span>{formatCount(stats.courses)} courses to explore</span><span>No account needed</span></div>
             </div>
-          </div>
-
-          <aside className={styles.archiveLedger} aria-label="EagleEvals data summary">
-            <h2>EagleEvals at a glance</h2>
-            <div><span>Structured ratings</span><strong>{formatCount(stats.reviews)}</strong></div>
-            <div><span>Courses</span><strong>{formatCount(stats.courses)}</strong></div>
-            <div><span>Professors</span><strong>{formatCount(stats.professors)}</strong></div>
-            <div><span>Written reviews</span><strong>{formatCount(stats.comments)}</strong></div>
-            <nav className={styles.archiveLinks} aria-label="Explore the EagleEvals archive"><Link href="/comments">Browse all written reviews</Link><Link href="/about">About EagleEvals</Link></nav>
-          </aside>
-        </section>
-
-        <div className={styles.trustLine}>
-          <div className="page-shell">
-            <strong>Independent and student-run.</strong>
-          <span>Read every public rating and written review without an account. New reviews are anonymous.</span>
-          </div>
-        </div>
-
-        <section className={`page-shell ${styles.directorySection}`}>
-          <div className={styles.sectionHeading}>
-            <h2>Start with a course</h2>
-            <p>Courses with the deepest written-review archive.</p>
-            <Link href="/courses">Browse and filter all courses</Link>
-          </div>
-          <div className={styles.recordList}>
-            {courses.map((course) => (
-              <Link key={course.id} href={`/courses/${course.id}`} className={styles.recordRow}>
-                <div><span className={styles.code}>{course.code}</span><h3>{course.title}</h3><p>{course.subject}</p></div>
-                <div className={styles.rowEvidence}><span><strong>{formatRating(course.courseOverall)}</strong> course</span><span><strong>{formatCount(course.reviewCount)}</strong> ratings</span><span><strong>{formatCount(course.commentCount)}</strong> {course.commentCount === 1 ? "written review" : "written reviews"}</span></div>
-              </Link>
-            ))}
+            <figure className={styles.heroArt}>
+              <Image src="/brand/wing-sculptural.webp" alt="" width={640} height={640} sizes="(max-width: 600px) 110px, (max-width: 1100px) 35vw, 430px" preload />
+              <figcaption>notes from the other<br />side of the syllabus.</figcaption>
+            </figure>
           </div>
         </section>
-
-        <section className={styles.paperBand}>
-          <div className={`page-shell ${styles.directorySection}`}>
-            <div className={styles.sectionHeading}>
-              <h2>Then check the professor</h2>
-              <p>Professors with the most written student context.</p>
-              <Link href="/professors">Browse and filter all professors</Link>
-            </div>
-            <div className={styles.recordList}>
-              {professors.map((professor) => (
-                <Link key={professor.id} href={`/professors/${professor.id}`} className={styles.recordRow}>
-                  <div><h3>{professor.name}</h3><p>{professor.titles[0] ?? "Boston College faculty"}</p></div>
-                  <div className={styles.rowEvidence}><span><strong>{formatRating(professor.instructorOverall)}</strong> instructor</span><span><strong>{formatCount(professor.reviewCount)}</strong> ratings</span><span><strong>{formatWrittenReviewCount(professor.commentCount)}</strong></span></div>
+        <section className={`page-shell ${styles.start}`}>
+          <h2>A few places to start</h2>
+          <div className={styles.spread}>
+            <div>
+              <div className={styles.listLabels}><span>Course</span><span>Overall rating</span></div>
+              {courses.slice(0,3).map(course => (
+                <Link key={course.id} href={`/courses/${course.id}`} className={styles.course}>
+                  <div><span className={styles.code}>{course.code}</span><h3>{course.title}</h3><p>{formatCount(course.reviewCount)} ratings <span>·</span> {formatWrittenReviewCount(course.commentCount)}</p></div>
+                  <div className={styles.rating}><strong>{formatRating(course.courseOverall)}</strong><span>{course.courseOverall === null ? "No rating" : "/ 5"}</span></div>
+                  <span className={styles.arrow} aria-hidden="true">↗</span>
                 </Link>
               ))}
+              <Link className={styles.browse} href="/courses">Browse all courses <span aria-hidden="true">↗</span></Link>
             </div>
+            <aside className={styles.note} aria-label="A note for you">
+              <Image className={styles.paperclip} src="/brand/paperclip.webp" alt="" width={240} height={320} sizes="55px" />
+              <span className={styles.noteLabel}>a note for you</span>
+              <p className={styles.hand}>Someone’s about<br />to take that class<br />you just finished.</p>
+              <p className={styles.noteBody}>What do you wish<br />you’d known?</p>
+              <Link href="/review">Pass it on <span aria-hidden="true">↗</span></Link>
+              <small>Your review is anonymous.</small>
+            </aside>
           </div>
         </section>
-
-        <section className={`page-shell ${styles.reviewCallout}`}>
-          <div>
-            <h2>Leave the next student something useful.</h2>
-            <p>No account, name, email, student ID, IP address, or browser identifier is stored with a review.</p>
-          </div>
-          <Link className="button-primary" href="/review">Write an anonymous review</Link>
-        </section>
+        <div className={`page-shell ${styles.professorLine}`}><p>Have a professor in mind?</p><Link href="/professors">Find their reviews <span aria-hidden="true">↗</span></Link></div>
       </main>
       <SiteFooter />
     </>

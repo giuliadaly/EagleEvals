@@ -18,11 +18,11 @@ export default async function CoursesPage({ searchParams }: { searchParams: Prom
     <>
       <SiteHeader />
       <main className="flex-1">
-        <section className="border-b border-[var(--line-strong)] bg-[var(--paper-raised)] py-10 sm:py-14">
+        <section className="page-intro">
           <div className="page-shell">
-            <h1 className="max-w-4xl font-serif text-4xl font-semibold tracking-[-0.035em] text-[var(--ink)] sm:text-5xl">Find a course without digging.</h1>
-            <p className="mt-3 text-sm text-[var(--muted)]">{formatCount(data.total)} matching courses · filter by rating or evidence depth</p>
-            <form role="search" className="mt-8 grid gap-3 rounded-[.75rem] border border-[var(--line-strong)] bg-[var(--paper-ledger)] p-4 sm:grid-cols-[minmax(0,1fr)_13rem_11rem_auto] sm:items-end">
+            <h1 className="max-w-4xl font-serif text-4xl font-semibold tracking-[-0.035em] text-[var(--ink)] sm:text-5xl">Start with a course.</h1>
+            <p className="mt-3 text-sm text-[var(--muted)]">{formatCount(data.total)} matching courses · see what students thought</p>
+            <form role="search" className="directory-filters">
               <label className="relative"><span className="form-label">Course code, title, or subject</span><SearchIcon className="pointer-events-none absolute bottom-3.5 left-3.5 size-4 text-[var(--muted)]" /><input name="q" defaultValue={data.query} placeholder="e.g. ECON1101" className="form-control pl-10" /></label>
               <label><span className="form-label">Order by</span><select name="sort" defaultValue={sort} className="form-control"><option value="evidence">Most evaluations</option><option value="rating">Highest course rating</option><option value="instructor">Highest instructor rating</option><option value="name">Course code A–Z</option></select></label>
               <label><span className="form-label">Minimum rating</span><select name="min" defaultValue={String(min)} className="form-control"><option value="0">Any rating</option><option value="4">4.0 and above</option><option value="4.5">4.5 and above</option></select></label>
@@ -31,7 +31,7 @@ export default async function CoursesPage({ searchParams }: { searchParams: Prom
           </div>
         </section>
         <div className="page-shell py-12">
-          {data.items.length ? <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{data.items.map((course) => <CourseCard key={course.id} course={course} />)}</div> : <div className="py-20 text-center"><h2 className="font-serif text-3xl font-semibold text-[var(--ink)]">No courses match those filters</h2><p className="mt-2 text-sm text-[var(--muted)]">Lower the rating threshold or try a shorter search.</p></div>}
+          {data.items.length ? <div className="catalog-list">{data.items.map((course) => <CourseCard key={course.id} course={course} />)}</div> : <div className="py-20 text-center"><h2 className="font-serif text-3xl font-semibold text-[var(--ink)]">No courses match those filters</h2><p className="mt-2 text-sm text-[var(--muted)]">Lower the rating threshold or try a shorter search.</p></div>}
           <Pagination page={data.page} totalPages={data.totalPages} basePath="/courses" query={data.query} params={{ sort, min: min ? String(min) : undefined }} />
         </div>
       </main>

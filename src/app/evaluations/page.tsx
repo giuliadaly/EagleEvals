@@ -21,7 +21,7 @@ export default async function EvaluationsPage({ searchParams }: { searchParams: 
     <>
       <SiteHeader />
       <main className="flex-1">
-        <section className="border-b border-[var(--line)] bg-white py-10 sm:py-14">
+        <section className="page-intro">
           <div className="page-shell">
             <p className="eyebrow text-[var(--gold-dark)]">BC course history</p>
             <h1 className="mt-3 font-serif text-4xl font-bold tracking-[-0.04em] text-[var(--navy)] sm:text-5xl">All evaluations</h1>
