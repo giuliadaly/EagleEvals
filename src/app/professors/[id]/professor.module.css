@@ -459,6 +459,11 @@ a.courseCode:hover {
   }
 }
 
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  .titleRow { flex-direction: column; }
+  .person { width: 100%; }
+}
+
 @media (max-width: 39.99rem) {
   .recordHeader {
     padding-block-end: 2rem;
