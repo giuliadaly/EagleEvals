@@ -224,7 +224,7 @@ function mapComment(row: DbRow): StudentComment {
   return {
     id: String(row.id),
     message: String(row.message),
-    wouldTakeAgain: Boolean(row.would_take_again),
+    wouldTakeAgain: row.would_take_again == null ? null : Boolean(row.would_take_again),
     createdAt: new Date(String(row.created_at)).toISOString(),
     professorId: String(row.professor_id),
     professorName: String(row.professor_name),
@@ -239,8 +239,8 @@ function mapEvaluation(row: DbRow): EvaluationRecord {
   return {
     id: String(row.id),
     semester: String(row.semester),
-    section: asCount(row.section),
-    sectionCode: String(row.section_code),
+    section: asNumber(row.section),
+    sectionCode: row.section_code == null ? null : String(row.section_code),
     courseOverall: asNumber(row.course_overall),
     instructorOverall: asNumber(row.instructor_overall),
     courseId: row.course_id ? String(row.course_id) : null,
@@ -393,6 +393,7 @@ export async function getCommentsPage(rawQuery: string, rawPage: number): Promis
 export async function getReviewSelections(courseId?: string, professorId?: string): Promise<{ course: ReviewSelection | null; professor: ReviewSelection | null }> {
   const validCourseId = courseId && /^[0-9a-f]{24}$/.test(courseId) ? courseId : null;
   const validProfessorId = professorId && /^[0-9a-f]{24}$/.test(professorId) ? professorId : null;
+  if (!validCourseId && !validProfessorId) return { course: null, professor: null };
   const sql = database();
   const [courseRows, professorRows] = (await Promise.all([
     validCourseId ? sql`SELECT id, code, title FROM courses WHERE id = ${validCourseId} LIMIT 1` : Promise.resolve([]),
@@ -573,7 +574,7 @@ export const getProfessorDetail = cache(async (id: string): Promise<ProfessorDet
     .map((row) => ({
       id: String(row.id),
       semester: String(row.semester),
-      section: asCount(row.section),
+      section: asNumber(row.section),
       courseId: row.course_id ? String(row.course_id) : null,
       courseCode: String(row.course_code),
       courseTitle: row.course_title ? String(row.course_title) : null,
@@ -587,7 +588,7 @@ export const getProfessorDetail = cache(async (id: string): Promise<ProfessorDet
       if (semesterDifference !== 0) return semesterDifference;
       if (a.source === "eagleevals_anonymous" && b.source !== "eagleevals_anonymous") return -1;
       if (b.source === "eagleevals_anonymous" && a.source !== "eagleevals_anonymous") return 1;
-      return a.courseCode.localeCompare(b.courseCode) || a.section - b.section;
+      return a.courseCode.localeCompare(b.courseCode) || (a.section ?? Infinity) - (b.section ?? Infinity);
     });
 
   return { professor: mapProfessor(professorRows[0]), metrics, courses, comments: commentRows.map(mapComment), evaluations };

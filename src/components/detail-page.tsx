@@ -27,7 +27,7 @@ function DetailReview({ comment, context }: { comment: StudentComment; context: 
       </div>
       <p className={styles.reviewMessage}>{comment.message}</p>
       <div className={styles.reviewFoot}>
-        <span className={`${styles.verdict} ${comment.wouldTakeAgain ? styles.positive : styles.negative}`}><span aria-hidden="true">{comment.wouldTakeAgain ? "✓" : "−"}</span>{comment.wouldTakeAgain ? "Would take again" : "Would not take again"}</span>
+        {comment.wouldTakeAgain !== null ? <span className={`${styles.verdict} ${comment.wouldTakeAgain ? styles.positive : styles.negative}`}><span aria-hidden="true">{comment.wouldTakeAgain ? "✓" : "−"}</span>{comment.wouldTakeAgain ? "Would take again" : "Would not take again"}</span> : null}
         <span className={styles.reviewSource}>{commentSourceLabel(comment.source)}</span>
       </div>
     </article>

@@ -31,7 +31,7 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
             <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Write a review" }]} />
             <p className="eyebrow mt-7 text-[var(--gold-dark)]">No account required</p>
             <h1 className="mt-3 max-w-4xl font-serif text-4xl font-bold tracking-[-0.04em] text-[var(--navy)] sm:text-5xl">Leave a little advice.</h1>
-            <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--ink-soft)]">What do you wish you’d known before taking the class? Share it with the next student. Your review is anonymous, and you don’t need an account.</p>
+            <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--ink-soft)]">Two ratings and a few words for the next student. Extra details are optional. Your review is anonymous, and you don’t need an account.</p>
           </div>
         </section>
         <div className="page-shell py-10 sm:py-14">
