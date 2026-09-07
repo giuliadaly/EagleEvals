@@ -33,8 +33,8 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           ) : (
             <div className="space-y-14">
               <p className="text-sm text-[var(--muted)]">Showing results for <strong className="text-[var(--ink)]">“{normalized}”</strong></p>
-              {results.courses.length ? <section><h2 className="font-serif text-3xl font-bold text-[var(--navy)]">Courses <span className="font-sans text-base font-semibold text-[var(--muted)]">({results.courses.length})</span></h2><div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{results.courses.map((course) => <CourseCard key={course.id} course={course} />)}</div></section> : null}
-              {results.professors.length ? <section><h2 className="font-serif text-3xl font-bold text-[var(--navy)]">Professors <span className="font-sans text-base font-semibold text-[var(--muted)]">({results.professors.length})</span></h2><div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{results.professors.map((professor) => <ProfessorCard key={professor.id} professor={professor} />)}</div></section> : null}
+              {results.courses.length ? <section><h2 className="font-serif text-3xl font-bold text-[var(--navy)]">Courses <span className="font-sans text-base font-semibold text-[var(--muted)]">({results.courses.length})</span></h2><div className="catalog-list mt-6">{results.courses.map((course) => <CourseCard key={course.id} course={course} />)}</div></section> : null}
+              {results.professors.length ? <section><h2 className="font-serif text-3xl font-bold text-[var(--navy)]">Professors <span className="font-sans text-base font-semibold text-[var(--muted)]">({results.professors.length})</span></h2><div className="catalog-list mt-6">{results.professors.map((professor) => <ProfessorCard key={professor.id} professor={professor} />)}</div></section> : null}
             </div>
           )}
         </div>

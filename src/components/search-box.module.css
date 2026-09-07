@@ -1,0 +1,6 @@
+.hero input { height: 3.7rem; padding-left: 3rem; padding-right: 7.6rem; border: 1px solid var(--gold); border-radius: 6px; box-shadow: 3px 3px 0 var(--gold); font-size: 1rem; }
+.hero button { top: 6px; right: 6px; height: calc(100% - 12px); border-radius: 3px; background: var(--gold); color: #441321; padding-inline: .9rem; font-size: .8rem; }
+.hero button:hover { background: var(--gold-light); }
+.hero button span { margin-left: .5rem; }
+.hero > svg { color: var(--maroon-deep); width: 18px; height: 18px; }
+@media(max-width:600px) { .hero input { padding-left: 2.6rem; padding-right: 6.8rem; } .hero button { padding-inline: .7rem; font-size: .75rem; } .hero button span { margin-left: .2rem; } }
