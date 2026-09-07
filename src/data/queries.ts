@@ -434,7 +434,6 @@ export const getCourseDetail = cache(async (id: string): Promise<CourseDetail | 
       WHERE r.published AND r.course_id = ${id}
       GROUP BY p.id, p.name, p.titles
       ORDER BY review_count DESC, p.name ASC
-      LIMIT 60
     `,
     sql`
       SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source,
@@ -444,8 +443,7 @@ export const getCourseDetail = cache(async (id: string): Promise<CourseDetail | 
       JOIN professors p ON p.id = sc.professor_id
       LEFT JOIN courses c ON c.id = sc.course_id
       WHERE sc.published AND sc.course_id = ${id}
-      ORDER BY sc.created_at DESC
-      LIMIT 30
+      ORDER BY sc.created_at DESC, sc.id DESC
     `,
     sql`
       SELECT semester, count(*)::integer AS review_count,
