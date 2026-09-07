@@ -100,6 +100,9 @@ html {
 .form-label { display: block; margin-bottom: .45rem; color: var(--maroon-deep); font-size: .78rem; font-weight: 700; }
 .form-control { width: 100%; min-width: 0; min-height: 2.85rem; border: 1px solid var(--line-strong); border-radius: .3rem; background: var(--paper-raised); padding: .7rem .85rem; color: var(--ink); font-size: 1rem; transition: border-color .15s, box-shadow .15s; }
 .form-control:focus { border-color: var(--gold-dark); box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 18%, transparent); }
+.form-control.with-search-icon { padding-left: 2.5rem; }
+.form-control.has-selection { padding-right: 5rem; }
+textarea.form-control { min-height: 10rem; }
 
 .detail-section { padding-block: 3.5rem; border-top: 1px solid var(--line); }
 
@@ -125,7 +128,7 @@ html {
 .rating-badge { flex-shrink: 0; min-width: 4.8rem; padding: .65rem 0 .65rem 1rem; border-left: 2px solid var(--gold); text-align: right; }
 .rating-badge strong { display: block; color: var(--maroon-deep); font-size: 1.8rem; font-weight: 600; line-height: 1.1; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
 .rating-badge span { display: block; margin-top: .35rem; color: var(--muted); font-size: .65rem; }
-.rating-badge-large { min-width: 7rem; padding: 1rem 0 1rem 1.5rem; }
+.rating-badge-large { align-self: flex-start; min-width: 7rem; padding: 1rem 0 1rem 1.5rem; }
 .rating-badge-large strong { font-size: 3.5rem; }
 .review-paper { border-block: 1px solid var(--line); background: var(--paper-raised); padding: 1.5rem; }
 .metric-note { border-top: 1px solid var(--line); padding-block: 1.2rem; }

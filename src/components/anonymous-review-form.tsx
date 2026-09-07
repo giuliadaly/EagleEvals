@@ -62,7 +62,7 @@ function CatalogPicker({
       <label className="form-label" htmlFor={inputId}>{label}</label>
       <input
         id={inputId}
-        className={`form-control ${selected ? "pr-20" : ""}`}
+        className={`form-control ${selected ? "has-selection" : ""}`}
         value={query}
         onChange={(event) => {
           setQuery(event.target.value);
