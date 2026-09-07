@@ -88,7 +88,7 @@ export default async function ProfessorDetailPage({ params }: { params: Promise<
               <tbody>{evaluations.map(evaluation => <tr key={evaluation.id}>
                 <td data-label="Term">{evaluation.semester}</td>
                 <td data-label="Course">{evaluation.courseId ? <Link href={`/courses/${evaluation.courseId}`}>{evaluation.courseCode}</Link> : evaluation.courseCode}</td>
-                <td data-label="Section" className={styles.numeric}>{String(evaluation.section).padStart(2, "0")}</td>
+                <td data-label="Section" className={styles.numeric}>{evaluation.section === null ? "Not provided" : String(evaluation.section).padStart(2, "0")}</td>
                 <td data-label="Instructor" className={styles.numeric}>{preciseRating(evaluation.instructorOverall)}</td>
                 <td data-label="Course rating" className={styles.numeric}>{preciseRating(evaluation.courseOverall)}</td>
               </tr>)}</tbody>

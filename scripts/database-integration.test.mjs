@@ -185,6 +185,47 @@ test('executes the schema, importer, views, and verifier against Postgres', asyn
   assert.equal(updatedCourseSummary.review_count, 2);
   assert.equal(updatedCourseSummary.comment_count, 2);
 
+  // A short review must not invent a section, a verdict, or detailed ratings.
+  const shortReviewId = '95c42c5949939741c67fa226';
+  await sql.query(
+    `INSERT INTO reviews (
+       id, course_id, professor_id, section_code, course_code, professor_name,
+       semester, section, course_overall, instructor_overall, legacy_document,
+       source_snapshot, source, published, submitted_at, submission_fingerprint
+     ) VALUES ($1, $2, $3, NULL, 'TEST1001', 'Test Professor',
+       'Spring 2024', NULL, 3, 4, '{}'::jsonb, NULL,
+       'eagleevals_anonymous', true, now(), 'short-fixture-fingerprint')`,
+    [shortReviewId, ids.course, ids.professor],
+  );
+  await sql.query(
+    `INSERT INTO review_metrics (id, review_id, legacy_document, source_snapshot)
+     VALUES ('95c430be49939741c68d51f3', $1, '{}'::jsonb, NULL)`,
+    [shortReviewId],
+  );
+  await sql.query(
+    `INSERT INTO student_comments (
+       professor_id, course_id, message, would_take_again, source,
+       published, legacy_document, source_snapshot
+     ) VALUES ($1, $2, 'Short anonymous fixture review', NULL,
+       'eagleevals_anonymous', true, '{}'::jsonb, NULL)`,
+    [ids.professor, ids.course],
+  );
+  const [shortReview] = await sql.query('SELECT section, section_code FROM reviews WHERE id = $1', [shortReviewId]);
+  assert.deepEqual(shortReview, { section: null, section_code: null });
+  const [shortComment] = await sql.query("SELECT would_take_again FROM student_comments WHERE message = 'Short anonymous fixture review'");
+  assert.equal(shortComment.would_take_again, null);
+  const [metrics] = await sql.query(
+    `SELECT avg(course_well_organized) AS organized, count(course_well_organized)::integer AS answered,
+       count(*)::integer AS total FROM review_metrics`,
+  );
+  assert.equal(Number(metrics.organized), 5);
+  assert.equal(metrics.answered, 2);
+  assert.equal(metrics.total, 3);
+  const [shortCourseSummary] = await sql.query('SELECT * FROM course_summaries WHERE id = $1', [ids.course]);
+  assert.equal(shortCourseSummary.review_count, 3);
+  assert.equal(shortCourseSummary.comment_count, 3);
+  assert.equal(Number(shortCourseSummary.course_overall), 4.17);
+
   const verifiedAfterAnonymousSubmission = await verifyDatabase({ sql, snapshotId, verification });
   assert.equal(verifiedAfterAnonymousSubmission.passed, true);
   assert.deepEqual(verifiedAfterAnonymousSubmission.counts, report.counts);

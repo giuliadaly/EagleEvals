@@ -44,7 +44,7 @@ export async function POST(request: Request) {
   const metricId = newObjectId();
   const courseCode = String(selected.course_code);
   const professorName = String(selected.professor_name);
-  const sectionCode = `${courseCode}${String(review.section).padStart(2, "0")}`;
+  const sectionCode = review.section === null ? null : `${courseCode}${String(review.section).padStart(2, "0")}`;
   const fingerprint = createHash("sha256")
     .update(JSON.stringify({
       ...review,
