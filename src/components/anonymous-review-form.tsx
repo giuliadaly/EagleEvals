@@ -202,7 +202,7 @@ export function AnonymousReviewForm({
         body: JSON.stringify({
           courseId: course.id,
           professorId: professor.id,
-          semester: fields.get("semester"),
+          semester: fields.get("semester") === "older" ? `${fields.get("semesterTerm")} ${fields.get("semesterYear")}` : fields.get("semester"),
           section: fields.get("section"),
           courseOverall: rating("courseOverall"),
           instructorOverall: rating("instructorOverall"),
