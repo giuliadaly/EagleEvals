@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { formatCount, formatEvaluationCount, formatWrittenReviewCount } from "@/data/format";
 import type { MetricValue } from "@/data/types";
 import styles from "./detail-page.module.css";
@@ -15,7 +16,7 @@ export function DetailRatingEvidence({ evaluationCount, writtenCount, children }
   return <>
     <p className={styles.evidence}>From {formatEvaluationCount(evaluationCount)}{children ? <><br />{children}</> : null}</p>
     <a className={styles.reviewAvailability} data-empty={writtenCount === 0} href="#comments">{formatWrittenReviewCount(writtenCount)} <span aria-hidden="true">↓</span></a>
-    <p className={styles.ratingExplanation}>Scores use numerical evaluations, which may not include a written review.</p>
+    <p className={styles.ratingExplanation}>Older rating records summarize course sections and may have no written feedback. New reviews add ratings and a comment. <Link href="/about#ratings">How scores work</Link></p>
   </>;
 }
 

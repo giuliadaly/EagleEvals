@@ -26,6 +26,7 @@
 .reviewAvailability[data-empty="true"] { background: #efe2c6; color: #66322e; }
 .reviewAvailability:hover { text-decoration: underline; text-underline-offset: .2em; }
 .ratingExplanation { margin-top: .6rem; color: var(--muted); font-size: .7rem; line-height: 1.65; }
+.ratingExplanation a { color: var(--maroon-deep); text-decoration: underline; text-underline-offset: .2em; }
 .body { display: grid; grid-template-columns: minmax(0, 1fr) 18rem; gap: 3.5rem; align-items: start; }
 .reviews { min-width: 0; scroll-margin-top: 8rem; }
 .sectionHeading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 2.3rem; }

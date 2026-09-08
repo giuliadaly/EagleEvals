@@ -10,7 +10,7 @@ export function formatWrittenReviewCount(value: number): string {
 }
 
 export function formatEvaluationCount(value: number): string {
-  return `${formatCount(value)} numerical ${value === 1 ? "evaluation" : "evaluations"}`;
+  return `${formatCount(value)} rating ${value === 1 ? "record" : "records"}`;
 }
 
 export function formatRating(value: number | null): string {
