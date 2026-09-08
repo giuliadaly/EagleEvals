@@ -91,10 +91,11 @@ export function animatePaperFlight(canvases: HTMLCanvasElement[], folds: (HTMLIm
   const sprite = cloudSprite();
   const planes = [[.485,.318,.72],[.45,.486,.57],[.418,.653,.44]].map(([fx,fy,fw],i) => {
     const x = rect.left + rect.width*fx, y = rect.top + rect.height*fy;
+    const right = w - (mobile ? 40 : 72), lift = Math.min(h*.18, Math.max(36,y-(mobile ? 158 : 128)));
     const routes = [
       [[x,y],[x+w*.07,y-18],[w*.77,h*.14],[w*.39,h*.2],[w*.12,h*.38],[w*.34,h*.52],[x-w*.24,y+65],[x-w*.08,y+8]],
       [[x,y],[x+w*.07,y-12],[w*.91,h*.5],[w*.63,h*.76],[w*.17,h*.63],[w*.14,h*.34],[x-w*.28,y-45],[x-w*.08,y+8]],
-      [[x,y],[x+w*.07,y-12],[w*.73,h*.28],[w*.34,h*.4],[w*.38,h*.68],[w*.73,h*.76],[w*.9,h*.47],[x-w*.12,y+12]],
+      [[x,y],[x+w*.012,y-lift],[right,y-lift*1.08],[right,Math.min(h*.7,y+h*.18)],[x+w*.03,Math.min(h*.68,y+h*.2)],[x-w*.065,y+h*.12],[x-w*.055,y+25],[x-w*.018,y+5]],
     ];
     return { samples: sampleLoop(routes[i]), startWidth: rect.width*fw, delay: i*110, duration: 3150+i*90, puffs: [] as Puff[], lastPuff: -1, puffCount: 0 };
   });
