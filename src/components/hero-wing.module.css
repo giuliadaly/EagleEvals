@@ -1,61 +1,9 @@
 .button { position: relative; display: block; width: 100%; border: 0; padding: 0; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-.mark { transition: transform .35s ease; }
-.button:hover:not(:disabled) .mark { transform: translateY(-4px) rotate(-2deg); }
 .button:focus-visible { outline: 2px solid var(--gold); outline-offset: -15px; border-radius: 1rem; }
+.button:hover:not(:disabled), .button[data-fold="true"] { background: radial-gradient(ellipse, #e5c36c20, transparent 65%); }
 .button[data-flying="true"] .mark { opacity: 0; }
-.button[data-fold="true"] { background: radial-gradient(ellipse, #e5c36c28, transparent 65%); }
-.fold { position: absolute; inset: 0; pointer-events: none; animation: reform var(--duration) linear var(--delay) both; }
-.layer { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.fold { position: absolute; inset: 0; pointer-events: none; will-change: opacity; }
+.layer { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .behind { z-index: 1; }
 .inFront { z-index: 4; }
-.trails { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.trail { fill: none; stroke: #f2d488; stroke-width: 1.5; stroke-linecap: round; stroke-dasharray: 48 952; stroke-dashoffset: 48; animation: trace var(--duration) linear var(--delay) both; }
-.trailGlow { stroke-width: 5; stroke: #e4bd61; filter: blur(2px); }
-.flight { position: absolute; left: 0; top: 0; display: block; width: 126px; height: 78px; offset-rotate: auto; offset-anchor: 50% 50%; opacity: 0; animation: fly var(--duration) linear var(--delay) both; will-change: offset-distance, opacity; }
-.distant { width: 88px; height: 55px; filter: brightness(.86) drop-shadow(0 5px 4px #28061220); }
-.near { filter: drop-shadow(0 14px 9px #28061245); }
-.paper { display: block; width: 100%; height: 100%; transform-style: preserve-3d; perspective: 350px; animation: bank var(--duration) ease-in-out var(--delay) both; }
-.paper > span { display: block; position: absolute; inset: 0; transform-origin: 50% 50%; }
-.upper { background: linear-gradient(155deg, #fff0bb, #e6bd5a 70%); animation: upper-fold var(--duration) ease-in-out var(--delay) both; }
-.lower { background: linear-gradient(20deg, #b27a31, #e3b652 65%); animation: lower-fold var(--duration) ease-in-out var(--delay) both; }
-.keel { background: #946027; clip-path: polygon(23% 50%,100% 50%,37% 67%); animation: crease var(--duration) linear var(--delay) both; }
-/* Flight distance and the trailing dash use identical timing and checkpoints. */
-@keyframes fly {
-  0% { offset-distance: 0%; opacity: 0; animation-timing-function: ease-in; }
-  9% { offset-distance: 2%; opacity: 1; animation-timing-function: cubic-bezier(.3,0,.2,1); }
-  32% { offset-distance: 39%; opacity: 1; animation-timing-function: ease-in-out; }
-  58% { offset-distance: 64%; opacity: 1; animation-timing-function: cubic-bezier(.45,0,.25,1); }
-  83% { offset-distance: 95%; opacity: 1; animation-timing-function: ease-out; }
-  93% { offset-distance: 99%; opacity: 1; }
-  99%,100% { offset-distance: 100%; opacity: 0; }
-}
-@keyframes trace {
-  0% { stroke-dashoffset: 48; opacity: 0; animation-timing-function: ease-in; }
-  9% { stroke-dashoffset: 28; opacity: 0; animation-timing-function: cubic-bezier(.3,0,.2,1); }
-  32% { stroke-dashoffset: -342; opacity: .28; animation-timing-function: ease-in-out; }
-  58% { stroke-dashoffset: -592; opacity: .32; animation-timing-function: cubic-bezier(.45,0,.25,1); }
-  83% { stroke-dashoffset: -902; opacity: .22; animation-timing-function: ease-out; }
-  93% { stroke-dashoffset: -942; opacity: 0; }
-  99%,100% { stroke-dashoffset: -952; opacity: 0; }
-}
-@keyframes bank {
-  0% { transform: scale(var(--start-scale)) rotateX(0deg); }
-  11% { transform: scale(.9) rotateX(18deg); }
-  30% { transform: scale(.6) rotateX(-38deg); }
-  48% { transform: scale(1.4) rotateX(28deg); }
-  65% { transform: scale(1.1) rotateX(-22deg); }
-  81% { transform: scale(.68) rotateX(32deg); }
-  94%,100% { transform: scale(var(--start-scale)) rotateX(0deg); }
-}
-@keyframes upper-fold {
-  0%,100% { transform: rotateX(0deg); clip-path: polygon(0 25%,100% 10%,100% 35%,0 55%); }
-  12%,87% { transform: rotateX(-9deg); clip-path: polygon(0 7%,100% 50%,23% 50%,0 7%); }
-}
-@keyframes lower-fold {
-  0%,100% { transform: rotateX(0deg); clip-path: polygon(0 45%,100% 30%,100% 55%,0 75%); }
-  12%,87% { transform: rotateX(12deg); clip-path: polygon(0 93%,100% 50%,23% 50%,0 93%); }
-}
-@keyframes crease { 0%,100% { opacity: 0; } 12%,87% { opacity: 1; } }
-@keyframes reform { 0% { opacity: 1; } 8%,92% { opacity: 0; } 100% { opacity: 1; } }
-@media(max-width:600px) { .flight { width: 88px; height: 55px; } .distant { width: 64px; height: 40px; } .trail { stroke-width: 1; } .trailGlow { stroke-width: 3; } }
-@media(prefers-reduced-motion:reduce) { .mark { transition: none; } .button:hover:not(:disabled) .mark { transform: none; } .layer { display: none; } }
+@media(prefers-reduced-motion:reduce) { .layer { display: none; } }
