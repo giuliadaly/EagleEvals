@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { formatCount } from "@/data/format";
+import { formatCount, formatEvaluationCount, formatWrittenReviewCount } from "@/data/format";
 import type { MetricValue } from "@/data/types";
 import styles from "./detail-page.module.css";
 
@@ -9,6 +9,14 @@ export function preciseRating(value: number | null): string {
 
 export function DetailScore({ value, label, precision = 2 }: { value: number | null; label: string; precision?: number }) {
   return <div className={styles.score}><strong>{value === null ? "—" : value.toFixed(precision)}{value !== null ? <small> / 5</small> : null}</strong><span>{label}</span>{value === null ? <small>No rating collected</small> : null}</div>;
+}
+
+export function DetailRatingEvidence({ evaluationCount, writtenCount, children }: { evaluationCount: number; writtenCount: number; children?: ReactNode }) {
+  return <>
+    <p className={styles.evidence}>From {formatEvaluationCount(evaluationCount)}{children ? <><br />{children}</> : null}</p>
+    <a className={styles.reviewAvailability} data-empty={writtenCount === 0} href="#comments">{formatWrittenReviewCount(writtenCount)} <span aria-hidden="true">↓</span></a>
+    <p className={styles.ratingExplanation}>Scores use numerical evaluations, which may not include a written review.</p>
+  </>;
 }
 
 export function DetailDisclosure({ title, children, id, open = false, className = "" }: { title: ReactNode; children: ReactNode; id?: string; open?: boolean; className?: string }) {

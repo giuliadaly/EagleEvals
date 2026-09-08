@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { DetailDisclosure, DetailMetrics, DetailReviews, DetailScore, preciseRating } from "@/components/detail-page";
+import { DetailDisclosure, DetailMetrics, DetailReviews, DetailRatingEvidence, DetailScore, preciseRating } from "@/components/detail-page";
 import { Breadcrumbs } from "@/components/page-parts";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -49,8 +49,9 @@ export default async function ProfessorDetailPage({ params }: { params: Promise<
             <div className={styles.actions}><SharePage path={`/professors/${professor.id}`} title={professor.name} /></div>
           </div>
           <div>
+            <p className={styles.ratingLabel}>Numerical ratings</p>
             <div className={styles.scoreGroup} aria-label="Professor rating summary"><DetailScore value={professor.instructorOverall} label="Instructor" /><DetailScore value={professor.courseOverall} label="Course" /></div>
-            <p className={styles.evidence}>From {formatCount(professor.reviewCount)} structured evaluations<br />Latest term: {evaluations[0]?.semester ?? "Unavailable"}</p>
+            <DetailRatingEvidence evaluationCount={professor.reviewCount} writtenCount={professor.commentCount}>Latest term: {evaluations[0]?.semester ?? "Unavailable"}</DetailRatingEvidence>
           </div>
         </header>
 
@@ -75,7 +76,7 @@ export default async function ProfessorDetailPage({ params }: { params: Promise<
                 </dl>
               </DetailDisclosure> : null}
               <DetailDisclosure id="metrics" title="All evaluation ratings">
-                <p className={styles.ratingsNote}>Instructor and course ratings answer different questions. Written reviews do not change either average. Missing responses are shown as “Not collected.”</p>
+                <p className={styles.ratingsNote}>Averages use numerical answers, including the ratings submitted with new reviews. Written comments are shown separately. Missing responses are shown as “Not collected.”</p>
                 <DetailMetrics metrics={metrics} />
               </DetailDisclosure>
               <a className={styles.textLink} href="#history">Term and section history <span aria-hidden="true">↓</span></a>
@@ -86,7 +87,7 @@ export default async function ProfessorDetailPage({ params }: { params: Promise<
         <DetailDisclosure id="history" title={<>Term and section history <span className={styles.count}>{formatCount(evaluations.length)} records</span></>} className={styles.history}>
           {evaluations.length ? <div className={styles.tableWrap}>
             <table className={styles.table}>
-              <caption>Every public structured evaluation for {professor.name}. Ratings are out of 5.</caption>
+              <caption>Every public numerical evaluation record for {professor.name}. Ratings are out of 5.</caption>
               <thead><tr><th scope="col">Term</th><th scope="col">Course</th><th scope="col">Section</th><th scope="col">Instructor</th><th scope="col">Course rating</th></tr></thead>
               <tbody>{evaluations.map(evaluation => <tr key={evaluation.id}>
                 <td data-label="Term">{evaluation.semester}</td>

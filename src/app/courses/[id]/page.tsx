@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { DetailDisclosure, DetailMetrics, DetailReviews, DetailScore } from "@/components/detail-page";
+import { DetailDisclosure, DetailMetrics, DetailReviews, DetailRatingEvidence, DetailScore } from "@/components/detail-page";
 import { Breadcrumbs } from "@/components/page-parts";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -62,8 +62,9 @@ export default async function CourseDetailPage({ params, searchParams }: { param
             </div>
           </div>
           <div>
+            <p className={styles.ratingLabel}>Numerical ratings</p>
             <DetailScore value={course.courseOverall} label="Course rating" precision={1} />
-            <p className={styles.evidence}>From {formatCount(course.reviewCount)} historical evaluations<br />Across {formatCount(instructors.length)} instructor{instructors.length === 1 ? "" : "s"}</p>
+            <DetailRatingEvidence evaluationCount={course.reviewCount} writtenCount={course.commentCount}>Across {formatCount(instructors.length)} instructor{instructors.length === 1 ? "" : "s"}</DetailRatingEvidence>
           </div>
         </header>
 
@@ -87,7 +88,7 @@ export default async function CourseDetailPage({ params, searchParams }: { param
             <div className={styles.marginDetails}>
               <DetailDisclosure id="description" title="About this course"><p className={styles.detailText}>{course.description || "No course description is currently available."}</p></DetailDisclosure>
               <DetailDisclosure id="metrics" title="All evaluation ratings">
-                <p className={styles.ratingsNote}>Averages use the original five-point historical evaluation scale.</p>
+                <p className={styles.ratingsNote}>Averages use numerical 1–5 ratings, including the ratings submitted with new anonymous reviews.</p>
                 <DetailMetrics metrics={metrics} />
                 <div className={styles.workload}><strong>Weekly effort: {estimatedWeeklyHours === null ? "Not collected" : `~${estimatedWeeklyHours} hours`}</strong><p className={styles.detailText}>Estimated from the original workload response buckets. Individual sections may differ.</p></div>
               </DetailDisclosure>
@@ -99,11 +100,11 @@ export default async function CourseDetailPage({ params, searchParams }: { param
 
         <DetailDisclosure id="history" title={<>Evaluation history <span className={styles.count}>{formatCount(semesters.length)} terms</span></>} className={styles.history}>
           {semesters.length ? <div className={styles.tableWrap}><table className={styles.table}>
-            <caption>All available terms for {course.code}. Section averages use the original five-point scale.</caption>
-            <thead><tr><th scope="col">Term</th><th scope="col">Sections</th><th scope="col">Course rating</th><th scope="col">Instructor rating</th></tr></thead>
+            <caption>All available terms for {course.code}. Numerical averages use the five-point scale.</caption>
+            <thead><tr><th scope="col">Term</th><th scope="col">Evaluations</th><th scope="col">Course rating</th><th scope="col">Instructor rating</th></tr></thead>
             <tbody>{semesters.map(semester => <tr key={semester.semester}>
               <td data-label="Term">{semester.semester}</td>
-              <td data-label="Sections" className={styles.numeric}>{formatCount(semester.reviewCount)}</td>
+              <td data-label="Evaluations" className={styles.numeric}>{formatCount(semester.reviewCount)}</td>
               <td data-label="Course rating" className={styles.numeric}>{formatRating(semester.courseOverall)}</td>
               <td data-label="Instructor rating" className={styles.numeric}>{formatRating(semester.instructorOverall)}</td>
             </tr>)}</tbody>
