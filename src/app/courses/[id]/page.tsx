@@ -5,6 +5,8 @@ import { DetailDisclosure, DetailMetrics, DetailReviews, DetailScore } from "@/c
 import { Breadcrumbs } from "@/components/page-parts";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { SharePage } from "@/components/share-page";
+import { detailSharingMetadata } from "@/data/sharing";
 import { cleanTitle, collegeName, formatCount, formatRating } from "@/data/format";
 import { getCourseDetail } from "@/data/queries";
 import type { InstructorCourseRow } from "@/data/types";
@@ -14,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const detail = await getCourseDetail(id);
   if (!detail) return { alternates: { canonical: `/courses/${id}` }, title: "Course not found", robots: { index: false, follow: false } };
-  return { alternates: { canonical: `/courses/${id}` }, title: `${detail.course.code}: ${detail.course.title}`, description: `Historical ratings, workload, instructors, and student comments for ${detail.course.code} ${detail.course.title}.` };
+  return detailSharingMetadata(`/courses/${id}`, `${detail.course.code}: ${detail.course.title}`, `Historical ratings, workload, instructors, and student comments for ${detail.course.code} ${detail.course.title}.`);
 }
 
 function InstructorPairing({ instructor }: { instructor: InstructorCourseRow }) {
@@ -54,7 +56,10 @@ export default async function CourseDetailPage({ params, searchParams }: { param
             <p className={styles.eyebrow}>{course.code} · {course.subject}</p>
             <h1>{course.title}</h1>
             {collegeName(course.college) ? <p className={styles.subtitle}>{collegeName(course.college)}</p> : null}
-            {instructors.length >= 2 ? <Link className={styles.textLink} href={`/courses/${course.id}/compare`}>Compare professors ↗</Link> : null}
+            <div className={styles.actions}>
+              {instructors.length >= 2 ? <Link className={styles.textLink} href={`/courses/${course.id}/compare`}>Compare professors ↗</Link> : null}
+              <SharePage path={`/courses/${course.id}`} title={`${course.code}: ${course.title}`} />
+            </div>
           </div>
           <div>
             <DetailScore value={course.courseOverall} label="Course rating" precision={1} />
