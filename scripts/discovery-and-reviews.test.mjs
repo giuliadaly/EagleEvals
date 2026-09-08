@@ -92,6 +92,12 @@ test('search and real submission queries preserve course context and old reviews
     '@/data/format': loadTs('src/data/format.ts', {}),
   });
   const detail = await queries.getCourseDetail(course);
+  const quickCatalog = await queries.getQuickSearchCatalog();
+  assert.equal(quickCatalog.courses.length, 2);
+  assert.equal(quickCatalog.professors.length, 2);
+  assert.deepEqual(Object.keys(quickCatalog.courses[0]).sort(), ['code', 'commentCount', 'id', 'reviewCount', 'subject', 'title']);
+  assert.deepEqual(Object.keys(quickCatalog.professors[0]).sort(), ['commentCount', 'id', 'name', 'reviewCount', 'title']);
+  assert.equal((await queries.searchCatalog('E')).courses.length, 2);
   const paired = detail.instructors.find(item => item.id === professor);
   assert.equal(paired.instructorOverall, 5);
   assert.equal(paired.reviewCount, 1);

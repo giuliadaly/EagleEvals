@@ -3,7 +3,8 @@ import "server-only";
 import { cache } from "react";
 import { database } from "@/data/database";
 import { catalogMatch, catalogSearchSql, normalizeCatalogQuery } from "@/data/catalog-search";
-import { semesterSortValue } from "@/data/format";
+import { cleanTitle, semesterSortValue } from "@/data/format";
+import type { QuickResults } from "@/data/quick-search";
 import type {
   CourseDetail,
   CourseSummary,
@@ -123,9 +124,24 @@ export const getFeaturedProfessors = cache(async (): Promise<ProfessorSummary[]>
   return rows.map(mapProfessor);
 });
 
+export async function getQuickSearchCatalog(): Promise<QuickResults> {
+  const sql = database();
+  // Only public suggestion fields: no review text, contact details, or legacy documents.
+  const [courses, professors] = await Promise.all([
+    sql`SELECT id, code, title, subject, comment_count, review_count FROM course_summaries ORDER BY code, id`,
+    sql`SELECT id, name, titles, comment_count, review_count FROM professor_summaries ORDER BY name, id`,
+  ]) as [DbRow[], DbRow[]];
+  return {
+    courses: courses.map(row => ({ id: String(row.id), code: String(row.code), title: String(row.title), subject: String(row.subject),
+      commentCount: asCount(row.comment_count), reviewCount: asCount(row.review_count) })),
+    professors: professors.map(row => ({ id: String(row.id), name: String(row.name), title: cleanTitle(asStringArray(row.titles)[0]),
+      commentCount: asCount(row.comment_count), reviewCount: asCount(row.review_count) })),
+  };
+}
+
 export async function searchCatalog(rawQuery: string, limit = 12): Promise<SearchResults> {
   const query = normalizeCatalogQuery(rawQuery);
-  if (query.length < 2) return { courses: [], professors: [] };
+  if (!query) return { courses: [], professors: [] };
   const parameters = [query, query.replace(/ /g, ""), Math.max(1, Math.min(Math.floor(limit), 30))];
   const sql = database();
   const [courseRows, professorRows] = await Promise.all([
