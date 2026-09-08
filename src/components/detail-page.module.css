@@ -21,6 +21,12 @@
 .score > span { font-size: .8rem; font-weight: 500; }
 .score > small { color: var(--muted); font-size: .75rem; }
 .evidence { margin-top: 1rem; font-size: .75rem; line-height: 1.8; color: var(--muted); }
+.ratingLabel { font-size: .68rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: .6rem; }
+.reviewAvailability { display: inline-flex; align-items: center; gap: .8rem; min-height: 2.4rem; padding: .45rem .65rem; margin-top: .6rem; border-radius: .2rem; background: #e9eee3; color: #3d614c; font-size: .75rem; font-weight: 600; }
+.reviewAvailability[data-empty="true"] { background: #efe2c6; color: #66322e; }
+.reviewAvailability:hover { text-decoration: underline; text-underline-offset: .2em; }
+.ratingExplanation { margin-top: .6rem; color: var(--muted); font-size: .7rem; line-height: 1.65; }
+.ratingExplanation a { color: var(--maroon-deep); text-decoration: underline; text-underline-offset: .2em; }
 .body { display: grid; grid-template-columns: minmax(0, 1fr) 18rem; gap: 3.5rem; align-items: start; }
 .reviews { min-width: 0; scroll-margin-top: 8rem; }
 .sectionHeading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 2.3rem; }
@@ -97,7 +103,9 @@
 .filters label { min-width: 0; }
 .filters select { font-size: 1rem; }
 .filterStatus { font-size: .75rem; color: var(--muted); margin-bottom: 1.2rem; }
-.emptyState { font-size: .95rem; color: var(--muted); line-height: 1.8; padding-block: .5rem 2rem; }
+.emptyState { color: var(--muted); line-height: 1.8; padding: 1.5rem; background: #f3ede1; border-radius: .25rem; }
+.emptyState h3 { color: var(--ink); font-size: 1.2rem; font-weight: 600; margin-bottom: .45rem; }
+.emptyState p { font-size: .9rem; max-width: 55ch; }
 
 @media (min-width: 640px) { .shell { width: min(100% - 5.5rem, 70rem); } }
 @media (max-width: 1023px) and (min-width: 761px) {

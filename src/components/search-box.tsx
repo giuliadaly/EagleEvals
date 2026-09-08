@@ -108,7 +108,7 @@ export function SearchBox({ compact = false, autoFocus = false, hero = false, in
               {results.courses.map((course, index) => (
                 <Link key={course.id} id={`${listId}-option-${index}`} role="option" aria-selected={activeIndex === index} tabIndex={-1} href={`/courses/${course.id}`} className={`result-row ${activeIndex === index ? "bg-[var(--paper-ledger)]" : ""}`} onMouseEnter={() => setActiveIndex(index)} onMouseDown={(event) => event.preventDefault()} onClick={() => setOpen(false)}>
                   <span className="result-icon"><BookIcon className="size-4" /></span>
-                  <span className="min-w-0"><strong className="block truncate text-sm text-[var(--ink)]">{course.code} · {course.title}</strong><span className="block truncate text-xs text-[var(--muted)]">{course.subject} · {formatWrittenReviewCount(course.commentCount)}</span></span>
+                  <span className="min-w-0"><strong className="block truncate text-sm text-[var(--ink)]">{course.code} · {course.title}</strong><span className="block truncate text-xs text-[var(--muted)]">{course.subject}</span><span className="search-review-count written-review-status" data-empty={course.commentCount === 0}>{formatWrittenReviewCount(course.commentCount)}</span></span>
                 </Link>
               ))}
             </div>
@@ -121,7 +121,7 @@ export function SearchBox({ compact = false, autoFocus = false, hero = false, in
                 return (
                 <Link key={professor.id} id={`${listId}-option-${optionIndex}`} role="option" aria-selected={activeIndex === optionIndex} tabIndex={-1} href={`/professors/${professor.id}`} className={`result-row ${activeIndex === optionIndex ? "bg-[var(--paper-ledger)]" : ""}`} onMouseEnter={() => setActiveIndex(optionIndex)} onMouseDown={(event) => event.preventDefault()} onClick={() => setOpen(false)}>
                   <span className="result-icon"><PersonIcon className="size-4" /></span>
-                  <span className="min-w-0"><strong className="block truncate text-sm text-[var(--ink)]">{professor.name}</strong><span className="block truncate text-xs text-[var(--muted)]">{professor.title ?? "Boston College faculty"} · {formatWrittenReviewCount(professor.commentCount)}</span></span>
+                  <span className="min-w-0"><strong className="block truncate text-sm text-[var(--ink)]">{professor.name}</strong><span className="block truncate text-xs text-[var(--muted)]">{professor.title ?? "Boston College faculty"}</span><span className="search-review-count written-review-status" data-empty={professor.commentCount === 0}>{formatWrittenReviewCount(professor.commentCount)}</span></span>
                 </Link>
                 );
               })}

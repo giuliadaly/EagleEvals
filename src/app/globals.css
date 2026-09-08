@@ -124,7 +124,10 @@ textarea.form-control { min-height: 10rem; }
 .catalog-record:hover h3 { text-decoration: underline; text-underline-offset: 4px; }
 .catalog-code { display: block; margin-bottom: .35rem; color: var(--maroon-deep); font-size: .75rem; font-weight: 700; letter-spacing: .04em; }
 .catalog-context { margin-top: .3rem; color: var(--muted); font-size: .85rem; line-height: 1.5; }
-.catalog-evidence { display: flex; flex-wrap: wrap; gap: .25rem 1rem; margin-top: .55rem; color: var(--muted); font-size: .75rem; }
+.catalog-evidence { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .8rem; margin-top: .55rem; color: var(--muted); font-size: .75rem; }
+.written-review-status { display: inline-block; padding: .2rem .45rem; border-radius: .2rem; background: #e9eee3; color: #3d614c; font-weight: 600; }
+.written-review-status[data-empty="true"] { background: #efe2c6; color: #66322e; }
+.search-review-count { display: block; width: fit-content; font-size: .68rem; line-height: 1.5; margin-top: .2rem; }
 .rating-badge { flex-shrink: 0; min-width: 4.8rem; padding: .65rem 0 .65rem 1rem; border-left: 2px solid var(--gold); text-align: right; }
 .rating-badge strong { display: block; color: var(--maroon-deep); font-size: 1.8rem; font-weight: 600; line-height: 1.1; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
 .rating-badge span { display: block; margin-top: .35rem; color: var(--muted); font-size: .65rem; }

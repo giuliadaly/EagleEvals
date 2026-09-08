@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowIcon, BookIcon, PersonIcon } from "@/components/icons";
-import { cleanTitle, commentSourceLabel, formatCount, formatDate, formatRating, formatWrittenReviewCount } from "@/data/format";
+import { cleanTitle, commentSourceLabel, formatDate, formatEvaluationCount, formatRating, formatWrittenReviewCount } from "@/data/format";
 import type { CourseSummary, EvaluationRecord, MetricValue, ProfessorSummary, StudentComment } from "@/data/types";
 
 export function RatingBadge({ value, label = "Overall", large = false }: { value: number | null; label?: string; large?: boolean }) {
@@ -10,7 +10,7 @@ export function RatingBadge({ value, label = "Overall", large = false }: { value
 export function CourseCard({ course }: { course: CourseSummary }) {
   return (
     <Link href={`/courses/${course.id}`} className="catalog-record">
-      <div><span className="catalog-code">{course.code}</span><h3>{course.title}</h3><p className="catalog-context">{course.subject}</p><div className="catalog-evidence"><span>{formatCount(course.reviewCount)} ratings</span><span>{formatWrittenReviewCount(course.commentCount)}</span></div></div>
+      <div><span className="catalog-code">{course.code}</span><h3>{course.title}</h3><p className="catalog-context">{course.subject}</p><div className="catalog-evidence"><span>{formatEvaluationCount(course.reviewCount)}</span><span className="written-review-status" data-empty={course.commentCount === 0}>{formatWrittenReviewCount(course.commentCount)}</span></div></div>
       <RatingBadge value={course.courseOverall} label="Course" /><ArrowIcon className="size-4 text-[var(--muted)]" />
     </Link>
   );
@@ -19,7 +19,7 @@ export function CourseCard({ course }: { course: CourseSummary }) {
 export function ProfessorCard({ professor }: { professor: ProfessorSummary }) {
   return (
     <Link href={`/professors/${professor.id}`} className="catalog-record">
-      <div><h3>{professor.name}</h3><p className="catalog-context">{cleanTitle(professor.titles[0]) ?? "Boston College faculty"}</p><div className="catalog-evidence"><span>{formatCount(professor.reviewCount)} ratings</span><span>{formatWrittenReviewCount(professor.commentCount)}</span></div></div>
+      <div><h3>{professor.name}</h3><p className="catalog-context">{cleanTitle(professor.titles[0]) ?? "Boston College faculty"}</p><div className="catalog-evidence"><span>{formatEvaluationCount(professor.reviewCount)}</span><span className="written-review-status" data-empty={professor.commentCount === 0}>{formatWrittenReviewCount(professor.commentCount)}</span></div></div>
       <RatingBadge value={professor.instructorOverall} label="Instructor" /><ArrowIcon className="size-4 text-[var(--muted)]" />
     </Link>
   );
