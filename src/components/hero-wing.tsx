@@ -7,7 +7,6 @@ import { animatePaperFlight } from "./paper-flight";
 import styles from "./hero-wing.module.css";
 
 type Flight = { scene: HTMLElement; reduced: boolean };
-const FIRST_FLIGHT_KEY = "eagleevals:wing-flight-seen";
 
 export function HeroWing() {
   const button = useRef<HTMLButtonElement>(null);
@@ -24,14 +23,12 @@ export function HeroWing() {
     if (!scene) return;
     busy.current = true;
     played.current = true;
-    try { sessionStorage.setItem(FIRST_FLIGHT_KEY, "1"); } catch { /* Replay still works when storage is unavailable. */ }
     setFlight({ scene, reduced: window.matchMedia("(prefers-reduced-motion: reduce)").matches });
   }, []);
 
   useEffect(() => {
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (motion.matches) return;
-    try { if (sessionStorage.getItem(FIRST_FLIGHT_KEY)) return; } catch { /* Fall back to once per mounted homepage. */ }
     let cancelled = false, ready = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const firstFlight = () => {
