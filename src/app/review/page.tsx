@@ -5,18 +5,10 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getReviewSelections } from "@/data/queries";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = { alternates: { canonical: "/review" },
   title: "Write an anonymous review",
   description: "Share a fully anonymous Boston College course and professor review.",
 };
-
-function semesterOptions(currentYear: number): string[] {
-  const options: string[] = [];
-  for (let year = currentYear; year >= currentYear - 3; year -= 1) {
-    options.push(`Fall ${year}`, `Summer ${year}`, `Spring ${year}`);
-  }
-  return options;
-}
 
 export default async function ReviewPage({ searchParams }: { searchParams: Promise<{ course?: string; professor?: string }> }) {
   const params = await searchParams;
@@ -35,7 +27,7 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
           </div>
         </section>
         <div className="page-shell py-10 sm:py-14">
-          <AnonymousReviewForm initialCourse={selections.course} initialProfessor={selections.professor} semesterOptions={semesterOptions(year)} />
+          <AnonymousReviewForm initialCourse={selections.course} initialProfessor={selections.professor} currentYear={year} />
         </div>
       </main>
       <SiteFooter />

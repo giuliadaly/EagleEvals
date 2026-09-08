@@ -47,6 +47,7 @@ export type MetricValue = {
 };
 
 export type InstructorCourseRow = {
+  latestSemester: string | null;
   id: string;
   name: string;
   titles: string[];
@@ -79,6 +80,7 @@ export type ProfessorEvaluationRow = {
 };
 
 export type StudentComment = {
+  semester: string | null;
   id: string;
   message: string;
   wouldTakeAgain: boolean | null;

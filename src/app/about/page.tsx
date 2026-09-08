@@ -3,7 +3,7 @@ import { InfoPage } from "@/components/info-page";
 import { formatCount } from "@/data/format";
 import { getSiteStats } from "@/data/queries";
 
-export const metadata: Metadata = { title: "About", description: "About EagleEvals, an independent course-planning resource for Boston College students." };
+export const metadata: Metadata = { alternates: { canonical: "/about" }, title: "About", description: "About EagleEvals, an independent course-planning resource for Boston College students." };
 
 export default async function AboutPage() {
   const stats = await getSiteStats();

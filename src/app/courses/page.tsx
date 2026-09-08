@@ -7,7 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 import { formatCount } from "@/data/format";
 import { getCoursesPage } from "@/data/queries";
 
-export const metadata: Metadata = { title: "Courses", description: "Search and filter Boston College courses using EagleEvals ratings and student input." };
+export const metadata: Metadata = { alternates: { canonical: "/courses" }, title: "Courses", description: "Search and filter Boston College courses using EagleEvals ratings and student input." };
 
 export default async function CoursesPage({ searchParams }: { searchParams: Promise<{ q?: string; page?: string; sort?: string; min?: string }> }) {
   const params = await searchParams;
