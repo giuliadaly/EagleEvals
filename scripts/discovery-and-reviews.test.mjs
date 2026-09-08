@@ -106,6 +106,14 @@ test('search and real submission queries preserve course context and old reviews
   assert.equal(detail.comments.find(item => item.professorId === otherProfessor).semester, 'Spring 2025');
   assert.equal((await queries.getCourseProfessors(course)).length, 2);
   assert.equal((await queries.getCoursesPage('ENGL 1010', 1)).items[0].id, course);
+  assert.equal((await queries.getCoursesPage('', 1, 'name', 0, 'English')).total, 2);
+  assert.equal((await queries.getCoursesPage('ENGL 1010', 1, 'name', 0, 'English')).total, 1);
+  assert.equal((await queries.getCoursesPage('ENGL 1010', 1, 'name', 0, 'Biology')).total, 0);
+  assert.equal((await queries.getCoursesPage('', 1, 'name', 0, "English' OR 1=1 --")).total, 0);
+  assert.equal((await queries.getShareIdentity('course', course)).title, 'ENGL1010');
+  assert.equal((await queries.getShareIdentity('professor', professor)).title, 'Brian Zimmerman');
+  assert.equal(await queries.getShareIdentity('course', '000000000000000000000099'), null);
+  assert.equal(await queries.getShareIdentity('professor', '../invalid'), null);
   assert.equal((await queries.getProfessorsPage('Zimerman', 1)).items[0].id, professor);
   assert.equal((await queries.getCommentsPage('', 1)).total, 4);
   assert.equal((await queries.getCatalogPaths()).length, 4);

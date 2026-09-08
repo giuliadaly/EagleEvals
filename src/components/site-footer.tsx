@@ -6,16 +6,12 @@ export function SiteFooter() {
   return (
     <footer className={styles.footer}>
       <div className={`page-shell ${styles.inner}`}>
-        <div className={styles.top}>
-          <p>Good advice gets passed around.</p>
-          <nav aria-label="Footer navigation"><Link href="/about">About</Link><Link href="/review">Write a review <span aria-hidden="true">↗</span></Link></nav>
+        <div className={styles.brand}>
+          <div><span className={styles.wordmark}>eagleevals</span><p className={styles.independent}>Independent of Boston College</p></div>
+          <p className={styles.note}>Made for the next<br />person in your seat.</p>
+          <div className={styles.eagle}><PerchedEagle /></div>
         </div>
-        <div className={styles.brand}><span>eagleevals</span><PerchedEagle /></div>
-        <div className={styles.bottom}>
-          <p>Made for the next person in your seat.</p>
-          <nav aria-label="Legal"><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link></nav>
-          <p>Independent of Boston College</p>
-        </div>
+        <nav className={styles.links} aria-label="Footer navigation"><Link href="/about">About</Link><Link href="/review">Write a review <span aria-hidden="true">↗</span></Link><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link></nav>
       </div>
     </footer>
   );

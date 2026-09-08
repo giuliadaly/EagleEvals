@@ -1,0 +1,8 @@
+.share { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem .75rem; min-width: 0; }
+.button { display: inline-flex; align-items: center; gap: .4rem; min-height: 2.75rem; padding: .4rem 0; cursor: pointer; color: var(--maroon-deep); font-size: .78rem; font-weight: 600; }
+.button:hover { text-decoration: underline; text-underline-offset: .2rem; }
+.button:disabled { cursor: wait; opacity: .65; }
+.status { color: var(--muted); font-size: .72rem; }
+.manual { flex-basis: 100%; min-width: 0; }
+.manual label { display: block; margin-bottom: .35rem; font-size: .75rem; color: var(--muted); }
+.manual input { width: min(100%, 28rem); min-width: 0; border: 1px solid var(--line-strong); border-radius: .25rem; background: var(--paper-raised); padding: .65rem; font-size: 1rem; color: var(--ink); }
