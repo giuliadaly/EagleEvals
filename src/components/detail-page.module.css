@@ -124,3 +124,8 @@
   .table td { display: block; padding: 0; overflow-wrap: anywhere; }
   .table td::before { content: attr(data-label); display: block; color: var(--muted); font-size: .68rem; margin-bottom: .25rem; }
 }
+
+.reviewTerm { font-size: .73rem; color: var(--muted); margin: -.25rem 0 .85rem; }
+.reviewFilters { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; margin-bottom: 1rem; }
+.reviewFilters label { min-width: 0; }
+@media (max-width: 520px) { .reviewFilters { grid-template-columns: minmax(0, 1fr); } }

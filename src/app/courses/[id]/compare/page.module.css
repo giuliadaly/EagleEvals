@@ -1,0 +1,36 @@
+.main { flex: 1; padding-block: 2.5rem 4rem; background: #fcf9f2; }
+.heading { margin-block: 2.5rem; max-width: 46rem; }
+.heading h1 { font-size: clamp(2.3rem, 5vw, 3.7rem); font-weight: 700; line-height: 1.1; letter-spacing: -.045em; margin-top: 1rem; color: var(--maroon-deep); }
+.heading > p:last-child { margin-top: 1.2rem; max-width: 40rem; font-size: .95rem; line-height: 1.8; color: var(--muted); }
+.picker { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; padding: 1.5rem; background: #f0eae0; border-radius: .3rem; }
+.picker label { min-width: 0; }
+.picker button { justify-self: start; }
+.note { color: var(--muted); font-size: .85rem; line-height: 1.8; margin-block: 1.2rem; }
+.error { color: var(--maroon-deep); padding-block: 1rem; }
+.results { margin-block: 2.5rem; scroll-margin-top: 8rem; }
+.tableWrap { overflow-x: auto; border-radius: .3rem; }
+.table { width: 100%; min-width: 34rem; border-collapse: collapse; text-align: left; }
+.tableHeading { font-weight: 650; font-size: 1.2rem; padding-block: 1rem; }
+.scrollHint { display: none; }
+.table th, .table td { padding: 1rem; font-size: .9rem; vertical-align: top; font-variant-numeric: tabular-nums; }
+.table thead th { background: var(--maroon-deep); color: var(--on-maroon); min-width: 10rem; }
+.table tbody th { font-weight: 500; }
+.table tbody tr:nth-child(odd) { background: #f0eae0; }
+.table td { color: var(--maroon-deep); font-weight: 650; }
+.table a:hover { text-decoration: underline; }
+.reviewColumns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem; margin-top: 3rem; }
+.reviewColumns[data-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.professorReviews { min-width: 0; scroll-margin-top: 8rem; }
+.professorReviews h2 { font-size: 1.4rem; font-weight: 650; letter-spacing: -.025em; }
+.professorReviews article { margin-block: 1.5rem 2.5rem; }
+.professorReviews summary { cursor: pointer; color: var(--maroon-deep); font-weight: 600; padding-block: .75rem; }
+.reviewLink { display: inline-flex; align-items: center; min-height: 44px; color: var(--maroon-deep); font-size: .85rem; font-weight: 650; }
+.reviewLink:hover { text-decoration: underline; }
+@media (max-width: 760px) { .picker, .reviewColumns, .reviewColumns[data-count="3"] { grid-template-columns: minmax(0, 1fr); } .picker { padding: 1rem; } }
+
+@media (max-width: 760px) {
+  .scrollHint { display: block; font-size: .78rem; color: var(--muted); margin-bottom: 1rem; }
+  .table th[scope="row"], .table thead th:first-child { position: sticky; left: 0; background: #fcf9f2; }
+  .table tbody tr:nth-child(odd) th[scope="row"] { background: #f0eae0; }
+  .table thead th:first-child { background: var(--maroon-deep); }
+}

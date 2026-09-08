@@ -18,11 +18,13 @@ Production domain: [eagleevals.com](https://eagleevals.com)
 
 The production application includes:
 
-- live autocomplete across course codes, titles, subjects, and professor names
+- autocomplete and directory search tolerant of course-code spacing, punctuation, and small name/title typos
 - paginated course and professor directories
 - a paginated, searchable view of every public historical evaluation row
 - a paginated, searchable view of every public written comment
-- course ratings, workload estimates, instructor comparisons, comments, and semester history
+- course ratings, workload estimates, same-course comparison of two or three professors, comments, and semester history
+- written-review filters by course/professor and ordering by post date or known semester taken
+- per-detail canonical URLs and a complete course/professor sitemap
 - professor ratings, course history, public faculty details, and comments
 - fully anonymous review submission with no account or identity fields
 - recovery context, privacy information, terms, loading, error, and missing-record states
@@ -109,3 +111,22 @@ compatible with the previous form during rollout.
 Import this GitHub repository into Vercel. Vercel detects Next.js without a
 custom build configuration. Connect `eagleevals.com` only after the production
 database and core search routes have been verified.
+
+### Review context and comparison rollout
+
+Before deploying review navigation, run `node scripts/link-review-context.mjs`
+in each target database environment. It applies only the additive migration
+`004_comment_review_context.sql`, with a five-second lock timeout. The previous
+application remains compatible. New comments link to their own anonymous
+rating submission; historical comments remain unlinked and display “Semester
+not recorded.” Never infer a semester from a comment's posting date.
+
+The form offers recent terms and an earlier-semester picker back to 2000.
+Known professors are suggestions; any catalog professor can still be selected.
+The success screen links to the published pages and offers a fresh review form.
+
+Comparison lives at `/courses/[id]/compare` and accepts two or three distinct
+`professor` parameters. All averages, counts, latest terms, and written reviews
+are scoped to that course. It does not claim current teaching availability.
+Custom share previews and lower-homepage design changes remain deferred;
+see [FOLLOW_UPS.md](FOLLOW_UPS.md).

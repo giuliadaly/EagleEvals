@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { InfoPage } from "@/components/info-page";
 
-export const metadata: Metadata = { title: "Privacy", description: "EagleEvals privacy information." };
+export const metadata: Metadata = { alternates: { canonical: "/privacy" }, title: "Privacy", description: "EagleEvals privacy information." };
 
 export default function PrivacyPage() {
   return (

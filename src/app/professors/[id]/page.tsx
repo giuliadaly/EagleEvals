@@ -13,8 +13,8 @@ import styles from "@/components/detail-page.module.css";
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const detail = await getProfessorDetail(id);
-  if (!detail) return { title: "Professor not found" };
-  return { title: detail.professor.name, description: `Ratings, courses, evaluation history, and anonymous written reviews for ${detail.professor.name} at Boston College.` };
+  if (!detail) return { alternates: { canonical: `/professors/${id}` }, title: "Professor not found", robots: { index: false, follow: false } };
+  return { alternates: { canonical: `/professors/${id}` }, title: detail.professor.name, description: `Ratings, courses, evaluation history, and anonymous written reviews for ${detail.professor.name} at Boston College.` };
 }
 
 function CoursePairing({ course }: { course: ProfessorCourseRow }) {

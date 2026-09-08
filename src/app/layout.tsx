@@ -24,7 +24,6 @@ export const metadata: Metadata = {
   },
   description: "Search Boston College course and professor evaluations, compare the details that matter, and share fully anonymous reviews.",
   applicationName: "EagleEvals",
-  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     siteName: "EagleEvals",
