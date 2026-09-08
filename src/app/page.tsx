@@ -8,6 +8,7 @@ import { getFeaturedCourses, getSiteStats } from "@/data/queries";
 import styles from "./home.module.css";
 
 export const revalidate = 3600;
+export const metadata = { alternates: { canonical: "/" } };
 
 export default async function Home() {
   const [stats, courses] = await Promise.all([getSiteStats(), getFeaturedCourses()]);

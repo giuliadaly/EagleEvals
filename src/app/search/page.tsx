@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { searchCatalog } from "@/data/queries";
 
-export const metadata: Metadata = { title: "Search", description: "Search EagleEvals courses, professors, ratings, and student reviews." };
+export const metadata: Metadata = { robots: { index: false, follow: true }, title: "Search", description: "Search EagleEvals courses, professors, ratings, and student reviews." };
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q = "" } = await searchParams;
@@ -22,7 +22,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           <div className="page-shell">
             <p className="eyebrow text-[var(--gold)]">Search EagleEvals</p>
             <h1 className="mt-3 font-serif text-4xl font-bold tracking-[-0.035em] sm:text-5xl">Find a course or professor</h1>
-            <div className="mt-7 max-w-3xl"><SearchBox autoFocus={!normalized} /></div>
+            <div className="mt-7 max-w-3xl"><SearchBox key={normalized} initialQuery={normalized} autoFocus={!normalized} /></div>
           </div>
         </section>
         <div className="page-shell py-12 sm:py-16">

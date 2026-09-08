@@ -2,6 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 import { database } from "@/data/database";
+import { catalogMatch, catalogSearchSql, normalizeCatalogQuery } from "@/data/catalog-search";
 import { semesterSortValue } from "@/data/format";
 import type {
   CourseDetail,
@@ -123,49 +124,25 @@ export const getFeaturedProfessors = cache(async (): Promise<ProfessorSummary[]>
 });
 
 export async function searchCatalog(rawQuery: string, limit = 12): Promise<SearchResults> {
-  const query = normalizeQuery(rawQuery);
+  const query = normalizeCatalogQuery(rawQuery);
   if (query.length < 2) return { courses: [], professors: [] };
-
+  const parameters = [query, query.replace(/ /g, ""), Math.max(1, Math.min(Math.floor(limit), 30))];
   const sql = database();
-  const pattern = `%${query}%`;
-  const safeLimit = Math.max(1, Math.min(Math.floor(limit), 30));
   const [courseRows, professorRows] = await Promise.all([
-    sql`
-      SELECT * FROM course_summaries
-      WHERE (code || ' ' || title || ' ' || subject) ILIKE ${pattern}
-      ORDER BY
-        CASE WHEN lower(code) = lower(${query}) THEN 0 WHEN code ILIKE ${`${query}%`} THEN 1 ELSE 2 END,
-        greatest(similarity(lower(code), lower(${query})), similarity(lower(title), lower(${query}))) DESC,
-        review_count DESC,
-        code ASC
-      LIMIT ${safeLimit}
-    `,
-    sql`
-      SELECT * FROM professor_summaries
-      WHERE name ILIKE ${pattern}
-      ORDER BY
-        CASE WHEN lower(name) = lower(${query}) THEN 0 WHEN name ILIKE ${`${query}%`} THEN 1 ELSE 2 END,
-        similarity(lower(name), lower(${query})) DESC,
-        review_count DESC,
-        name ASC
-      LIMIT ${safeLimit}
-    `,
+    sql.query(catalogSearchSql("course"), parameters),
+    sql.query(catalogSearchSql("professor"), parameters),
   ]);
-
-  return {
-    courses: (courseRows as DbRow[]).map(mapCourse),
-    professors: (professorRows as DbRow[]).map(mapProfessor),
-  };
+  return { courses: (courseRows as DbRow[]).map(mapCourse), professors: (professorRows as DbRow[]).map(mapProfessor) };
 }
 
 export async function getCoursesPage(rawQuery: string, rawPage: number, rawSort = "evidence", rawMinRating = 0): Promise<PaginatedResult<CourseSummary>> {
-  const query = normalizeQuery(rawQuery);
+  const query = normalizeCatalogQuery(rawQuery);
   const page = normalizePage(rawPage);
   const offset = (page - 1) * PAGE_SIZE;
   const sql = database();
   const sort = ["rating", "instructor", "name"].includes(rawSort) ? rawSort : "evidence";
   const minRating = [4, 4.5].includes(rawMinRating) ? rawMinRating : 0;
-  const pattern = `%${query}%`;
+  const compact = query.replace(/ /g, "");
   const order = sort === "rating"
     ? "ORDER BY course_overall DESC NULLS LAST, review_count DESC, code ASC"
     : sort === "instructor"
@@ -175,13 +152,13 @@ export async function getCoursesPage(rawQuery: string, rawPage: number, rawSort 
         : "ORDER BY review_count DESC, code ASC";
   const [rows, countRows] = (await Promise.all([
     sql.query(`SELECT * FROM course_summaries
-      WHERE ($1 = '' OR (code || ' ' || title || ' ' || subject) ILIKE $2)
+      WHERE ($1 = '' OR ${catalogMatch('course')})
         AND ($3::numeric = 0 OR course_overall >= $3::numeric)
       ${order}
-      LIMIT $4 OFFSET $5`, [query, pattern, minRating, PAGE_SIZE, offset]),
+      LIMIT $4 OFFSET $5`, [query, compact, minRating, PAGE_SIZE, offset]),
     sql.query(`SELECT count(*)::integer AS total FROM course_summaries
-      WHERE ($1 = '' OR (code || ' ' || title || ' ' || subject) ILIKE $2)
-        AND ($3::numeric = 0 OR course_overall >= $3::numeric)`, [query, pattern, minRating]),
+      WHERE ($1 = '' OR ${catalogMatch('course')})
+        AND ($3::numeric = 0 OR course_overall >= $3::numeric)`, [query, compact, minRating]),
   ])) as [DbRow[], DbRow[]];
 
   const total = asCount(countRows[0]?.total);
@@ -189,13 +166,13 @@ export async function getCoursesPage(rawQuery: string, rawPage: number, rawSort 
 }
 
 export async function getProfessorsPage(rawQuery: string, rawPage: number, rawSort = "evidence", rawMinRating = 0): Promise<PaginatedResult<ProfessorSummary>> {
-  const query = normalizeQuery(rawQuery);
+  const query = normalizeCatalogQuery(rawQuery);
   const page = normalizePage(rawPage);
   const offset = (page - 1) * PAGE_SIZE;
   const sql = database();
   const sort = ["rating", "course", "comments", "name"].includes(rawSort) ? rawSort : "evidence";
   const minRating = [4, 4.5].includes(rawMinRating) ? rawMinRating : 0;
-  const pattern = `%${query}%`;
+  const compact = query.replace(/ /g, "");
   const order = sort === "rating"
     ? "ORDER BY instructor_overall DESC NULLS LAST, review_count DESC, name ASC"
     : sort === "course"
@@ -207,13 +184,13 @@ export async function getProfessorsPage(rawQuery: string, rawPage: number, rawSo
         : "ORDER BY review_count DESC, name ASC";
   const [rows, countRows] = (await Promise.all([
     sql.query(`SELECT * FROM professor_summaries
-      WHERE ($1 = '' OR name ILIKE $2)
+      WHERE ($1 = '' OR ${catalogMatch('professor')})
         AND ($3::numeric = 0 OR instructor_overall >= $3::numeric)
       ${order}
-      LIMIT $4 OFFSET $5`, [query, pattern, minRating, PAGE_SIZE, offset]),
+      LIMIT $4 OFFSET $5`, [query, compact, minRating, PAGE_SIZE, offset]),
     sql.query(`SELECT count(*)::integer AS total FROM professor_summaries
-      WHERE ($1 = '' OR name ILIKE $2)
-        AND ($3::numeric = 0 OR instructor_overall >= $3::numeric)`, [query, pattern, minRating]),
+      WHERE ($1 = '' OR ${catalogMatch('professor')})
+        AND ($3::numeric = 0 OR instructor_overall >= $3::numeric)`, [query, compact, minRating]),
   ])) as [DbRow[], DbRow[]];
 
   const total = asCount(countRows[0]?.total);
@@ -226,6 +203,7 @@ function mapComment(row: DbRow): StudentComment {
     message: String(row.message),
     wouldTakeAgain: row.would_take_again == null ? null : Boolean(row.would_take_again),
     createdAt: new Date(String(row.created_at)).toISOString(),
+    semester: row.review_semester ? String(row.review_semester) : null,
     professorId: String(row.professor_id),
     professorName: String(row.professor_name),
     courseId: row.course_id ? String(row.course_id) : null,
@@ -343,10 +321,11 @@ export async function getCommentsPage(rawQuery: string, rawPage: number): Promis
   const offset = (page - 1) * EVALUATION_PAGE_SIZE;
   const sql = database();
   const select = `
-    SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source,
+    SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source, r.semester AS review_semester,
       sc.professor_id, p.name AS professor_name,
       sc.course_id, c.code AS course_code, c.title AS course_title
     FROM student_comments sc
+    LEFT JOIN reviews r ON r.id = sc.review_id AND r.published AND r.course_id = sc.course_id AND r.professor_id = sc.professor_id
     JOIN professors p ON p.id = sc.professor_id
     LEFT JOIN courses c ON c.id = sc.course_id
   `;
@@ -429,7 +408,7 @@ export const getCourseDetail = cache(async (id: string): Promise<CourseDetail | 
     sql`
       SELECT p.id, p.name, p.titles, count(r.id)::integer AS review_count,
         avg(r.course_overall) AS course_overall,
-        avg(r.instructor_overall) AS instructor_overall
+        avg(r.instructor_overall) AS instructor_overall, array_agg(DISTINCT r.semester) AS semesters
       FROM reviews r
       JOIN professors p ON p.id = r.professor_id
       WHERE r.published AND r.course_id = ${id}
@@ -437,10 +416,11 @@ export const getCourseDetail = cache(async (id: string): Promise<CourseDetail | 
       ORDER BY review_count DESC, p.name ASC
     `,
     sql`
-      SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source,
+      SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source, r.semester AS review_semester,
         sc.professor_id, p.name AS professor_name,
         sc.course_id, c.code AS course_code, c.title AS course_title
       FROM student_comments sc
+      LEFT JOIN reviews r ON r.id = sc.review_id AND r.published AND r.course_id = sc.course_id AND r.professor_id = sc.professor_id
       JOIN professors p ON p.id = sc.professor_id
       LEFT JOIN courses c ON c.id = sc.course_id
       WHERE sc.published AND sc.course_id = ${id}
@@ -467,6 +447,7 @@ export const getCourseDetail = cache(async (id: string): Promise<CourseDetail | 
   const effort = asNumber(metric.effort);
 
   const instructors: InstructorCourseRow[] = instructorRows.map((row) => ({
+    latestSemester: asStringArray(row.semesters).sort((a, b) => semesterSortValue(b) - semesterSortValue(a))[0] ?? null,
     id: String(row.id),
     name: String(row.name),
     titles: asStringArray(row.titles),
@@ -528,10 +509,11 @@ export const getProfessorDetail = cache(async (id: string): Promise<ProfessorDet
       ORDER BY review_count DESC, c.code ASC
     `,
     sql`
-      SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source,
+      SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source, r.semester AS review_semester,
         sc.professor_id, p.name AS professor_name,
         sc.course_id, c.code AS course_code, c.title AS course_title
       FROM student_comments sc
+      LEFT JOIN reviews r ON r.id = sc.review_id AND r.published AND r.course_id = sc.course_id AND r.professor_id = sc.professor_id
       JOIN professors p ON p.id = sc.professor_id
       LEFT JOIN courses c ON c.id = sc.course_id
       WHERE sc.published AND sc.professor_id = ${id}
@@ -593,3 +575,21 @@ export const getProfessorDetail = cache(async (id: string): Promise<ProfessorDet
 
   return { professor: mapProfessor(professorRows[0]), metrics, courses, comments: commentRows.map(mapComment), evaluations };
 });
+
+export async function getCatalogPaths(): Promise<string[]> {
+  const sql = database();
+  const rows = await sql`SELECT '/courses/' || id AS path FROM courses
+    UNION ALL SELECT '/professors/' || id AS path FROM professors`;
+  return rows.map(row => String(row.path));
+}
+
+export async function getCourseProfessors(courseId: string): Promise<ReviewSelection[]> {
+  if (!/^[0-9a-f]{24}$/.test(courseId)) return [];
+  const sql = database();
+  const rows = await sql`SELECT p.id, p.name, p.titles
+    FROM professors p
+    WHERE EXISTS (SELECT 1 FROM reviews r WHERE r.published AND r.course_id = ${courseId} AND r.professor_id = p.id)
+      OR EXISTS (SELECT 1 FROM student_comments sc WHERE sc.published AND sc.course_id = ${courseId} AND sc.professor_id = p.id)
+    ORDER BY p.name, p.id`;
+  return rows.map(row => ({ id: String(row.id), primary: String(row.name), secondary: asStringArray(row.titles).join(' · ') || 'Boston College faculty' }));
+}

@@ -13,8 +13,8 @@ import styles from "@/components/detail-page.module.css";
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const detail = await getCourseDetail(id);
-  if (!detail) return { title: "Course not found" };
-  return { title: `${detail.course.code}: ${detail.course.title}`, description: `Historical ratings, workload, instructors, and student comments for ${detail.course.code} ${detail.course.title}.` };
+  if (!detail) return { alternates: { canonical: `/courses/${id}` }, title: "Course not found", robots: { index: false, follow: false } };
+  return { alternates: { canonical: `/courses/${id}` }, title: `${detail.course.code}: ${detail.course.title}`, description: `Historical ratings, workload, instructors, and student comments for ${detail.course.code} ${detail.course.title}.` };
 }
 
 function InstructorPairing({ instructor }: { instructor: InstructorCourseRow }) {
@@ -54,6 +54,7 @@ export default async function CourseDetailPage({ params, searchParams }: { param
             <p className={styles.eyebrow}>{course.code} · {course.subject}</p>
             <h1>{course.title}</h1>
             {collegeName(course.college) ? <p className={styles.subtitle}>{collegeName(course.college)}</p> : null}
+            {instructors.length >= 2 ? <Link className={styles.textLink} href={`/courses/${course.id}/compare`}>Compare professors ↗</Link> : null}
           </div>
           <div>
             <DetailScore value={course.courseOverall} label="Course rating" precision={1} />

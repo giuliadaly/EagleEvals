@@ -57,7 +57,8 @@ export function CommentCard({ comment, context }: { comment: StudentComment; con
           <span className="result-icon">{context === "course" ? <PersonIcon className="size-4" /> : <BookIcon className="size-4" />}</span>
           <div>
             {href ? <Link href={href} className="font-bold text-[var(--navy)] hover:text-[var(--blue)]">{title}</Link> : <p className="font-bold text-[var(--navy)]">{title}</p>}
-            <p className="text-xs text-[var(--muted)]">{formatDate(comment.createdAt)} · {commentSourceLabel(comment.source)}</p>
+            <p className="text-xs text-[var(--muted)]">Posted {formatDate(comment.createdAt)} · {commentSourceLabel(comment.source)}</p>
+            <p className="text-xs text-[var(--muted)]">{comment.semester ? `Taken ${comment.semester}` : "Semester not recorded"}</p>
           </div>
         </div>
         {comment.wouldTakeAgain !== null ? <span className={`rounded-full px-3 py-1 text-xs font-bold ${comment.wouldTakeAgain ? "bg-[var(--green-pale)] text-[var(--green)]" : "bg-[var(--rose-pale)] text-[var(--rose)]"}`}>
@@ -100,7 +101,8 @@ export function CommentArchiveCard({ comment }: { comment: StudentComment }) {
         <div>
           <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
             <span className={`rounded-full px-3 py-1 ${comment.source === "eagleevals_anonymous" ? "bg-[var(--green-pale)] text-[var(--green)]" : "bg-[var(--wash)] text-[var(--muted)]"}`}>{commentSourceLabel(comment.source)}</span>
-            <span className="text-[var(--muted)]">{formatDate(comment.createdAt)}</span>
+            <span className="text-[var(--muted)]">Posted {formatDate(comment.createdAt)}</span>
+            <span className="text-[var(--muted)]">{comment.semester ? `Taken ${comment.semester}` : "Semester not recorded"}</span>
           </div>
           <p className="mt-3 font-bold text-[var(--navy)]"><Link href={`/professors/${comment.professorId}`} className="hover:text-[var(--blue)]">{comment.professorName}</Link></p>
           {comment.courseId && comment.courseCode ? <p className="mt-1 text-sm text-[var(--muted)]"><Link href={`/courses/${comment.courseId}`} className="hover:text-[var(--blue)]">{comment.courseCode}{comment.courseTitle ? ` · ${comment.courseTitle}` : ""}</Link></p> : null}
