@@ -35,7 +35,7 @@ export function DetailReviews({ comments, context, reviewHref, archiveHref }: { 
   const remaining = visible.slice(5);
   return <section id="comments" className={styles.reviews} aria-labelledby={headingId}>
     <div className={styles.sectionHeading}>
-      <div><h2 id={headingId}>Student reviews <span className={styles.count}>{formatCount(comments.length)}</span></h2>{comments.length ? <p className={styles.caption}>Anonymous, shown as submitted.</p> : null}</div>
+      <div><h2 id={headingId}>Written reviews <span className={styles.count}>{formatCount(comments.length)}</span></h2>{comments.length ? <p className={styles.caption}>Anonymous student feedback, shown as submitted.</p> : null}</div>
       <Link href={reviewHref} className={styles.writeReview}>Write a review <span aria-hidden="true">↗</span></Link>
     </div>
     {comments.length ? <>
@@ -52,6 +52,6 @@ export function DetailReviews({ comments, context, reviewHref, archiveHref }: { 
       <div className={styles.reviewList}>{visible.slice(0, 5).map(comment => <DetailReview key={comment.id} comment={comment} context={context} />)}</div>
       {remaining.length ? <details key={`${selected}-${sort}`} className={`${styles.disclosure} ${styles.moreReviews}`}><summary>Read {formatCount(remaining.length)} more reviews</summary><div className={styles.disclosureBody}><div className={styles.reviewList}>{remaining.map(comment => <DetailReview key={comment.id} comment={comment} context={context} />)}</div></div></details> : null}
       {archiveHref ? <Link className={styles.textLink} href={archiveHref}>Browse the review archive <span aria-hidden="true">↗</span></Link> : null}
-    </> : <p className={styles.emptyState}>No written reviews yet. Share what you wish you’d known before taking this {context === "course" ? "course" : "professor’s class"}.</p>}
+    </> : <div className={styles.emptyState}><h3>No written reviews yet</h3><p>Numerical ratings and written feedback are separate. Be the first to share what you wish you’d known before taking this {context === "course" ? "course" : "professor’s class"}.</p></div>}
   </section>;
 }
