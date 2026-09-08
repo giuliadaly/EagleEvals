@@ -25,7 +25,7 @@ export default async function EvaluationsPage({ searchParams }: { searchParams: 
           <div className="page-shell">
             <p className="eyebrow text-[var(--gold-dark)]">BC course history</p>
             <h1 className="mt-3 font-serif text-4xl font-bold tracking-[-0.04em] text-[var(--navy)] sm:text-5xl">All evaluations</h1>
-            <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--ink-soft)]">Browse 32,417 section-level numerical evaluations from BC students across courses, professors, and semesters. Written reviews also appear on their related course and professor pages.</p>
+            <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--ink-soft)]">Browse numerical rating records across courses, professors, and semesters. Older records summarize course sections; new anonymous reviews add individual ratings. Written feedback is listed separately on course and professor pages.</p>
             <form className="mt-7 flex max-w-3xl flex-col gap-3 sm:flex-row" role="search">
               <label className="sr-only" htmlFor="evaluation-search">Search evaluations</label>
               <input id="evaluation-search" name="q" defaultValue={result.query} className="form-control flex-1" placeholder="Course code, title, professor, or semester" />
@@ -35,7 +35,7 @@ export default async function EvaluationsPage({ searchParams }: { searchParams: 
         </section>
         <div className="page-shell py-10 sm:py-14">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-[var(--muted)]"><strong className="text-[var(--ink)]">{formatCount(result.total)}</strong> public evaluation{result.total === 1 ? "" : "s"}{result.query ? ` matching “${result.query}”` : ""}</p>
+            <p className="text-sm text-[var(--muted)]"><strong className="text-[var(--ink)]">{formatCount(result.total)}</strong> rating record{result.total === 1 ? "" : "s"}{result.query ? ` matching “${result.query}”` : ""}</p>
             <div className="flex flex-wrap gap-3"><Link className="button-secondary" href="/comments">Browse written reviews</Link><Link className="button-gold" href="/review">Write anonymous review</Link></div>
           </div>
           {result.items.length ? <div className="grid gap-5">{result.items.map((evaluation) => <EvaluationCard key={evaluation.id} evaluation={evaluation} />)}</div> : <p className="rounded-2xl border border-[var(--line)] bg-white p-8 text-[var(--muted)]">No evaluations matched that search.</p>}
