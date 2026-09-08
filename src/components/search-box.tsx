@@ -5,52 +5,19 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useId, useRef, useState } from "react";
 import { BookIcon, PersonIcon, SearchIcon } from "@/components/icons";
 import { formatWrittenReviewCount } from "@/data/format";
+import { useCatalogSearch } from "./use-catalog-search";
 import styles from "./search-box.module.css";
-
-type QuickCourse = { id: string; code: string; title: string; subject: string; commentCount: number };
-type QuickProfessor = { id: string; name: string; title: string | null; commentCount: number };
-type QuickResults = { courses: QuickCourse[]; professors: QuickProfessor[] };
 
 export function SearchBox({ compact = false, autoFocus = false, hero = false, initialQuery = "" }: { compact?: boolean; autoFocus?: boolean; hero?: boolean; initialQuery?: string }) {
   const router = useRouter();
   const listId = useId();
   const [query, setQuery] = useState(initialQuery);
-  const [results, setResults] = useState<QuickResults>({ courses: [], professors: [] });
+  const { results, loading, failed } = useCatalogSearch(query);
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    const normalized = query.trim();
-    if (normalized.length < 2) {
-      return;
-    }
-
-    const controller = new AbortController();
-    const timer = setTimeout(async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(normalized)}`, { signal: controller.signal });
-        if (!response.ok) throw new Error("Search unavailable");
-        const payload = (await response.json()) as QuickResults;
-        setResults(payload);
-        setActiveIndex(-1);
-        setOpen(true);
-      } catch (error) {
-        if (!(error instanceof DOMException && error.name === "AbortError")) {
-          setResults({ courses: [], professors: [] });
-        }
-      } finally {
-        setLoading(false);
-      }
-    }, 220);
-
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
-  }, [query]);
+  useEffect(() => () => { if (blurTimer.current) clearTimeout(blurTimer.current); }, []);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -61,7 +28,7 @@ export function SearchBox({ compact = false, autoFocus = false, hero = false, in
   }
 
   const hasResults = results.courses.length > 0 || results.professors.length > 0;
-  const showPanel = open && query.trim().length >= 2;
+  const showPanel = open && query.trim().length > 0;
   const flatResults = [
     ...results.courses.map((course) => ({ href: `/courses/${course.id}` })),
     ...results.professors.map((professor) => ({ href: `/professors/${professor.id}` })),
@@ -87,14 +54,13 @@ export function SearchBox({ compact = false, autoFocus = false, hero = false, in
           onChange={(event) => {
             const nextQuery = event.target.value;
             setQuery(nextQuery);
-            setResults({ courses: [], professors: [] });
-            if (nextQuery.trim().length < 2) {
-              setOpen(false);
-              setResults({ courses: [], professors: [] });
-            }
+            setOpen(nextQuery.trim().length > 0);
             setActiveIndex(-1);
           }}
-          onFocus={() => query.trim().length >= 2 && setOpen(true)}
+          onFocus={() => {
+            if (blurTimer.current) clearTimeout(blurTimer.current);
+            if (query.trim()) setOpen(true);
+          }}
           onBlur={() => { blurTimer.current = setTimeout(() => setOpen(false), 120); }}
           onKeyDown={(event) => {
             if (event.key === "ArrowDown") {
@@ -135,7 +101,7 @@ export function SearchBox({ compact = false, autoFocus = false, hero = false, in
       {showPanel ? (
         <div id={`${listId}-results`} role="listbox" className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[28rem] overflow-y-auto rounded-[.375rem] border border-[var(--line-strong)] bg-[var(--paper-raised)] p-2 text-left shadow-xl shadow-black/10">
           {loading && !hasResults ? <p className="px-4 py-5 text-sm text-[var(--muted)]">Searching…</p> : null}
-          {!loading && !hasResults ? <p className="px-4 py-5 text-sm text-[var(--muted)]">No matching courses or professors found.</p> : null}
+          {!loading && !hasResults ? <p className="px-4 py-5 text-sm text-[var(--muted)]">{failed ? "Search is temporarily unavailable. Please try again." : "No matching courses or professors found."}</p> : null}
           {results.courses.length > 0 ? (
             <div>
               <p className="px-3 pb-1 pt-2 text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Courses</p>
