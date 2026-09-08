@@ -5,7 +5,12 @@ export function formatCount(value: number): string {
 }
 
 export function formatWrittenReviewCount(value: number): string {
+  if (value === 0) return "No written reviews yet";
   return `${formatCount(value)} written ${value === 1 ? "review" : "reviews"}`;
+}
+
+export function formatEvaluationCount(value: number): string {
+  return `${formatCount(value)} numerical ${value === 1 ? "evaluation" : "evaluations"}`;
 }
 
 export function formatRating(value: number | null): string {
