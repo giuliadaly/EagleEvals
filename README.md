@@ -92,6 +92,18 @@ legacy rows. It does not request or persist a name, account, email, student ID,
 IP address, user agent, cookie identifier, or browser fingerprint with a
 review. Exact duplicate payloads are rejected with a content-only fingerprint.
 
+New reviews require a course, professor, semester, two overall ratings, a short
+comment, and one confirmation of first-hand experience and the guidelines.
+Section, take-again preference, and the nine detailed ratings are optional.
+Unanswered details are stored as SQL NULL, excluded from category averages,
+and never displayed as a negative take-again response or a numbered section.
+
+Before deploying the simpler form, apply `003_optional_review_details.sql` via
+`node scripts/allow-optional-review-details.mjs` in each database environment.
+This scoped rollout command verifies the three nullable columns. The migration only
+relaxes required-value constraints and preserves existing data; it is also
+compatible with the previous form during rollout.
+
 ## Deployment
 
 Import this GitHub repository into Vercel. Vercel detects Next.js without a

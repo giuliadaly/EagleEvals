@@ -68,7 +68,7 @@ export type ProfessorCourseRow = {
 export type ProfessorEvaluationRow = {
   id: string;
   semester: string;
-  section: number;
+  section: number | null;
   courseId: string | null;
   courseCode: string;
   courseTitle: string | null;
@@ -81,7 +81,7 @@ export type ProfessorEvaluationRow = {
 export type StudentComment = {
   id: string;
   message: string;
-  wouldTakeAgain: boolean;
+  wouldTakeAgain: boolean | null;
   createdAt: string;
   professorId: string;
   professorName: string;
@@ -94,8 +94,8 @@ export type StudentComment = {
 export type EvaluationRecord = {
   id: string;
   semester: string;
-  section: number;
-  sectionCode: string;
+  section: number | null;
+  sectionCode: string | null;
   courseOverall: number | null;
   instructorOverall: number | null;
   courseId: string | null;
