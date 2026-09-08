@@ -4,7 +4,7 @@ import { searchCatalog } from "@/data/queries";
 
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get("q") ?? "";
-  if (query.trim().length < 2) return NextResponse.json({ courses: [], professors: [] });
+  if (!query.trim()) return NextResponse.json({ courses: [], professors: [] });
 
   const results = await searchCatalog(query, 6);
   return NextResponse.json(
