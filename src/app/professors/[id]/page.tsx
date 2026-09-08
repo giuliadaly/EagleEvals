@@ -5,6 +5,8 @@ import { DetailDisclosure, DetailMetrics, DetailReviews, DetailScore, preciseRat
 import { Breadcrumbs } from "@/components/page-parts";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { SharePage } from "@/components/share-page";
+import { detailSharingMetadata } from "@/data/sharing";
 import { cleanTitle, formatCount } from "@/data/format";
 import { getProfessorDetail } from "@/data/queries";
 import type { ProfessorCourseRow } from "@/data/types";
@@ -14,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const detail = await getProfessorDetail(id);
   if (!detail) return { alternates: { canonical: `/professors/${id}` }, title: "Professor not found", robots: { index: false, follow: false } };
-  return { alternates: { canonical: `/professors/${id}` }, title: detail.professor.name, description: `Ratings, courses, evaluation history, and anonymous written reviews for ${detail.professor.name} at Boston College.` };
+  return detailSharingMetadata(`/professors/${id}`, detail.professor.name, `Ratings, courses, evaluation history, and anonymous written reviews for ${detail.professor.name} at Boston College.`);
 }
 
 function CoursePairing({ course }: { course: ProfessorCourseRow }) {
@@ -44,6 +46,7 @@ export default async function ProfessorDetailPage({ params }: { params: Promise<
             <p className={styles.eyebrow}>Professor profile</p>
             <h1>{professor.name}</h1>
             <p className={styles.subtitle}>{titles.length ? titles.join(" · ") : "Boston College faculty"}</p>
+            <div className={styles.actions}><SharePage path={`/professors/${professor.id}`} title={professor.name} /></div>
           </div>
           <div>
             <div className={styles.scoreGroup} aria-label="Professor rating summary"><DetailScore value={professor.instructorOverall} label="Instructor" /><DetailScore value={professor.courseOverall} label="Course" /></div>

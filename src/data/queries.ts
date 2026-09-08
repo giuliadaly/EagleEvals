@@ -139,6 +139,17 @@ export async function getQuickSearchCatalog(): Promise<QuickResults> {
   };
 }
 
+export async function getShareIdentity(kind: "course" | "professor", id: string): Promise<{ title: string; subtitle: string } | null> {
+  if (!/^[a-f0-9]{24}$/i.test(id)) return null;
+  const sql = database();
+  if (kind === "course") {
+    const rows = await sql`SELECT code, title FROM courses WHERE id = ${id} LIMIT 1` as DbRow[];
+    return rows[0] ? { title: String(rows[0].code), subtitle: String(rows[0].title) } : null;
+  }
+  const rows = await sql`SELECT name FROM professors WHERE id = ${id} LIMIT 1` as DbRow[];
+  return rows[0] ? { title: String(rows[0].name), subtitle: "Advice from students who took the class." } : null;
+}
+
 export async function searchCatalog(rawQuery: string, limit = 12): Promise<SearchResults> {
   const query = normalizeCatalogQuery(rawQuery);
   if (!query) return { courses: [], professors: [] };
@@ -151,7 +162,7 @@ export async function searchCatalog(rawQuery: string, limit = 12): Promise<Searc
   return { courses: (courseRows as DbRow[]).map(mapCourse), professors: (professorRows as DbRow[]).map(mapProfessor) };
 }
 
-export async function getCoursesPage(rawQuery: string, rawPage: number, rawSort = "evidence", rawMinRating = 0): Promise<PaginatedResult<CourseSummary>> {
+export async function getCoursesPage(rawQuery: string, rawPage: number, rawSort = "evidence", rawMinRating = 0, rawSubject = ""): Promise<PaginatedResult<CourseSummary>> {
   const query = normalizeCatalogQuery(rawQuery);
   const page = normalizePage(rawPage);
   const offset = (page - 1) * PAGE_SIZE;
@@ -159,6 +170,7 @@ export async function getCoursesPage(rawQuery: string, rawPage: number, rawSort 
   const sort = ["rating", "instructor", "name"].includes(rawSort) ? rawSort : "evidence";
   const minRating = [4, 4.5].includes(rawMinRating) ? rawMinRating : 0;
   const compact = query.replace(/ /g, "");
+  const subject = rawSubject.trim().slice(0, 100);
   const order = sort === "rating"
     ? "ORDER BY course_overall DESC NULLS LAST, review_count DESC, code ASC"
     : sort === "instructor"
@@ -170,11 +182,13 @@ export async function getCoursesPage(rawQuery: string, rawPage: number, rawSort 
     sql.query(`SELECT * FROM course_summaries
       WHERE ($1 = '' OR ${catalogMatch('course')})
         AND ($3::numeric = 0 OR course_overall >= $3::numeric)
+        AND ($6 = '' OR subject = $6)
       ${order}
-      LIMIT $4 OFFSET $5`, [query, compact, minRating, PAGE_SIZE, offset]),
+      LIMIT $4 OFFSET $5`, [query, compact, minRating, PAGE_SIZE, offset, subject]),
     sql.query(`SELECT count(*)::integer AS total FROM course_summaries
       WHERE ($1 = '' OR ${catalogMatch('course')})
-        AND ($3::numeric = 0 OR course_overall >= $3::numeric)`, [query, compact, minRating]),
+        AND ($3::numeric = 0 OR course_overall >= $3::numeric)
+        AND ($4 = '' OR subject = $4)`, [query, compact, minRating, subject]),
   ])) as [DbRow[], DbRow[]];
 
   const total = asCount(countRows[0]?.total);

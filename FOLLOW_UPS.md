@@ -1,6 +1,9 @@
-# Design discussions to revisit
+# Approved homepage and sharing design
 
-Requested by Aidan on September 7, 2026. Bring these two topics back up after the discovery, review navigation, professor comparison, and contribution work is ready. They require discussion before implementation.
+Discussed and approved by Aidan on September 7, 2026 after the discovery, review navigation, comparison, and contribution work shipped.
 
-- Lower homepage: clarify the purpose and mobile hierarchy below “A few places to start,” preserving the maroon palette, handwritten notes, and perched eagle.
-- Sharing individual pages: discuss course/professor preview designs and a share action. Search indexing corrections are approved separately; custom social previews are deferred.
+- Lower homepage: the subject index, smaller anonymous-contribution note, and compact footer with the perched eagle.
+- Sharing individual pages: clean maroon course/professor previews with the existing wing mark and a small Share action.
+- Additional approved easter egg: the hero wing's folds become paper airplanes, follow curved paths with soft cloud puffs and changes in scale, fly behind/in front of the text, and return to form the logo. The flight should be quick and smooth.
+
+Later data cleanup: the recovered catalog has some incorrect legacy subject labels (for example, EESC courses labeled “British Indian Ocean Territory”). The six homepage subjects use verified catalog labels. The original data has not been changed in this design update.
