@@ -31,8 +31,10 @@ export default async function ComparePage({ params, searchParams }: { params: Pr
     {selection.error ? <p role="alert" className={styles.error}>{selection.error}</p> : null}
     {selected.length ? <section id="comparison" className={styles.results} aria-label={`Professor comparison for ${course.code}`}>
       <p className={styles.note}>Both ratings are out of 5 and use only {course.code} evaluations. Consider how many evaluations each average includes and when the class was taught.</p>
+      <h2 className={styles.tableHeading}>Professor comparison for {course.code}</h2>
+      <p className={styles.scrollHint}>Swipe across the table to see each professor →</p>
       <div className={styles.tableWrap} tabIndex={0} role="region" aria-label="Comparison table; scroll horizontally on smaller screens"><table className={styles.table}>
-        <caption>Professor comparison for {course.code}</caption>
+        <caption className="sr-only">Professor comparison for {course.code}</caption>
         <thead><tr><th scope="col">For {course.code}</th>{selected.map(item => <th scope="col" key={item.id}><Link href={`/professors/${item.id}`}>{item.name}</Link></th>)}</tr></thead>
         <tbody>
           <tr><th scope="row">Instructor rating</th>{selected.map(item => <td key={item.id}>{rating(item.instructorOverall)}</td>)}</tr>
