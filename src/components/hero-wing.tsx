@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import { createPortal } from "react-dom";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { animatePaperFlight } from "./paper-flight";
 import styles from "./hero-wing.module.css";
 
 type Flight = { scene: HTMLElement; reduced: boolean };
+const FIRST_FLIGHT_KEY = "eagleevals:wing-flight-seen";
 
 export function HeroWing() {
   const button = useRef<HTMLButtonElement>(null);
@@ -14,7 +15,43 @@ export function HeroWing() {
   const front = useRef<HTMLCanvasElement>(null);
   const folds = useRef<(HTMLImageElement | null)[]>([]);
   const busy = useRef(false);
+  const played = useRef(false);
   const [flight, setFlight] = useState<Flight | null>(null);
+
+  const launch = useCallback(() => {
+    if (busy.current || !button.current) return;
+    const scene = button.current.closest<HTMLElement>("[data-plane-scene]");
+    if (!scene) return;
+    busy.current = true;
+    played.current = true;
+    try { sessionStorage.setItem(FIRST_FLIGHT_KEY, "1"); } catch { /* Replay still works when storage is unavailable. */ }
+    setFlight({ scene, reduced: window.matchMedia("(prefers-reduced-motion: reduce)").matches });
+  }, []);
+
+  useEffect(() => {
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (motion.matches) return;
+    try { if (sessionStorage.getItem(FIRST_FLIGHT_KEY)) return; } catch { /* Fall back to once per mounted homepage. */ }
+    let cancelled = false, ready = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const firstFlight = () => {
+      if (!ready || cancelled || played.current || document.hidden || motion.matches) return;
+      const rect = button.current?.getBoundingClientRect();
+      if (rect && rect.bottom > 0 && rect.top < window.innerHeight) launch();
+    };
+    // Give the complete logo a brief moment on screen before it takes flight.
+    // Fonts and the artwork are ready first so its return coordinates stay put.
+    const artwork = button.current?.querySelector("img");
+    Promise.all([document.fonts.ready, artwork?.decode().catch(() => {})]).then(() => {
+      if (!cancelled) timer = setTimeout(() => { ready = true; firstFlight(); }, 850);
+    });
+    document.addEventListener("visibilitychange", firstFlight);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", firstFlight);
+    };
+  }, [launch]);
 
   useEffect(() => {
     if (!flight || !button.current) return;
@@ -38,14 +75,6 @@ export function HeroWing() {
       document.removeEventListener("visibilitychange", hide);
     };
   }, [flight]);
-
-  function launch() {
-    if (busy.current || !button.current) return;
-    const scene = button.current.closest<HTMLElement>("[data-plane-scene]");
-    if (!scene) return;
-    busy.current = true;
-    setFlight({ scene, reduced: window.matchMedia("(prefers-reduced-motion: reduce)").matches });
-  }
 
   return <>
     <button ref={button} type="button" className={styles.button} onClick={launch} disabled={!!flight} aria-label="Send the wing flying as paper airplanes" aria-busy={!!flight} data-flying={!!flight && !flight.reduced} data-fold={!!flight?.reduced}>
