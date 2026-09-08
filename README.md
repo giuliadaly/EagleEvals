@@ -99,7 +99,8 @@ Unanswered details are stored as SQL NULL, excluded from category averages,
 and never displayed as a negative take-again response or a numbered section.
 
 Before deploying the simpler form, apply `003_optional_review_details.sql` via
-`pnpm db:migrate:schema` in each database environment. This migration only
+`node scripts/allow-optional-review-details.mjs` in each database environment.
+This scoped rollout command verifies the three nullable columns. The migration only
 relaxes required-value constraints and preserves existing data; it is also
 compatible with the previous form during rollout.
 
