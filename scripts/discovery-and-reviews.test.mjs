@@ -103,6 +103,9 @@ test('search and real submission queries preserve course context and old reviews
   assert.equal((await queries.getProfessorsPage('Zimerman', 1)).items[0].id, professor);
   assert.equal((await queries.getCommentsPage('', 1)).total, 4);
   assert.equal((await queries.getCatalogPaths()).length, 4);
+  const oldSchemaRows = await pg.query(`SELECT r.semester FROM (SELECT id, professor_id, course_id FROM student_comments) sc
+    LEFT JOIN reviews r ON r.id = (to_jsonb(sc)->>'review_id')`);
+  assert.ok(oldSchemaRows.rows.every(row => row.semester === null));
   // Reapplying migrations preserves the old comment and the new semester link.
   await applyMigrations(sql, path.join(process.cwd(), 'database/migrations'));
   assert.equal((await pg.query("SELECT review_id FROM student_comments WHERE id = 'legacy'")).rows[0].review_id, null);

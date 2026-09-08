@@ -197,6 +197,8 @@ export async function getProfessorsPage(rawQuery: string, rawPage: number, rawSo
   return { items: rows.map(mapProfessor), page, pageSize: PAGE_SIZE, total, totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)), query };
 }
 
+// Reading the optional link through the row JSON keeps read-only previews usable
+// before the additive migration runs. No semester is inferred for unlinked rows.
 function mapComment(row: DbRow): StudentComment {
   return {
     id: String(row.id),
@@ -325,7 +327,7 @@ export async function getCommentsPage(rawQuery: string, rawPage: number): Promis
       sc.professor_id, p.name AS professor_name,
       sc.course_id, c.code AS course_code, c.title AS course_title
     FROM student_comments sc
-    LEFT JOIN reviews r ON r.id = sc.review_id AND r.published AND r.course_id = sc.course_id AND r.professor_id = sc.professor_id
+    LEFT JOIN reviews r ON r.id = (to_jsonb(sc)->>'review_id') AND r.published AND r.course_id = sc.course_id AND r.professor_id = sc.professor_id
     JOIN professors p ON p.id = sc.professor_id
     LEFT JOIN courses c ON c.id = sc.course_id
   `;
@@ -420,7 +422,7 @@ export const getCourseDetail = cache(async (id: string): Promise<CourseDetail | 
         sc.professor_id, p.name AS professor_name,
         sc.course_id, c.code AS course_code, c.title AS course_title
       FROM student_comments sc
-      LEFT JOIN reviews r ON r.id = sc.review_id AND r.published AND r.course_id = sc.course_id AND r.professor_id = sc.professor_id
+      LEFT JOIN reviews r ON r.id = (to_jsonb(sc)->>'review_id') AND r.published AND r.course_id = sc.course_id AND r.professor_id = sc.professor_id
       JOIN professors p ON p.id = sc.professor_id
       LEFT JOIN courses c ON c.id = sc.course_id
       WHERE sc.published AND sc.course_id = ${id}
@@ -513,7 +515,7 @@ export const getProfessorDetail = cache(async (id: string): Promise<ProfessorDet
         sc.professor_id, p.name AS professor_name,
         sc.course_id, c.code AS course_code, c.title AS course_title
       FROM student_comments sc
-      LEFT JOIN reviews r ON r.id = sc.review_id AND r.published AND r.course_id = sc.course_id AND r.professor_id = sc.professor_id
+      LEFT JOIN reviews r ON r.id = (to_jsonb(sc)->>'review_id') AND r.published AND r.course_id = sc.course_id AND r.professor_id = sc.professor_id
       JOIN professors p ON p.id = sc.professor_id
       LEFT JOIN courses c ON c.id = sc.course_id
       WHERE sc.published AND sc.professor_id = ${id}
