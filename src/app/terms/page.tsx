@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { InfoPage } from "@/components/info-page";
 
-export const metadata: Metadata = { title: "Terms", description: "Terms for using EagleEvals course and professor information." };
+export const metadata: Metadata = { alternates: { canonical: "/terms" }, title: "Terms", description: "Terms for using EagleEvals course and professor information." };
 
 export default function TermsPage() {
   return (

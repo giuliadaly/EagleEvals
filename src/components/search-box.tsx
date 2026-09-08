@@ -11,10 +11,10 @@ type QuickCourse = { id: string; code: string; title: string; subject: string; c
 type QuickProfessor = { id: string; name: string; title: string | null; commentCount: number };
 type QuickResults = { courses: QuickCourse[]; professors: QuickProfessor[] };
 
-export function SearchBox({ compact = false, autoFocus = false, hero = false }: { compact?: boolean; autoFocus?: boolean; hero?: boolean }) {
+export function SearchBox({ compact = false, autoFocus = false, hero = false, initialQuery = "" }: { compact?: boolean; autoFocus?: boolean; hero?: boolean; initialQuery?: string }) {
   const router = useRouter();
   const listId = useId();
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState<QuickResults>({ courses: [], professors: [] });
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -87,6 +87,7 @@ export function SearchBox({ compact = false, autoFocus = false, hero = false }: 
           onChange={(event) => {
             const nextQuery = event.target.value;
             setQuery(nextQuery);
+            setResults({ courses: [], professors: [] });
             if (nextQuery.trim().length < 2) {
               setOpen(false);
               setResults({ courses: [], professors: [] });

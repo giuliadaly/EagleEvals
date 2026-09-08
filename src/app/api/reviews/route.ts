@@ -86,10 +86,10 @@ export async function POST(request: Request) {
       `,
       sql`
         INSERT INTO student_comments (
-          professor_id, course_id, message, would_take_again, source,
+          review_id, professor_id, course_id, message, would_take_again, source,
           published, created_at, legacy_document, source_snapshot, imported_at
         ) VALUES (
-          ${review.professorId}, ${review.courseId}, ${review.message}, ${review.wouldTakeAgain},
+          ${reviewId}, ${review.professorId}, ${review.courseId}, ${review.message}, ${review.wouldTakeAgain},
           'eagleevals_anonymous', true, now(),
           ${JSON.stringify({ schemaVersion: 1, anonymousSubmission: true })}::jsonb,
           NULL, now()
@@ -107,6 +107,8 @@ export async function POST(request: Request) {
 
   revalidatePath("/");
   revalidatePath("/evaluations");
+  revalidatePath("/comments");
+  revalidatePath(`/courses/${review.courseId}/compare`);
   revalidatePath(`/courses/${review.courseId}`);
   revalidatePath(`/professors/${review.professorId}`);
 
