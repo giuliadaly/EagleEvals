@@ -2,15 +2,15 @@ import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-const assets = Promise.all([
+function loadAssets() { return Promise.all([
   readFile(join(process.cwd(), "src/assets/share/dm-sans-400.ttf")),
   readFile(join(process.cwd(), "src/assets/share/dm-sans-600.ttf")),
   readFile(join(process.cwd(), "src/assets/share/patrick-hand.ttf")),
   readFile(join(process.cwd(), "src/assets/share/wing-sculptural.png")),
-]);
+]); }
 
 export async function socialPreview(kind: "course" | "professor", title: string, subtitle: string) {
-  const [regular, semibold, hand, wing] = await assets;
+  const [regular, semibold, hand, wing] = await loadAssets();
   return new ImageResponse(
     <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", padding: "52px 68px", background: "#541a2a", color: "#fff8e9", fontFamily: "DM Sans" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
