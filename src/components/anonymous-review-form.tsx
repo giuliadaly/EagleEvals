@@ -4,10 +4,8 @@ import Link from "next/link";
 import { FormEvent, useEffect, useId, useRef, useState } from "react";
 import { SemesterPicker } from "./semester-picker";
 import type { ReviewSelection } from "@/data/types";
-
-type QuickCourse = { id: string; code: string; title: string; subject: string };
-type QuickProfessor = { id: string; name: string; title: string | null };
-type QuickResults = { courses: QuickCourse[]; professors: QuickProfessor[] };
+import type { QuickCourse, QuickProfessor } from "@/data/quick-search";
+import { useCatalogSearch } from "./use-catalog-search";
 
 type SubmissionSuccess = {
   message: string;
@@ -28,33 +26,10 @@ function CatalogPicker({
 }) {
   const inputId = useId();
   const [query, setQuery] = useState(selected ? selected.primary : "");
-  const [results, setResults] = useState<QuickResults>({ courses: [], professors: [] });
+  const { results, loading, failed } = useCatalogSearch(query, !selected, kind);
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (selected || query.trim().length < 2) return;
-    const controller = new AbortController();
-    const timer = setTimeout(async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(query.trim())}`, { signal: controller.signal });
-        if (!response.ok) throw new Error("Search unavailable");
-        setResults((await response.json()) as QuickResults);
-        setOpen(true);
-      } catch (error) {
-        if (!(error instanceof DOMException && error.name === "AbortError")) {
-          setResults({ courses: [], professors: [] });
-        }
-      } finally {
-        setLoading(false);
-      }
-    }, 220);
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
-  }, [query, selected]);
+  const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (blurTimer.current) clearTimeout(blurTimer.current); }, []);
 
   const choices = kind === "course" ? results.courses : results.professors;
 
@@ -68,10 +43,13 @@ function CatalogPicker({
         onChange={(event) => {
           setQuery(event.target.value);
           onSelect(null);
-          if (event.target.value.trim().length < 2) setOpen(false);
+          setOpen(event.target.value.trim().length > 0);
         }}
-        onFocus={() => !selected && query.trim().length >= 2 && setOpen(true)}
-        onBlur={() => setTimeout(() => setOpen(false), 120)}
+        onFocus={() => {
+          if (blurTimer.current) clearTimeout(blurTimer.current);
+          if (!selected && query.trim()) setOpen(true);
+        }}
+        onBlur={() => { blurTimer.current = setTimeout(() => setOpen(false), 120); }}
         autoComplete="off"
         role="combobox"
         aria-expanded={open}
@@ -86,6 +64,7 @@ function CatalogPicker({
           onClick={() => {
             onSelect(null);
             setQuery("");
+            setOpen(false);
           }}
         >
           Change
@@ -94,7 +73,7 @@ function CatalogPicker({
       {open ? (
         <div id={`${inputId}-choices`} role="listbox" className="absolute left-0 right-0 top-full z-30 mt-2 max-h-72 overflow-y-auto rounded-[.375rem] border border-[var(--line-strong)] bg-[var(--paper-raised)] p-2 shadow-xl">
           {loading && choices.length === 0 ? <p className="p-3 text-sm text-[var(--muted)]">Searching…</p> : null}
-          {!loading && choices.length === 0 ? <p className="p-3 text-sm text-[var(--muted)]">No matches found.</p> : null}
+          {!loading && choices.length === 0 ? <p className="p-3 text-sm text-[var(--muted)]">{failed ? "Search is temporarily unavailable. Please try again." : "No matches found."}</p> : null}
           {kind === "course" ? (choices as QuickCourse[]).map((course) => (
             <button
               key={course.id}
