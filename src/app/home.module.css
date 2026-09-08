@@ -1,45 +1,45 @@
 .main { background: var(--paper); }
-.heroBand { background: var(--maroon-deep); color: var(--on-maroon); }
+.heroBand { position: relative; isolation: isolate; background: var(--maroon-deep); color: var(--on-maroon); }
 .hero { display: grid; grid-template-columns: minmax(0,1.55fr) minmax(0,1fr); gap: 1rem; align-items: center; padding-block: 3.3rem 4.2rem; }
-.heroCopy { min-width: 0; }
+.heroCopy { position: relative; z-index: 2; min-width: 0; }
 .overline { color: var(--gold); font-family: var(--font-hand),cursive; font-size: 1.6rem; margin-bottom: 1.3rem; }
 .hero h1 { font-size: clamp(2.7rem,5vw,4.6rem); font-weight: 700; letter-spacing: -.05em; line-height: 1.06; }
 .hero h1 span { color: var(--gold); }
 .intro { color: #edcfd0; font-size: 1.05rem; line-height: 1.65; margin-top: 1.4rem; }
 .search { margin-top: 1.9rem; max-width: 37rem; }
 .searchCaption { display: flex; justify-content: space-between; gap: .8rem; max-width: 37rem; margin-top: 1rem; font-size: .75rem; color: #edcfd0; }
-.heroArt { margin: -.5rem 0 0; }
+.heroArt { position: relative; z-index: 3; margin: -.5rem 0 0; }
 .heroArt img { display: block; width: 100%; height: auto; filter: drop-shadow(7px 15px 9px #28061250); }
 .heroArt figcaption { color: var(--gold); font-family: var(--font-hand),cursive; font-size: 1.65rem; line-height: 1.1; text-align: center; transform: rotate(-6deg); margin: 0 0 0 1.9rem; }
-.start { padding-block: 3rem; }
-.start h2 { font-size: clamp(1.65rem,3vw,2rem); line-height: 1.2; font-weight: 700; letter-spacing: -.035em; margin-bottom: 1.5rem; }
-.spread { display: grid; grid-template-columns: minmax(0,1.8fr) minmax(0,1fr); gap: 4rem; align-items: start; }
-.listLabels { display: flex; justify-content: space-between; border-top: 2px solid var(--maroon-deep); padding-top: .8rem; font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-.listLabels span:last-child { padding-right: 1.7rem; }
-.course { display: grid; grid-template-columns: minmax(0,1fr) 3.5rem 1rem; gap: 1rem; align-items: center; border-bottom: 1px solid var(--line); padding-block: 1.4rem; }
-.code { font-size: .75rem; font-weight: 700; letter-spacing: .04em; color: var(--maroon-deep); }
-.course h3 { font-size: 1.2rem; font-weight: 500; letter-spacing: -.025em; line-height: 1.3; margin: .3rem 0 .4rem; }
-.course:hover h3 { text-decoration: underline; text-underline-offset: 4px; }
-.course p { font-size: .75rem; color: var(--muted); }
-.course p > span { padding-inline: .25rem; }
-.rating { text-align: right; color: var(--maroon-deep); }
-.rating strong { display: block; font-size: 2rem; line-height: 1.2; font-weight: 600; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
-.rating > span { display: block; font-size: .7rem; color: var(--muted); }
-.arrow { color: var(--muted); font-size: 1.25rem; }
-.browse { display: inline-flex; align-items: center; gap: 1.8rem; padding-block: .5rem; margin-top: 1rem; font-size: .85rem; font-weight: 600; color: var(--maroon-deep); }
-.browse:hover { text-decoration: underline; text-underline-offset: 4px; }
-.note { position: relative; background: #edda9d; color: #542b30; padding: 2.5rem 2rem 1.8rem; transform: rotate(3deg); margin: 1.7rem .5rem 0 0; box-shadow: 4px 11px 13px #68352715; border-radius: 1px 1px 25px 1px; }
-.note::after { position: absolute; content: ''; right: 0; bottom: 0; border-style: solid; border-width: 0 0 23px 23px; border-color: transparent transparent var(--paper) #d3b96f; }
-.paperclip { position: absolute; top: -44px; right: 20px; width: 55px; height: auto; transform: rotate(-8deg); }
-.noteLabel { font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; }
-.hand { font-family: var(--font-hand),cursive; font-size: clamp(1.7rem,2.7vw,2.1rem); line-height: 1.15; margin-block: 1.2rem; }
-.noteBody { font-size: .9rem; line-height: 1.5; }
-.note a { display: inline-block; margin-top: 1.4rem; padding-bottom: .3rem; border-bottom: 1px solid #542b30; font-weight: 600; }
-.note a span { margin-left: 1.6rem; }
-.note small { display: block; margin-top: .9rem; font-size: .7rem; color: #6d4a3e; }
-.professorLine { display: flex; justify-content: space-between; gap: 1.5rem; align-items: center; padding-block: 1.5rem 2rem; border-top: 1px solid var(--line); }
-.professorLine p { font-size: 1.1rem; letter-spacing: -.02em; }
-.professorLine a { color: var(--maroon-deep); font-size: .85rem; font-weight: 600; }
-.professorLine a span { margin-left: 1rem; }
-@media(max-width:820px) { .hero { padding-block: 2.5rem 3rem; } .hero h1 { font-size: 2.7rem; } .spread { gap: 2rem; grid-template-columns: minmax(0,1.65fr) minmax(0,1fr); } .note { padding: 2rem 1.3rem 1.5rem; } .hand { font-size: 1.7rem; } }
-@media(max-width:600px) { .hero { position: relative; display: block; padding-block: 1.8rem 2.8rem; } .overline { max-width: 180px; min-height: 70px; font-size: 1.3rem; line-height: 1.2; padding-top: .4rem; margin-bottom: .7rem; } .hero h1 { font-size: clamp(2.1rem,10.7vw,3rem); } .intro { font-size: .95rem; } .desktopBreak { display: none; } .heroArt { position: absolute; width: 110px; right: 0; top: 1.4rem; margin: 0; } .heroArt figcaption { display: none; } .searchCaption { font-size: .68rem; gap: .4rem; } .start { padding-block: 2.2rem; } .spread { grid-template-columns: 1fr; gap: 2rem; } .course { gap: .65rem; grid-template-columns: minmax(0,1fr) 2.8rem .9rem; } .course h3 { font-size: 1.1rem; } .course p { font-size: .7rem; } .note { width: 86%; max-width: 320px; margin: 1rem auto .2rem; padding: 2rem 1.7rem 1.5rem; transform: rotate(2deg); } .hand { font-size: 1.8rem; } .professorLine { flex-direction: column; align-items: flex-start; gap: .6rem; } }
+.start { max-width: 64rem; padding-block: 3.8rem 3rem; }
+.sectionLabel { color: var(--muted); font-size: .7rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; margin-bottom: 1rem; }
+.start h2 { font-size: clamp(2rem, 3.5vw, 2.8rem); line-height: 1.1; font-weight: 500; letter-spacing: -.045em; }
+.subjects { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .4rem 5rem; margin-block: 2rem 1.5rem; }
+.subjects a { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 3.2rem; color: var(--maroon-deep); font-size: 1.25rem; font-weight: 500; }
+.subjects a > span:last-child { color: var(--gold-dark); font-size: 1.3rem; }
+.subjects a:hover > span:first-child { text-decoration: underline; text-underline-offset: .25rem; }
+.browseLinks { display: flex; flex-wrap: wrap; gap: .5rem 2rem; }
+.browseLinks a { display: inline-flex; align-items: center; gap: .6rem; min-height: 2.75rem; color: var(--maroon-deep); font-size: .8rem; font-weight: 600; }
+.browseLinks a:hover { text-decoration: underline; text-underline-offset: .2rem; }
+.note { display: flex; justify-content: space-between; align-items: center; gap: 2rem; margin-top: 2rem; padding: 1.3rem 1.7rem; background: #efe4ca; color: #542b30; }
+.note p { font-family: var(--font-hand),cursive; font-size: 1.8rem; line-height: 1.2; }
+.note a { display: inline-flex; align-items: center; gap: .9rem; min-height: 2.75rem; font-size: .82rem; font-weight: 600; }
+.note a:hover { text-decoration: underline; text-underline-offset: .2rem; }
+.note small { display: block; font-size: .68rem; color: #6d4a3e; }
+@media(max-width:820px) { .hero { padding-block: 2.5rem 3rem; } .hero h1 { font-size: 2.7rem; } }
+@media(max-width:600px) {
+  .hero { position: relative; display: block; padding-block: 1.8rem 2.8rem; }
+  .overline { max-width: 180px; min-height: 70px; font-size: 1.3rem; line-height: 1.2; padding-top: .4rem; margin-bottom: .7rem; }
+  .hero h1 { font-size: clamp(2.1rem,10.7vw,3rem); }
+  .intro { font-size: .95rem; }
+  .desktopBreak { display: none; }
+  .heroArt { position: absolute; width: 110px; right: 0; top: 1.4rem; margin: 0; }
+  .heroArt figcaption { display: none; }
+  .searchCaption { font-size: .68rem; gap: .4rem; }
+  .start { padding-block: 2.4rem 2rem; }
+  .subjects { gap: .2rem 1.7rem; margin-block: 1.5rem 1rem; }
+  .subjects a { font-size: 1rem; min-height: 3rem; gap: .4rem; }
+  .browseLinks { gap: .15rem 1.3rem; }
+  .note { flex-direction: column; align-items: flex-start; gap: .65rem; padding: 1.2rem; margin-top: 1.5rem; }
+  .note p { font-size: 1.6rem; }
+}

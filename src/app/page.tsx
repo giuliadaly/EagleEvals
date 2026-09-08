@@ -1,22 +1,24 @@
-import Image from "next/image";
 import Link from "next/link";
+import { HeroWing } from "@/components/hero-wing";
 import { SearchBox } from "@/components/search-box";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { formatCount, formatRating, formatWrittenReviewCount } from "@/data/format";
-import { getFeaturedCourses, getSiteStats } from "@/data/queries";
+import { formatCount } from "@/data/format";
+import { getSiteStats } from "@/data/queries";
 import styles from "./home.module.css";
 
 export const revalidate = 3600;
 export const metadata = { alternates: { canonical: "/" } };
 
+const startingSubjects = ["English", "Economics", "Biology", "Psychology", "History", "Mathematics"];
+
 export default async function Home() {
-  const [stats, courses] = await Promise.all([getSiteStats(), getFeaturedCourses()]);
+  const stats = await getSiteStats();
   return (
     <>
       <SiteHeader showSearch={false} />
       <main className={styles.main}>
-        <section className={styles.heroBand}>
+        <section className={styles.heroBand} data-plane-scene>
           <div className={`page-shell ${styles.hero}`}>
             <div className={styles.heroCopy}>
               <p className={styles.overline}>For BC students, by BC students.</p>
@@ -26,36 +28,28 @@ export default async function Home() {
               <div className={styles.searchCaption}><span>{formatCount(stats.courses)} courses to explore</span><span>No account needed</span></div>
             </div>
             <figure className={styles.heroArt}>
-              <Image src="/brand/wing-sculptural.webp" alt="" width={640} height={640} sizes="(max-width: 600px) 110px, (max-width: 1100px) 35vw, 430px" preload />
+              <HeroWing />
               <figcaption>notes from the other<br />side of the syllabus.</figcaption>
             </figure>
           </div>
         </section>
-        <section className={`page-shell ${styles.start}`}>
-          <h2>A few places to start</h2>
-          <div className={styles.spread}>
-            <div>
-              <div className={styles.listLabels}><span>Course</span><span>Overall rating</span></div>
-              {courses.slice(0,3).map(course => (
-                <Link key={course.id} href={`/courses/${course.id}`} className={styles.course}>
-                  <div><span className={styles.code}>{course.code}</span><h3>{course.title}</h3><p>{formatCount(course.reviewCount)} ratings <span>·</span> {formatWrittenReviewCount(course.commentCount)}</p></div>
-                  <div className={styles.rating}><strong>{formatRating(course.courseOverall)}</strong><span>{course.courseOverall === null ? "No rating" : "/ 5"}</span></div>
-                  <span className={styles.arrow} aria-hidden="true">↗</span>
-                </Link>
-              ))}
-              <Link className={styles.browse} href="/courses">Browse all courses <span aria-hidden="true">↗</span></Link>
-            </div>
-            <aside className={styles.note} aria-label="A note for you">
-              <Image className={styles.paperclip} src="/brand/paperclip.webp" alt="" width={240} height={320} sizes="55px" />
-              <span className={styles.noteLabel}>a note for you</span>
-              <p className={styles.hand}>Someone’s about<br />to take that class<br />you just finished.</p>
-              <p className={styles.noteBody}>What do you wish<br />you’d known?</p>
-              <Link href="/review">Pass it on <span aria-hidden="true">↗</span></Link>
-              <small>Your review is anonymous.</small>
-            </aside>
+        <section className={`page-shell ${styles.start}`} aria-labelledby="browse-heading">
+          <p className={styles.sectionLabel}>Find your next class</p>
+          <h2 id="browse-heading">Start with what<br />you’re studying.</h2>
+          <nav className={styles.subjects} aria-label="Browse courses by subject">
+            {startingSubjects.map(subject => <Link key={subject} href={`/courses?subject=${encodeURIComponent(subject)}`}>
+              <span>{subject}</span><span aria-hidden="true">↗</span>
+            </Link>)}
+          </nav>
+          <div className={styles.browseLinks}>
+            <Link href="/courses">Browse all courses <span aria-hidden="true">↗</span></Link>
+            <Link href="/professors">Have a professor in mind? <span aria-hidden="true">↗</span></Link>
           </div>
+          <aside className={styles.note} aria-label="Pass on a little advice">
+            <p>Someone’s about to take that class.</p>
+            <div><Link href="/review">Pass on a little advice <span aria-hidden="true">↗</span></Link><small>Your review is anonymous.</small></div>
+          </aside>
         </section>
-        <div className={`page-shell ${styles.professorLine}`}><p>Have a professor in mind?</p><Link href="/professors">Find their reviews <span aria-hidden="true">↗</span></Link></div>
       </main>
       <SiteFooter />
     </>
