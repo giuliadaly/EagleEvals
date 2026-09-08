@@ -10,7 +10,8 @@
 .results { margin-block: 2.5rem; scroll-margin-top: 8rem; }
 .tableWrap { overflow-x: auto; border-radius: .3rem; }
 .table { width: 100%; min-width: 34rem; border-collapse: collapse; text-align: left; }
-.table caption { text-align: left; font-weight: 650; font-size: 1.2rem; padding-block: 1rem; }
+.tableHeading { font-weight: 650; font-size: 1.2rem; padding-block: 1rem; }
+.scrollHint { display: none; }
 .table th, .table td { padding: 1rem; font-size: .9rem; vertical-align: top; font-variant-numeric: tabular-nums; }
 .table thead th { background: var(--maroon-deep); color: var(--on-maroon); min-width: 10rem; }
 .table tbody th { font-weight: 500; }
@@ -26,3 +27,10 @@
 .reviewLink { display: inline-flex; align-items: center; min-height: 44px; color: var(--maroon-deep); font-size: .85rem; font-weight: 650; }
 .reviewLink:hover { text-decoration: underline; }
 @media (max-width: 760px) { .picker, .reviewColumns, .reviewColumns[data-count="3"] { grid-template-columns: minmax(0, 1fr); } .picker { padding: 1rem; } }
+
+@media (max-width: 760px) {
+  .scrollHint { display: block; font-size: .78rem; color: var(--muted); margin-bottom: 1rem; }
+  .table th[scope="row"], .table thead th:first-child { position: sticky; left: 0; background: #fcf9f2; }
+  .table tbody tr:nth-child(odd) th[scope="row"] { background: #f0eae0; }
+  .table thead th:first-child { background: var(--maroon-deep); }
+}
