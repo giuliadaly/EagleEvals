@@ -14,13 +14,15 @@ export const reviewRatingFields = [
 
 export type ReviewRatingField = (typeof reviewRatingFields)[number];
 
-export type AnonymousReviewSubmission = Record<ReviewRatingField, number> & {
+export type AnonymousReviewSubmission = Record<ReviewRatingField, number | null> & {
+  courseOverall: number;
+  instructorOverall: number;
   courseId: string;
   professorId: string;
   semester: string;
-  section: number;
+  section: number | null;
   message: string;
-  wouldTakeAgain: boolean;
+  wouldTakeAgain: boolean | null;
   firsthandConfirmed: true;
   guidelinesAccepted: true;
 };
@@ -35,6 +37,14 @@ const contactOrLinkPattern = /(?:https?:\/\/|www\.|\b[\w.+-]+@[\w.-]+\.[a-z]{2,}
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isUnanswered(value: unknown): boolean {
+  return value === undefined || value === null || (typeof value === "string" && value.trim() === "");
+}
+
+function numberAnswer(value: unknown): number {
+  return typeof value === "number" || typeof value === "string" ? Number(value) : NaN;
 }
 
 export function normalizeReviewMessage(value: string): string {
@@ -58,16 +68,22 @@ export function validateReviewSubmission(value: unknown, currentYear = new Date(
     return { ok: false, message: "Choose a valid semester." };
   }
 
-  const section = Number(value.section);
-  if (!Number.isInteger(section) || section < 1 || section > 99) {
+  const section = isUnanswered(value.section) ? null : numberAnswer(value.section);
+  if (section !== null && (!Number.isInteger(section) || section < 1 || section > 99)) {
     return { ok: false, message: "Section must be a whole number from 1 to 99." };
   }
 
-  const ratings = {} as Record<ReviewRatingField, number>;
+  const ratings = {} as Record<ReviewRatingField, number | null>;
   for (const field of reviewRatingFields) {
-    const rating = Number(value[field]);
+    const required = field === "courseOverall" || field === "instructorOverall";
+    if (isUnanswered(value[field])) {
+      if (required) return { ok: false, message: "Rate the course and professor overall using the 1–5 scale." };
+      ratings[field] = null;
+      continue;
+    }
+    const rating = numberAnswer(value[field]);
     if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
-      return { ok: false, message: "Complete every rating using the 1–5 scale." };
+      return { ok: false, message: "Use the 1–5 scale for any ratings you choose to answer." };
     }
     ratings[field] = rating;
   }
@@ -79,8 +95,9 @@ export function validateReviewSubmission(value: unknown, currentYear = new Date(
   if (contactOrLinkPattern.test(message)) {
     return { ok: false, message: "Remove links, email addresses, and phone numbers before submitting." };
   }
-  if (typeof value.wouldTakeAgain !== "boolean") {
-    return { ok: false, message: "Choose whether you would take this professor again." };
+  const wouldTakeAgain = isUnanswered(value.wouldTakeAgain) ? null : value.wouldTakeAgain;
+  if (wouldTakeAgain !== null && typeof wouldTakeAgain !== "boolean") {
+    return { ok: false, message: "Choose yes or no, or skip whether you would take this professor again." };
   }
   if (value.firsthandConfirmed !== true || value.guidelinesAccepted !== true) {
     return { ok: false, message: "Confirm that this is your experience and that it follows the review guidelines." };
@@ -90,12 +107,14 @@ export function validateReviewSubmission(value: unknown, currentYear = new Date(
     ok: true,
     data: {
       ...ratings,
+      courseOverall: ratings.courseOverall as number,
+      instructorOverall: ratings.instructorOverall as number,
       courseId,
       professorId,
       semester,
       section,
       message,
-      wouldTakeAgain: value.wouldTakeAgain,
+      wouldTakeAgain,
       firsthandConfirmed: true,
       guidelinesAccepted: true,
     },

@@ -135,13 +135,13 @@ function CatalogPicker({
   );
 }
 
-function RatingField({ name, label, hint }: { name: string; label: string; hint?: string }) {
+function RatingField({ name, label, hint, required = false }: { name: string; label: string; hint?: string; required?: boolean }) {
   return (
     <label className="review-rating-field">
       <span className="block text-sm font-bold text-[var(--navy)]">{label}</span>
       {hint ? <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">{hint}</span> : null}
-      <select name={name} className="form-control mt-3" defaultValue="" required>
-        <option value="" disabled>Select 1–5</option>
+      <select name={name} className="form-control mt-3" defaultValue="" required={required}>
+        <option value="" disabled={required}>{required ? "Select 1–5" : "Skip / don’t remember"}</option>
         <option value="1">1 · Very low</option>
         <option value="2">2 · Low</option>
         <option value="3">3 · Moderate</option>
@@ -177,7 +177,9 @@ export function AnonymousReviewForm({
     }
     const form = event.currentTarget;
     const fields = new FormData(form);
-    const rating = (name: string) => Number(fields.get(name));
+    const rating = (name: string) => fields.get(name);
+    const takeAgain = fields.get("wouldTakeAgain");
+    const confirmed = fields.get("reviewConfirmed") === "on";
     setPending(true);
     try {
       const response = await fetch("/api/reviews", {
@@ -187,7 +189,7 @@ export function AnonymousReviewForm({
           courseId: course.id,
           professorId: professor.id,
           semester: fields.get("semester"),
-          section: Number(fields.get("section")),
+          section: fields.get("section"),
           courseOverall: rating("courseOverall"),
           instructorOverall: rating("instructorOverall"),
           attendanceNecessary: rating("attendanceNecessary"),
@@ -200,9 +202,9 @@ export function AnonymousReviewForm({
           assignmentsHelpful: rating("assignmentsHelpful"),
           weeklyEffort: rating("weeklyEffort"),
           message: fields.get("message"),
-          wouldTakeAgain: fields.get("wouldTakeAgain") === "true",
-          firsthandConfirmed: fields.get("firsthandConfirmed") === "on",
-          guidelinesAccepted: fields.get("guidelinesAccepted") === "on",
+          wouldTakeAgain: takeAgain === "true" ? true : takeAgain === "false" ? false : null,
+          firsthandConfirmed: confirmed,
+          guidelinesAccepted: confirmed,
           website: fields.get("website"),
         }),
       });
@@ -218,23 +220,37 @@ export function AnonymousReviewForm({
   }
 
   return (
-    <form onSubmit={submit} className="review-form space-y-12">
+    <form onSubmit={submit} className="review-form space-y-8">
       <div className="review-form-section">
-        <h2 className="font-serif text-2xl font-bold text-[var(--navy)]">1. Choose the class</h2>
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
+        <h2 className="font-serif text-2xl font-bold text-[var(--navy)]">Which class did you take?</h2>
+        <div className="mt-5 grid gap-5 sm:grid-cols-2">
           <CatalogPicker kind="course" label="Course" selected={course} onSelect={setCourse} />
           <CatalogPicker kind="professor" label="Professor" selected={professor} onSelect={setProfessor} />
-          <label><span className="form-label">Semester</span><select name="semester" className="form-control" required>{semesterOptions.map((semester) => <option key={semester} value={semester}>{semester}</option>)}</select></label>
-          <label><span className="form-label">Section number</span><input name="section" className="form-control" type="number" min="1" max="99" defaultValue="1" required /></label>
+          <label><span className="form-label">Semester taken</span><select name="semester" className="form-control" defaultValue="" required><option value="" disabled>Choose your semester</option>{semesterOptions.map((semester) => <option key={semester} value={semester}>{semester}</option>)}</select></label>
         </div>
       </div>
 
       <div>
-        <h2 className="font-serif text-2xl font-bold text-[var(--navy)]">2. Rate the experience</h2>
-        <p className="mt-2 text-sm text-[var(--muted)]">Use the same five-point scale used throughout EagleEvals.</p>
-        <div className="mt-6 grid gap-x-8 gap-y-2 sm:grid-cols-2">
-          <RatingField name="courseOverall" label="Course overall" />
-          <RatingField name="instructorOverall" label="Instructor overall" />
+        <h2 className="font-serif text-2xl font-bold text-[var(--navy)]">How was it?</h2>
+        <div className="mt-3 grid gap-x-8 gap-y-2 sm:grid-cols-2">
+          <RatingField name="courseOverall" label="Course overall" required />
+          <RatingField name="instructorOverall" label="Professor overall" required />
+        </div>
+      </div>
+
+      <div className="review-form-section">
+        <label className="block"><span className="form-label">What would you tell a friend?</span><textarea name="message" className="form-control min-h-32 resize-y leading-6" minLength={20} maxLength={1000} placeholder="A few words about the teaching, workload, or what helped you in this class." required aria-describedby="review-message-hint" /></label>
+        <p id="review-message-hint" className="mt-2 text-xs leading-5 text-[var(--muted)]">20–1,000 characters. Keep it about the class; leave out private information and links.</p>
+      </div>
+
+      <details className="review-extra">
+        <summary>Add a few details <span>Optional</span></summary>
+        <p className="mt-4 text-sm leading-6 text-[var(--muted)]">Answer anything you remember. It’s fine to leave the rest blank.</p>
+        <div className="mt-5 grid gap-5 sm:grid-cols-2">
+          <label><span className="form-label">Section number</span><input name="section" className="form-control" type="number" min="1" max="99" placeholder="If you remember" /></label>
+          <label><span className="form-label">Would you take this professor again?</span><select name="wouldTakeAgain" className="form-control" defaultValue=""><option value="">Skip / not sure</option><option value="true">Yes</option><option value="false">No</option></select></label>
+        </div>
+        <div className="mt-5 grid gap-x-8 gap-y-2 sm:grid-cols-2">
           <RatingField name="courseOrganization" label="Course organization" />
           <RatingField name="courseChallenge" label="Intellectual challenge" />
           <RatingField name="attendanceNecessary" label="Attendance necessary" />
@@ -245,31 +261,19 @@ export function AnonymousReviewForm({
           <RatingField name="stimulatedInterest" label="Stimulated interest" />
           <RatingField name="weeklyEffort" label="Weekly effort" hint="1 is very light; 5 is very heavy." />
         </div>
-      </div>
+      </details>
 
-      <div className="review-form-section">
-        <h2 className="font-serif text-2xl font-bold text-[var(--navy)]">3. Share useful context</h2>
-        <label className="mt-6 block"><span className="form-label">Anonymous written review</span><textarea name="message" className="form-control min-h-40 resize-y leading-6" minLength={20} maxLength={1000} placeholder="What should another student know about the course, workload, teaching, or assignments?" required /></label>
-        <p className="mt-2 text-xs leading-5 text-[var(--muted)]">20–1,000 characters. Do not include names of students, contact information, links, or private personal details.</p>
-        <fieldset className="mt-6">
-          <legend className="form-label">Would you take this professor again?</legend>
-          <div className="flex gap-6 text-sm"><label className="flex items-center gap-2"><input type="radio" name="wouldTakeAgain" value="true" required /> Yes</label><label className="flex items-center gap-2"><input type="radio" name="wouldTakeAgain" value="false" required /> No</label></div>
-        </fieldset>
-        <div className="mt-6 space-y-3 text-sm leading-6 text-[var(--ink-soft)]">
-          <label className="flex items-start gap-3"><input className="mt-1" type="checkbox" name="firsthandConfirmed" required /><span>This review reflects my own course experience.</span></label>
-          <label className="flex items-start gap-3"><input className="mt-1" type="checkbox" name="guidelinesAccepted" required /><span>I kept it truthful and constructive and did not include harassment, private information, or claims unrelated to the course.</span></label>
-        </div>
-        <div className="absolute left-[-10000px] top-auto h-px w-px overflow-hidden" aria-hidden="true"><label>Website<input name="website" tabIndex={-1} autoComplete="off" /></label></div>
-      </div>
+      <label className="flex items-start gap-3 text-sm leading-6 text-[var(--ink-soft)]"><input className="mt-1 shrink-0" type="checkbox" name="reviewConfirmed" required /><span>This is my own class experience. I’ve kept it truthful, constructive, and free of harassment or private information.</span></label>
+      <div className="absolute left-[-10000px] top-auto h-px w-px overflow-hidden" aria-hidden="true"><label>Website<input name="website" tabIndex={-1} autoComplete="off" /></label></div>
 
       <div aria-live="polite">
         {error ? <p className="rounded-[.375rem] border border-[var(--rose)]/25 bg-[var(--rose-pale)] p-4 text-sm font-semibold text-[var(--rose)]">{error}</p> : null}
         {success ? <div className="rounded-[.375rem] border border-[var(--green)]/25 bg-[var(--green-pale)] p-5 text-sm text-[var(--green)]"><p className="font-bold">{success.message}</p><p className="mt-2">It is now included in the public ratings and written reviews.</p><div className="mt-3 flex flex-wrap gap-4 font-bold"><Link href={`/courses/${success.course.id}`}>View {success.course.code}</Link><Link href={`/professors/${success.professor.id}`}>View {success.professor.name}</Link></div></div> : null}
       </div>
 
-      <div className="flex flex-col gap-4 rounded-[.3rem] bg-[var(--maroon-deep)] p-6 text-white sm:flex-row sm:items-center sm:justify-between">
-        <p className="max-w-2xl text-sm leading-6 text-white/68">No account, name, email, student ID, IP address, or browser identifier is saved with your review. Infrastructure providers may still process routine security logs as described in the privacy policy.</p>
-        <button className="button-gold shrink-0 disabled:cursor-not-allowed disabled:opacity-60" type="submit" disabled={pending}>{pending ? "Publishing…" : "Publish anonymous review"}</button>
+      <div className="flex flex-col items-start gap-4">
+        <button className="button-primary disabled:cursor-not-allowed disabled:opacity-60" type="submit" disabled={pending}>{pending ? "Publishing…" : "Publish anonymous review"}</button>
+        <p className="text-xs leading-5 text-[var(--muted)]">No account or identifying details are saved with your review. Hosting providers may process routine security logs. <Link href="/privacy" className="underline underline-offset-2">Privacy policy</Link></p>
       </div>
     </form>
   );

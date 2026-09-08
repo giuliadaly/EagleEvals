@@ -139,6 +139,9 @@ textarea.form-control { min-height: 10rem; }
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
 }
 
-.review-form { max-width: 64rem; margin-inline: auto; }
-.review-form-section { border-top: 2px solid var(--maroon-deep); padding-top: 1.8rem; }
-.review-rating-field { display: block; border-top: 1px solid var(--line); padding-block: 1.2rem; }
+.review-form { max-width: 46rem; margin-inline: auto; }
+.review-rating-field { display: block; padding-block: .7rem; }
+.review-extra { border-block: 1px solid var(--line); padding-block: 1.2rem; }
+.review-extra summary { cursor: pointer; color: var(--maroon-deep); font-weight: 700; }
+.review-extra summary span { margin-left: .5rem; color: var(--muted); font-size: .8rem; font-weight: 400; }
+.review-extra summary:focus-visible { outline: 2px solid var(--maroon); outline-offset: 5px; }
