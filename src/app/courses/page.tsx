@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { directoryMetadata, type DirectoryParams } from "@/data/seo";
 import Link from "next/link";
 import { CourseCard } from "@/components/cards";
 import { SearchIcon } from "@/components/icons";
@@ -8,7 +9,9 @@ import { SiteHeader } from "@/components/site-header";
 import { formatCount } from "@/data/format";
 import { getCoursesPage } from "@/data/queries";
 
-export const metadata: Metadata = { alternates: { canonical: "/courses" }, title: "Courses", description: "Search and filter Boston College courses using EagleEvals ratings and student input." };
+export async function generateMetadata({ searchParams }: { searchParams: Promise<DirectoryParams> }): Promise<Metadata> {
+  return directoryMetadata("/courses", "Boston College course reviews", "Browse Boston College courses, compare instructors, and read anonymous student reviews.", await searchParams);
+}
 
 export default async function CoursesPage({ searchParams }: { searchParams: Promise<{ q?: string; page?: string; sort?: string; min?: string; subject?: string }> }) {
   const params = await searchParams;

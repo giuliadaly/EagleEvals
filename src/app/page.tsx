@@ -5,17 +5,17 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { formatCount } from "@/data/format";
 import { getSiteStats } from "@/data/queries";
+import { browseSubjects, serializeJsonLd } from "@/data/seo";
 import styles from "./home.module.css";
 
 export const revalidate = 3600;
 export const metadata = { alternates: { canonical: "/" } };
 
-const startingSubjects = ["English", "Economics", "Biology", "Psychology", "History", "Mathematics"];
-
 export default async function Home() {
   const stats = await getSiteStats();
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd({ "@context": "https://schema.org", "@type": "WebSite", name: "EagleEvals", alternateName: "EagleEval", url: "https://eagleevals.com/", description: "Independent Boston College course and professor ratings and anonymous student reviews." }) }} />
       <SiteHeader showSearch={false} />
       <main className={styles.main}>
         <section className={styles.heroBand} data-plane-scene>
@@ -37,7 +37,7 @@ export default async function Home() {
           <p className={styles.sectionLabel}>Find your next class</p>
           <h2 id="browse-heading">Start with what<br />you’re studying.</h2>
           <nav className={styles.subjects} aria-label="Browse courses by subject">
-            {startingSubjects.map(subject => <Link key={subject} href={`/courses?subject=${encodeURIComponent(subject)}`}>
+            {browseSubjects.map(subject => <Link key={subject} href={`/courses?subject=${encodeURIComponent(subject)}`}>
               <span>{subject}</span><span aria-hidden="true">↗</span>
             </Link>)}
           </nav>

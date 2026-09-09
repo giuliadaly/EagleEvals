@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { ArrowIcon } from "@/components/icons";
+import { breadcrumbData, serializeJsonLd } from "@/data/seo";
 
 export function Breadcrumbs({ items }: { items: { label: string; href?: string }[] }) {
   return (
     <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs font-semibold text-[var(--muted)]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbData(items)) }} />
       {items.map((item, index) => (
         <span key={`${item.label}-${index}`} className="flex items-center gap-2">
           {index > 0 ? <span aria-hidden="true">/</span> : null}
