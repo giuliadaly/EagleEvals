@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { directoryMetadata, type DirectoryParams } from "@/data/seo";
 import Link from "next/link";
 import { EvaluationCard } from "@/components/cards";
 import { Pagination } from "@/components/page-parts";
@@ -7,10 +8,9 @@ import { SiteHeader } from "@/components/site-header";
 import { formatCount } from "@/data/format";
 import { getEvaluationsPage } from "@/data/queries";
 
-export const metadata: Metadata = {
-  title: "All evaluations",
-  description: "Browse EagleEvals course and professor evaluation records and anonymous student reviews.",
-};
+export async function generateMetadata({ searchParams }: { searchParams: Promise<DirectoryParams> }): Promise<Metadata> {
+  return directoryMetadata("/evaluations", "Boston College course evaluations", "Browse numerical Boston College course and professor rating records by course, instructor, and semester.", await searchParams);
+}
 
 export default async function EvaluationsPage({ searchParams }: { searchParams: Promise<{ q?: string; page?: string }> }) {
   const params = await searchParams;

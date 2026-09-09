@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { directoryMetadata, type DirectoryParams } from "@/data/seo";
 import Link from "next/link";
 import { CommentArchiveCard } from "@/components/cards";
 import { Pagination } from "@/components/page-parts";
@@ -7,10 +8,9 @@ import { SiteHeader } from "@/components/site-header";
 import { formatCount } from "@/data/format";
 import { getCommentsPage } from "@/data/queries";
 
-export const metadata: Metadata = {
-  title: "All written reviews",
-  description: "Browse every public written review recovered from the original EagleEval and every new anonymous EagleEvals review.",
-};
+export async function generateMetadata({ searchParams }: { searchParams: Promise<DirectoryParams> }): Promise<Metadata> {
+  return directoryMetadata("/comments", "Boston College student reviews", "Browse anonymous written reviews of Boston College courses and professors, including the original EagleEval archive.", await searchParams);
+}
 
 export default async function CommentsPage({ searchParams }: { searchParams: Promise<{ q?: string; page?: string }> }) {
   const params = await searchParams;

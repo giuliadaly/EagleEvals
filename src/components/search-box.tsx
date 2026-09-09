@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useId, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useId, useRef, useState } from "react";
 import { BookIcon, PersonIcon, SearchIcon } from "@/components/icons";
 import { formatWrittenReviewCount } from "@/data/format";
 import { useCatalogSearch } from "./use-catalog-search";
+import { trackProductEvent } from "./site-telemetry";
 import styles from "./search-box.module.css";
 
 export function SearchBox({ compact = false, autoFocus = false, hero = false, initialQuery = "" }: { compact?: boolean; autoFocus?: boolean; hero?: boolean; initialQuery?: string }) {
@@ -16,6 +17,7 @@ export function SearchBox({ compact = false, autoFocus = false, hero = false, in
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastReported = useRef("");
 
   useEffect(() => () => { if (blurTimer.current) clearTimeout(blurTimer.current); }, []);
 
@@ -23,15 +25,39 @@ export function SearchBox({ compact = false, autoFocus = false, hero = false, in
     event.preventDefault();
     const normalized = query.trim();
     if (!normalized) return;
+    recordSearch();
+    trackProductEvent({ name: "search_submitted" });
     setOpen(false);
     router.push(`/search?q=${encodeURIComponent(normalized)}`);
   }
 
   const hasResults = results.courses.length > 0 || results.professors.length > 0;
   const showPanel = open && query.trim().length > 0;
+  const recordSearch = useCallback(() => {
+    if (loading || !query.trim()) return;
+    const outcome = failed ? "unavailable" : hasResults ? "matches" : "empty";
+    const key = `${query.trim()}\n${outcome}`;
+    if (lastReported.current === key) return;
+    lastReported.current = key;
+    trackProductEvent({ name: "search_results", outcome });
+  }, [query, loading, failed, hasResults]);
+
+  useEffect(() => {
+    if (!showPanel) return;
+    // Measure a settled result, not every keystroke. Filtering stays immediate.
+    const timer = setTimeout(recordSearch, 800);
+    return () => clearTimeout(timer);
+  }, [showPanel, recordSearch]);
+
+  function openedResult(kind: "course" | "professor") {
+    recordSearch();
+    trackProductEvent({ name: "search_opened", kind });
+    setOpen(false);
+  }
+
   const flatResults = [
-    ...results.courses.map((course) => ({ href: `/courses/${course.id}` })),
-    ...results.professors.map((professor) => ({ href: `/professors/${professor.id}` })),
+    ...results.courses.map((course) => ({ href: `/courses/${course.id}`, kind: "course" as const })),
+    ...results.professors.map((professor) => ({ href: `/professors/${professor.id}`, kind: "professor" as const })),
   ];
 
   function moveActive(direction: 1 | -1) {
@@ -73,7 +99,7 @@ export function SearchBox({ compact = false, autoFocus = false, hero = false, in
               event.preventDefault();
               const active = flatResults[activeIndex];
               if (active) {
-                setOpen(false);
+                openedResult(active.kind);
                 router.push(active.href);
               }
             } else if (event.key === "Escape") {
@@ -106,7 +132,7 @@ export function SearchBox({ compact = false, autoFocus = false, hero = false, in
             <div>
               <p className="px-3 pb-1 pt-2 text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Courses</p>
               {results.courses.map((course, index) => (
-                <Link key={course.id} id={`${listId}-option-${index}`} role="option" aria-selected={activeIndex === index} tabIndex={-1} href={`/courses/${course.id}`} className={`result-row ${activeIndex === index ? "bg-[var(--paper-ledger)]" : ""}`} onMouseEnter={() => setActiveIndex(index)} onMouseDown={(event) => event.preventDefault()} onClick={() => setOpen(false)}>
+                <Link key={course.id} id={`${listId}-option-${index}`} role="option" aria-selected={activeIndex === index} tabIndex={-1} href={`/courses/${course.id}`} className={`result-row ${activeIndex === index ? "bg-[var(--paper-ledger)]" : ""}`} onMouseEnter={() => setActiveIndex(index)} onMouseDown={(event) => event.preventDefault()} onClick={() => openedResult("course")}>
                   <span className="result-icon"><BookIcon className="size-4" /></span>
                   <span className="min-w-0"><strong className="block truncate text-sm text-[var(--ink)]">{course.code} · {course.title}</strong><span className="block truncate text-xs text-[var(--muted)]">{course.subject}</span><span className="search-review-count written-review-status" data-empty={course.commentCount === 0}>{formatWrittenReviewCount(course.commentCount)}</span></span>
                 </Link>
@@ -119,7 +145,7 @@ export function SearchBox({ compact = false, autoFocus = false, hero = false, in
               {results.professors.map((professor, index) => {
                 const optionIndex = results.courses.length + index;
                 return (
-                <Link key={professor.id} id={`${listId}-option-${optionIndex}`} role="option" aria-selected={activeIndex === optionIndex} tabIndex={-1} href={`/professors/${professor.id}`} className={`result-row ${activeIndex === optionIndex ? "bg-[var(--paper-ledger)]" : ""}`} onMouseEnter={() => setActiveIndex(optionIndex)} onMouseDown={(event) => event.preventDefault()} onClick={() => setOpen(false)}>
+                <Link key={professor.id} id={`${listId}-option-${optionIndex}`} role="option" aria-selected={activeIndex === optionIndex} tabIndex={-1} href={`/professors/${professor.id}`} className={`result-row ${activeIndex === optionIndex ? "bg-[var(--paper-ledger)]" : ""}`} onMouseEnter={() => setActiveIndex(optionIndex)} onMouseDown={(event) => event.preventDefault()} onClick={() => openedResult("professor")}>
                   <span className="result-icon"><PersonIcon className="size-4" /></span>
                   <span className="min-w-0"><strong className="block truncate text-sm text-[var(--ink)]">{professor.name}</strong><span className="block truncate text-xs text-[var(--muted)]">{professor.title ?? "Boston College faculty"}</span><span className="search-review-count written-review-status" data-empty={professor.commentCount === 0}>{formatWrittenReviewCount(professor.commentCount)}</span></span>
                 </Link>
@@ -128,7 +154,7 @@ export function SearchBox({ compact = false, autoFocus = false, hero = false, in
             </div>
           ) : null}
           {hasResults ? (
-            <Link href={`/search?q=${encodeURIComponent(query.trim())}`} onClick={() => setOpen(false)} className="mt-2 flex items-center justify-center rounded-xl bg-[var(--wash)] px-4 py-3 text-xs font-bold text-[var(--navy)] hover:bg-[var(--gold-pale)]">
+            <Link href={`/search?q=${encodeURIComponent(query.trim())}`} onClick={() => { recordSearch(); trackProductEvent({ name: "search_submitted" }); setOpen(false); }} className="mt-2 flex items-center justify-center rounded-xl bg-[var(--wash)] px-4 py-3 text-xs font-bold text-[var(--navy)] hover:bg-[var(--gold-pale)]">
               View all results
             </Link>
           ) : null}
