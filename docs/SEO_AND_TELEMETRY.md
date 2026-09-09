@@ -12,7 +12,9 @@ Use the existing Next.js application and Vercel project for this iteration. Aida
 | Local QA fixtures and initial measurements | This rollout; maintainers | Transitional | Remove local-only fixtures before deployment; establish a production baseline after launch. |
 | Google indexing and search queries; actual student completion times | Search Console ownership pending, no completion events yet | Unknown | Verify property ownership, submit sitemap, and collect enough real production traffic before making claims. |
 
-No paid upgrade is needed for this scope. On the verified Pro team, custom Web Analytics events are supported and metered at the existing plan's rate ($0.03/1,000 events at audit time, subject to usage credit). Speed Insights remains on the free tier, sampled at 50%; its free allowance is shared across the team. Detailed performance breakdowns require a separate Plus upgrade, which this change does not enable.
+No spending, paid upgrades, or newly introduced metered collection without Aidan's explicit prior cost approval. Custom events were briefly enabled in the initial rollout, but are now paused by default because their usage cost was not explicitly approved. `NEXT_PUBLIC_ENABLE_PRODUCT_EVENTS` must equal `true` at build time to send them; do not set this flag without approval, and rebuild when changing it. The privacy page follows the same flag. Existing page-view analytics remains enabled.
+
+On the verified Pro team, custom Web Analytics events are supported and metered at the existing plan's rate ($0.03/1,000 events at audit time, subject to usage credit). Speed Insights remains on the free tier, sampled at 50%; its free allowance is shared across the team. Detailed performance breakdowns require a separate Plus upgrade, which this change does not enable. Search Console is free.
 
 ## SEO audit and changes
 
@@ -26,9 +28,11 @@ Changes:
 - Visible breadcrumbs also render safe BreadcrumbList JSON-LD. The homepage names EagleEvals with WebSite JSON-LD.
 - Existing entity sharing images remain in place. No review-star markup is added: historical counts represent section records, not individual reviewers.
 
-Next external step: choose the owning Google account, verify an EagleEvals Search Console property, submit https://eagleevals.com/sitemap.xml, and inspect the homepage plus a representative course and professor. Use the Performance report to learn which real searches produce impressions/clicks. Do not infer index coverage from a site: search or promise rankings from metadata changes.
+Search Console uses Giulia Daly's Google account and the URL-prefix property `https://eagleevals.com/`. The root layout retains her public ownership-verification meta tag. After it deploys, complete Google's Verify step and submit https://eagleevals.com/sitemap.xml. Inspect the homepage plus a representative course and professor, and use the Performance report to learn which real searches produce impressions/clicks. Do not infer index coverage from a site: search or promise rankings from metadata changes.
 
 ## Telemetry definitions
+
+The following custom events are implemented but disabled pending explicit cost approval. Previously collected events may remain in the dashboard.
 
 | Event | Meaning | Properties |
 | --- | --- | --- |
@@ -45,7 +49,7 @@ No event properties include review text, search text, ratings, semester, selecte
 
 ## Reading the results
 
-Use the project's Vercel Analytics dashboard, with production traffic selected, for page views and the Events panel. Compare review_started, review_submitted, duration buckets, and error reasons over the same date range. Start with weekly totals and a production baseline; tests and your own use can otherwise dominate this small site's numbers. Speed Insights needs real traffic before its score is useful, and is not an animation FPS profiler.
+Use the project's Vercel Analytics dashboard, with production traffic selected, for page views. Custom event collection is paused; only after cost approval and enabling the build flag should maintainers compare review_started, review_submitted, duration buckets, and error reasons over the same date range. Start with weekly totals and a production baseline; tests and your own use can otherwise dominate this small site's numbers. Speed Insights needs real traffic before its score is useful, and is not an animation FPS profiler.
 
 Advance only when evidence supports it: investigate repeated errors first, evaluate completion times after representative submissions, then use Search Console queries to select genuinely useful student-facing content. Consider paid performance breakdowns or another tool only if the free view cannot answer a specific measured problem. Remove unused custom events after the first baseline review rather than accumulating trackers.
 
