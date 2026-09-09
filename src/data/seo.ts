@@ -19,7 +19,8 @@ export function directoryMetadata(path: string, title: string, description: stri
     title: `${name}${page > 1 ? ` · Page ${page}` : ""}`,
     description: summary,
     ...(filtered ? { robots: { index: false, follow: true } } : { alternates: { canonical } }),
-    openGraph: { title: name, description: summary, url: filtered ? path : canonical },
+    openGraph: { type: "website", siteName: "EagleEvals", title: name, description: summary, url: filtered ? path : canonical, images: ["/eagleevals-logo-card.png"] },
+    twitter: { card: "summary_large_image", title: name, description: summary, images: ["/eagleevals-logo-card.png"] },
   };
 }
 
