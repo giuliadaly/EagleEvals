@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const detail = await getCourseDetail(id);
   if (!detail) return { alternates: { canonical: `/courses/${id}` }, title: "Course not found", robots: { index: false, follow: false } };
-  return detailSharingMetadata(`/courses/${id}`, `${detail.course.code}: ${detail.course.title}`, `Historical ratings, workload, instructors, and student comments for ${detail.course.code} ${detail.course.title}.`);
+  return detailSharingMetadata(`/courses/${id}`, `${detail.course.code}: ${detail.course.title} at Boston College`, `Read Boston College student reviews of ${detail.course.code} ${detail.course.title}. Compare instructors, numerical ratings, workload, and evaluation history.`);
 }
 
 function InstructorPairing({ instructor }: { instructor: InstructorCourseRow }) {
