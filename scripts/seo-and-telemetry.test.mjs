@@ -61,20 +61,20 @@ test('breadcrumb markup follows visible navigation and escapes script terminatio
 
 function loadComponent(file, dependencies, globals = {}) {
   const code = ts.transpileModule(readFileSync(file, 'utf8'), {compilerOptions:{module:ts.ModuleKind.CommonJS, target:ts.ScriptTarget.ES2022, jsx:ts.JsxEmit.ReactJSX}}).outputText;
-  const module = {exports:{}};
-  vm.runInNewContext(code, {module, exports:module.exports, console, ...globals, require(name) {
+  const compiled = {exports:{}};
+  vm.runInNewContext(code, {module:compiled, exports:compiled.exports, console, ...globals, require(name) {
     assert.ok(name in dependencies, `Unexpected dependency ${name}`); return dependencies[name];
   }}, {filename:file});
-  return module.exports;
+  return compiled.exports;
 }
 const jsx = {jsx:(type,props)=>({type,props}),jsxs:(type,props)=>({type,props})};
 
 test('an analytics failure cannot prevent a product action', () => {
-  const module = loadComponent('src/components/site-telemetry.tsx', {
+  const component = loadComponent('src/components/site-telemetry.tsx', {
     'react/jsx-runtime':jsx, '@vercel/analytics/next':{}, '@vercel/speed-insights/next':{},
     '@vercel/analytics':{track(){throw new Error('blocked');}}, '@/data/telemetry':{productEventData,redactTelemetry}
   });
-  assert.doesNotThrow(()=>module.trackProductEvent({name:'review_started'}));
+  assert.doesNotThrow(()=>component.trackProductEvent({name:'review_started'}));
 });
 
 test('real form handlers count starts once, report failures, and only count confirmed success', async () => {
