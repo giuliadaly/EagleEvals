@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const detail = await getProfessorDetail(id);
   if (!detail) return { alternates: { canonical: `/professors/${id}` }, title: "Professor not found", robots: { index: false, follow: false } };
-  return detailSharingMetadata(`/professors/${id}`, detail.professor.name, `Ratings, courses, evaluation history, and anonymous written reviews for ${detail.professor.name} at Boston College.`);
+  return detailSharingMetadata(`/professors/${id}`, `${detail.professor.name} — Boston College professor reviews`, `Ratings, courses, evaluation history, and anonymous written reviews for ${detail.professor.name} at Boston College.`);
 }
 
 function CoursePairing({ course }: { course: ProfessorCourseRow }) {

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/next";
+import { SiteTelemetry } from "@/components/site-telemetry";
 import { DM_Sans, Patrick_Hand } from "next/font/google";
 import "./globals.css";
 
@@ -40,7 +40,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={`h-full scroll-smooth ${dmSans.variable} ${patrickHand.variable}`} data-scroll-behavior="smooth">
       <body suppressHydrationWarning className="min-h-full flex flex-col">
         {children}
-        <Analytics />
+        <SiteTelemetry />
       </body>
     </html>
   );

@@ -101,7 +101,8 @@ export async function POST(request: Request) {
     if (code === "23505") {
       return NextResponse.json({ message: "This exact review has already been submitted." }, { status: 409 });
     }
-    console.error("Anonymous review submission failed", error);
+    // Database errors can contain submitted values. Log only a bounded category.
+    console.error("Anonymous review submission failed", { code: /^[A-Z0-9]{5}$/.test(code) ? code : "unknown" });
     return NextResponse.json({ message: "The review could not be saved. Please try again." }, { status: 500 });
   }
 
