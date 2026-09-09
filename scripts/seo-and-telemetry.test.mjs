@@ -69,11 +69,29 @@ function loadComponent(file, dependencies, globals = {}) {
 }
 const jsx = {jsx:(type,props)=>({type,props}),jsxs:(type,props)=>({type,props})};
 
+test('metered custom events require explicit opt-in and preserve page-view and free performance components', () => {
+  for (const enabled of [undefined, '', 'false', '1', 'true']) {
+    const events = [];
+    const component = loadComponent('src/components/site-telemetry.tsx', {
+      'react/jsx-runtime':jsx,
+      '@vercel/analytics/next':{Analytics:'page-views'},
+      '@vercel/speed-insights/next':{SpeedInsights:'free-performance'},
+      '@vercel/analytics':{track:(...args)=>events.push(args)},
+      '@/data/telemetry':{productEventData,redactTelemetry}
+    }, {process:{env:{NEXT_PUBLIC_ENABLE_PRODUCT_EVENTS:enabled}}});
+    component.trackProductEvent({name:'review_started'});
+    assert.equal(events.length, enabled === 'true' ? 1 : 0);
+    const children = component.SiteTelemetry().props.children;
+    assert.equal(children[0].type, 'page-views');
+    assert.equal(children[1].type, 'free-performance');
+  }
+});
+
 test('an analytics failure cannot prevent a product action', () => {
   const component = loadComponent('src/components/site-telemetry.tsx', {
     'react/jsx-runtime':jsx, '@vercel/analytics/next':{}, '@vercel/speed-insights/next':{},
     '@vercel/analytics':{track(){throw new Error('blocked');}}, '@/data/telemetry':{productEventData,redactTelemetry}
-  });
+  }, {process:{env:{NEXT_PUBLIC_ENABLE_PRODUCT_EVENTS:'true'}}});
   assert.doesNotThrow(()=>component.trackProductEvent({name:'review_started'}));
 });
 
