@@ -19,10 +19,10 @@ const patrickHand = Patrick_Hand({
 export const metadata: Metadata = {
   metadataBase: new URL("https://eagleevals.com"),
   title: {
-    default: "EagleEvals · Boston College Course & Professor Evaluations",
+    default: "EagleEvals · Boston College Course & Professor Reviews",
     template: "%s · EagleEvals",
   },
-  description: "Search Boston College course and professor evaluations, compare the details that matter, and share fully anonymous reviews.",
+  description: "Find Boston College course and professor reviews on EagleEvals. Compare instructors, explore past evaluations, and leave an anonymous review. No account needed.",
   applicationName: "EagleEvals",
   verification: { google: "Q8rulayOhEv3MkT4pa2W2XrjAuWNsFUdpLSWDC2Wl1U" },
   openGraph: {

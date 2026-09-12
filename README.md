@@ -1,132 +1,76 @@
 # EagleEvals
 
-EagleEvals is a student-run Boston College course and professor evaluation
-site. This repository is the clean replacement for the legacy Angular and
-Express application.
+**A little advice before you register.**
 
-Production domain: [eagleevals.com](https://eagleevals.com)
+[EagleEvals](https://eagleevals.com) is an independent resource for Boston College
+students to find courses, compare professors, and share anonymous reviews.
+No account needed. Not affiliated with or operated by Boston College.
 
-## Stack
+[Explore courses](https://eagleevals.com/courses) ·
+[Find a professor](https://eagleevals.com/professors) ·
+[Write a review](https://eagleevals.com/review)
 
-- Next.js App Router
-- React and TypeScript
-- Tailwind CSS
-- Vercel for hosting and deployment
-- Neon Postgres through the Vercel Marketplace for restored evaluation data
+## What you can do
 
-## Current product
+- Search courses and professors as you type, including spaced course codes and small typos.
+- Read student reviews alongside numerical ratings, workload details, and semester history.
+- Compare two or three professors for the same course.
+- Filter written reviews by professor or course and sort by posting date or known semester.
+- Leave an anonymous review with two overall ratings and a short comment; detailed ratings are optional.
+- Share course and professor pages with their own branded previews.
 
-The production application includes:
+The archive includes recovered reviews from the original **EagleEval** and new
+EagleEvals submissions, labeled by source. Historical numerical records summarize
+course sections and may have no written feedback. Rating counts and written-review
+counts are shown separately.
 
-- autocomplete and directory search tolerant of course-code spacing, punctuation, and small name/title typos
-- paginated course and professor directories
-- a paginated, searchable view of every public historical evaluation row
-- a paginated, searchable view of every public written comment
-- course ratings, workload estimates, same-course comparison of two or three professors, comments, and semester history
-- written-review filters by course/professor and ordering by post date or known semester taken
-- per-detail canonical URLs and a complete course/professor sitemap
-- professor ratings, course history, public faculty details, and comments
-- fully anonymous review submission with no account or identity fields
-- recovery context, privacy information, terms, loading, error, and missing-record states
+## Development
 
-## Local development
+Built with Next.js App Router, React, TypeScript, and Tailwind CSS. Data lives in
+Neon Postgres; the site is deployed on Vercel.
 
-Use Node.js 20 or newer and pnpm:
+Use Node.js 22 or newer and the pnpm version specified in `package.json`.
 
 ```bash
-pnpm install
+git clone https://github.com/giuliadaly/EagleEvals.git
+cd EagleEvals
+pnpm install --frozen-lockfile
+cp .env.example .env.local
+```
+
+Set `DATABASE_URL` in `.env.local` to a development Neon database with the current
+schema and catalog data. Database credentials and recovery data are not included
+in this repository. See [database setup and recovery](docs/DATABASE.md).
+
+```bash
 pnpm dev
 ```
 
-Then open [http://localhost:3000](http://localhost:3000).
+Open [localhost:3000](http://localhost:3000).
 
-## Commands
+## Checks
 
 ```bash
 pnpm lint
-pnpm build
+pnpm exec tsc --noEmit
 pnpm test:migration
-pnpm db:migrate:schema
+pnpm build
 ```
 
-## Data migration boundary
+The tests cover database migration, anonymous submissions, search, and review
+context. A production build needs access to the configured database.
 
-Recovered legacy data is intentionally stored outside this repository. Do not
-commit database exports, source-feed snapshots, cached API responses, or user
-identifiers. Migration code and database schemas may be committed later, but
-the data itself must remain in the separate temporary recovery directory until
-it is imported and independently backed up.
+## Deployment and project notes
 
-### Migration workflow
+Pull requests receive Vercel previews. Merging into `main` deploys to
+[eagleevals.com](https://eagleevals.com). Verify schema compatibility before
+deploying a change that depends on a database migration.
 
-The migration accepts only an absolute path to an isolated recovery snapshot.
-It verifies every gzip checksum, record count, foreign-key relationship, rating
-range, and comment-anonymization invariant before connecting to Postgres. It is
-idempotent: rerunning the same snapshot updates its rows and performs the same
-database verification again.
+- [Database setup, recovery, and anonymous review storage](docs/DATABASE.md)
+- [SEO and privacy-conscious telemetry](docs/SEO_AND_TELEMETRY.md)
+- [Design direction](DESIGN.md)
+- [Privacy](https://eagleevals.com/privacy) and [terms](https://eagleevals.com/terms)
 
-After the Vercel Marketplace database has supplied `DATABASE_URL`:
-
-```bash
-pnpm db:migrate:recovered -- \
-  --snapshot /Users/giuliadaly/workplace/eagle-eval/recovered-data/2026-08-13
-
-pnpm db:verify -- \
-  --snapshot /Users/giuliadaly/workplace/eagle-eval/recovered-data/2026-08-13
-```
-
-The schema preserves the original source object in a JSONB column while also
-normalizing fields needed for the Next.js search, course, and professor pages.
-Exact legacy professors are stored separately from the current public faculty
-directory supplement. The discovery archive is retained for reconciliation
-but is not inserted as a second set of reviews.
-
-Successful migration writes `manifests/database-verification.json` into the
-recovery snapshot and marks only the database-migration gate as verified. The
-snapshot remains blocked from deletion until the independent provider backup,
-restore test, and deployed-page checks also pass.
-
-### Anonymous submissions
-
-The application stores new ratings, metric responses, and written comments in
-the same normalized tables while keeping them distinguishable from recovered
-legacy rows. It does not request or persist a name, account, email, student ID,
-IP address, user agent, cookie identifier, or browser fingerprint with a
-review. Exact duplicate payloads are rejected with a content-only fingerprint.
-
-New reviews require a course, professor, semester, two overall ratings, a short
-comment, and one confirmation of first-hand experience and the guidelines.
-Section, take-again preference, and the nine detailed ratings are optional.
-Unanswered details are stored as SQL NULL, excluded from category averages,
-and never displayed as a negative take-again response or a numbered section.
-
-Before deploying the simpler form, apply `003_optional_review_details.sql` via
-`node scripts/allow-optional-review-details.mjs` in each database environment.
-This scoped rollout command verifies the three nullable columns. The migration only
-relaxes required-value constraints and preserves existing data; it is also
-compatible with the previous form during rollout.
-
-## Deployment
-
-Import this GitHub repository into Vercel. Vercel detects Next.js without a
-custom build configuration. Connect `eagleevals.com` only after the production
-database and core search routes have been verified.
-
-### Review context and comparison rollout
-
-Before deploying review navigation, run `node scripts/link-review-context.mjs`
-in each target database environment. It applies only the additive migration
-`004_comment_review_context.sql`, with a five-second lock timeout. The previous
-application remains compatible. New comments link to their own anonymous
-rating submission; historical comments remain unlinked and display “Semester
-not recorded.” Never infer a semester from a comment's posting date.
-
-The form offers recent terms and an earlier-semester picker back to 2000.
-Known professors are suggestions; any catalog professor can still be selected.
-The success screen links to the published pages and offers a fresh review form.
-
-Comparison lives at `/courses/[id]/compare` and accepts two or three distinct
-`professor` parameters. All averages, counts, latest terms, and written reviews
-are scoped to that course. It does not claim current teaching availability.
-Custom share previews and lower-homepage design changes remain deferred;
-see [FOLLOW_UPS.md](FOLLOW_UPS.md).
+Keep credentials, database exports, recovery snapshots, and identifying student
+data out of commits and issue reports. Paid services and additional metered
+tracking require the owner's approval.

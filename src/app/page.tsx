@@ -16,7 +16,16 @@ export default async function Home() {
   const stats = await getSiteStats();
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd({ "@context": "https://schema.org", "@type": "WebSite", name: "EagleEvals", alternateName: "EagleEval", url: "https://eagleevals.com/", description: "Independent Boston College course and professor ratings and anonymous student reviews." }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd({
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "@id": "https://eagleevals.com/#website",
+        name: "EagleEvals",
+        alternateName: "Eagle Evals",
+        url: "https://eagleevals.com/",
+        description: "Independent Boston College course and professor ratings and anonymous student reviews.",
+        inLanguage: "en",
+      }) }} />
       <SiteHeader showSearch={false} />
       <main className={styles.main}>
         <section className={styles.heroBand} data-plane-scene>
