@@ -1,6 +1,20 @@
 import type { Metadata } from "next";
 
-export const browseSubjects = ["English", "Economics", "Biology", "Psychology", "History", "Mathematics"];
+export const browseSubjectGroups = [
+  {
+    name: "Business & economics",
+    subjects: ["Finance", "Accounting", "Economics", "Business Analytics", "Marketing", "Business Law"],
+  },
+  {
+    name: "Science, tech & health",
+    subjects: ["Computer Science", "Biology", "Chemistry", "Mathematics", "Physics", "Nursing"],
+  },
+  {
+    name: "Humanities & society",
+    subjects: ["English", "History", "Psychology", "Political Science", "Philosophy", "Theology"],
+  },
+];
+export const browseSubjects = browseSubjectGroups.flatMap(group => group.subjects);
 export type DirectoryParams = { q?: string; page?: string; sort?: string; min?: string; subject?: string };
 
 export function directoryMetadata(path: string, title: string, description: string, params: DirectoryParams): Metadata {

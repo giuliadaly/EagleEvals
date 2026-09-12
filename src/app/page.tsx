@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { formatCount } from "@/data/format";
 import { getSiteStats } from "@/data/queries";
-import { browseSubjects, serializeJsonLd } from "@/data/seo";
+import { browseSubjectGroups, serializeJsonLd } from "@/data/seo";
 import styles from "./home.module.css";
 
 export const revalidate = 3600;
@@ -44,16 +44,28 @@ export default async function Home() {
           </div>
         </section>
         <section className={`page-shell ${styles.start}`} aria-labelledby="browse-heading">
-          <p className={styles.sectionLabel}>Find your next class</p>
-          <h2 id="browse-heading">Start with what<br />you’re studying.</h2>
+          <div className={styles.browseHeading}>
+            <div>
+              <p className={styles.sectionLabel}>Find your next class</p>
+              <h2 id="browse-heading">Start with a subject.</h2>
+            </div>
+            <Link href="/courses" className={styles.allCourses}>Browse all courses<ChevronIcon /></Link>
+          </div>
           <nav className={styles.subjects} aria-label="Browse courses by subject">
-            {browseSubjects.map(subject => <Link key={subject} href={`/courses?subject=${encodeURIComponent(subject)}`}>
-              <span>{subject}</span><ChevronIcon />
-            </Link>)}
+            {browseSubjectGroups.map(group => <div className={styles.subjectGroup} key={group.name}>
+              <h3>{group.name}</h3>
+              <ul>
+                {group.subjects.map(subject => <li key={subject}>
+                  <Link href={`/courses?subject=${encodeURIComponent(subject)}`} prefetch={false}>
+                    <span>{subject}</span><ChevronIcon />
+                  </Link>
+                </li>)}
+              </ul>
+            </div>)}
           </nav>
           <div className={styles.browseLinks}>
-            <Link href="/courses">Browse all courses</Link>
-            <Link href="/professors">Have a professor in mind?</Link>
+            <span>Have a professor in mind?</span>
+            <Link href="/professors">Find a professor</Link>
           </div>
           <aside className={styles.note} aria-label="Pass on a little advice">
             <p>Someone’s about to take that class.</p>
