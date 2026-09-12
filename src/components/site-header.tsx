@@ -24,7 +24,7 @@ export function SiteHeader({ showSearch = true }: { showSearch?: boolean }) {
           <Link href="/courses">Courses</Link><Link href="/professors">Professors</Link>
           <Link href="/comments">Reviews</Link><Link href="/evaluations">Ratings</Link>
         </nav>
-        <Link className={styles.review} href="/review">Write a review <span aria-hidden="true">↗</span></Link>
+        <Link className={styles.review} href="/review">Write a review</Link>
       </div>
     </header>
   );

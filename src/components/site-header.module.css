@@ -12,5 +12,5 @@
 .review:hover { background: var(--gold-light); }
 .header a:focus-visible { outline-color: var(--gold-light); }
 @media(max-width:1100px) { .search { display: none; } }
-@media(max-width:760px) { .inner { flex-wrap: wrap; gap: .8rem; padding-block: 1.1rem .7rem; } .nav { order: 3; width: 100%; justify-content: space-between; margin: .1rem 0 0; gap: 1rem; } .review { margin-left: auto; font-size: .72rem; padding: .55rem .65rem; } .review span { display: none; } .wordmark { font-size: 24px; } }
+@media(max-width:760px) { .inner { flex-wrap: wrap; gap: .8rem; padding-block: 1.1rem .7rem; } .nav { order: 3; width: 100%; justify-content: space-between; margin: .1rem 0 0; gap: 1rem; } .review { margin-left: auto; font-size: .72rem; padding: .55rem .65rem; } .wordmark { font-size: 24px; } }
 @media(pointer:coarse) { .nav a { min-height: 44px; display: inline-flex; align-items: center; } .review { min-height: 44px; } }

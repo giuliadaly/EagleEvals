@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ChevronIcon } from "@/components/icons";
 import { notFound } from "next/navigation";
 import { DetailDisclosure, DetailMetrics, DetailReviews, DetailRatingEvidence, DetailScore } from "@/components/detail-page";
 import { Breadcrumbs } from "@/components/page-parts";
@@ -57,7 +58,7 @@ export default async function CourseDetailPage({ params, searchParams }: { param
             <h1>{course.title}</h1>
             {collegeName(course.college) ? <p className={styles.subtitle}>{collegeName(course.college)}</p> : null}
             <div className={styles.actions}>
-              {instructors.length >= 2 ? <Link className={styles.textLink} href={`/courses/${course.id}/compare`}>Compare professors ↗</Link> : null}
+              {instructors.length >= 2 ? <Link className={styles.textLink} href={`/courses/${course.id}/compare`}>Compare professors <ChevronIcon /></Link> : null}
               <SharePage path={`/courses/${course.id}`} title={`${course.code}: ${course.title}`} />
             </div>
           </div>
@@ -92,8 +93,8 @@ export default async function CourseDetailPage({ params, searchParams }: { param
                 <DetailMetrics metrics={metrics} />
                 <div className={styles.workload}><strong>Weekly effort: {estimatedWeeklyHours === null ? "Not collected" : `~${estimatedWeeklyHours} hours`}</strong><p className={styles.detailText}>Estimated from the original workload response buckets. Individual sections may differ.</p></div>
               </DetailDisclosure>
-              <a className={styles.textLink} href="#history">Evaluation history <span aria-hidden="true">↓</span></a>
-              <Link className={styles.textLink} href={`/evaluations?q=${encodeURIComponent(course.code)}`}>Browse all evaluations <span aria-hidden="true">↗</span></Link>
+              <a className={styles.textLink} href="#history">Evaluation history <ChevronIcon direction="down" /></a>
+              <Link className={styles.textLink} href={`/evaluations?q=${encodeURIComponent(course.code)}`}>Browse all evaluations <ChevronIcon /></Link>
             </div>
           </aside>
         </div>

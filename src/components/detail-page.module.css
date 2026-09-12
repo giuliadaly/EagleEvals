@@ -51,6 +51,7 @@
 .moreReviews > summary { color: var(--maroon-deep); }
 .moreReviews[open] .reviewList { padding-top: 1.3rem; }
 .textLink { display: flex; width: fit-content; align-items: center; gap: .75rem; min-height: 2.75rem; color: var(--maroon-deep); font-size: .78rem; font-weight: 600; margin-top: .75rem; }
+.textLink > svg, .reviewAvailability > svg { flex-shrink: 0; }
 .textLink:hover { text-decoration: underline; text-underline-offset: .2em; }
 .margin { min-width: 0; border-radius: .3rem; padding: 1.6rem; background: var(--detail-margin); }
 .marginHeading { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem; margin-bottom: 1.5rem; }

@@ -11,7 +11,7 @@ export function SiteFooter() {
           <p className={styles.note}>Made for the next<br />person in your seat.</p>
           <div className={styles.eagle}><PerchedEagle /></div>
         </div>
-        <nav className={styles.links} aria-label="Footer navigation"><Link href="/about">About</Link><Link href="/review">Write a review <span aria-hidden="true">↗</span></Link><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link></nav>
+        <nav className={styles.links} aria-label="Footer navigation"><Link href="/about">About</Link><Link href="/review">Write a review</Link><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link></nav>
       </div>
     </footer>
   );
