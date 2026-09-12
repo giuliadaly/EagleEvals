@@ -11,17 +11,22 @@
 .heroArt { position: relative; z-index: 3; margin: -.5rem 0 0; }
 .heroArt img { display: block; width: 100%; height: auto; filter: drop-shadow(7px 15px 9px #28061250); }
 .heroArt figcaption { color: var(--gold); font-family: var(--font-hand),cursive; font-size: 1.65rem; line-height: 1.1; text-align: center; transform: rotate(-6deg); margin: 0 0 0 1.9rem; }
-.start { max-width: 64rem; padding-block: 3.8rem 3rem; }
-.sectionLabel { color: var(--muted); font-size: .7rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; margin-bottom: 1rem; }
+.start { max-width: 68rem; padding-block: 3.5rem 3rem; }
+.browseHeading { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem 2rem; }
+.sectionLabel { color: var(--muted); font-size: .7rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; margin-bottom: .75rem; }
 .start h2 { font-size: clamp(2rem, 3.5vw, 2.8rem); line-height: 1.1; font-weight: 500; letter-spacing: -.045em; }
-.subjects { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .4rem 5rem; margin-block: 2rem 1.5rem; }
-.subjects a { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 3.2rem; color: var(--maroon-deep); font-size: 1.25rem; font-weight: 500; }
-.subjects a > svg { width: 1rem; height: 1rem; flex-shrink: 0; color: var(--gold-dark); }
-.subjects a:hover > span:first-child { text-decoration: underline; text-underline-offset: .25rem; }
-.browseLinks { display: flex; flex-wrap: wrap; gap: .5rem 2rem; }
-.browseLinks a { display: inline-flex; align-items: center; gap: .6rem; min-height: 2.75rem; color: var(--maroon-deep); font-size: .8rem; font-weight: 600; }
-.browseLinks a { text-decoration: underline; text-underline-offset: .2rem; text-decoration-color: #68182b55; }
-.browseLinks a:hover { text-decoration: underline; text-underline-offset: .2rem; }
+.allCourses { display: inline-flex; flex-shrink: 0; align-items: center; gap: .6rem; min-height: 2.75rem; color: var(--maroon-deep); font-size: .82rem; font-weight: 600; text-decoration: underline; text-underline-offset: .25rem; text-decoration-color: #68182b55; }
+.allCourses > svg { flex-shrink: 0; }
+.subjects { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 2.5rem; margin-block: 2.1rem 1.1rem; }
+.subjectGroup { min-width: 0; }
+.subjectGroup h3 { margin-bottom: .8rem; color: var(--ink-soft); font-family: var(--font-hand), cursive; font-size: 1.5rem; line-height: 1.2; }
+.subjectGroup ul { margin: 0; padding: 0; list-style: none; }
+.subjects a { display: flex; align-items: center; justify-content: space-between; gap: .7rem; min-height: 2.8rem; padding-block: .55rem; color: var(--maroon-deep); font-size: 1.06rem; font-weight: 500; line-height: 1.35; }
+.subjects a > svg { width: .85rem; height: .85rem; flex-shrink: 0; color: var(--gold-dark); }
+.subjects a:hover > span:first-child, .subjects a:focus-visible > span:first-child { text-decoration: underline; text-decoration-color: var(--gold-dark); text-underline-offset: .25rem; }
+.browseLinks { display: flex; align-items: center; flex-wrap: wrap; gap: .1rem .65rem; font-size: .82rem; color: var(--muted); }
+.browseLinks a { display: inline-flex; align-items: center; min-height: 2.75rem; color: var(--maroon-deep); font-weight: 600; text-decoration: underline; text-underline-offset: .2rem; text-decoration-color: #68182b55; }
+.allCourses:hover, .browseLinks a:hover { text-decoration-color: currentColor; }
 .note { display: flex; justify-content: space-between; align-items: center; gap: 2rem; margin-top: 2rem; padding: 1.3rem 1.7rem; background: #efe4ca; color: #542b30; }
 .note p { font-family: var(--font-hand),cursive; font-size: 1.8rem; line-height: 1.2; }
 .note a { display: inline-flex; align-items: center; gap: .9rem; min-height: 2.75rem; font-size: .82rem; font-weight: 600; }
@@ -29,6 +34,11 @@
 .note a:hover { text-decoration: underline; text-underline-offset: .2rem; }
 .note small { display: block; font-size: .68rem; color: #6d4a3e; }
 @media(max-width:820px) { .hero { padding-block: 2.5rem 3rem; } .hero h1 { font-size: 2.7rem; } }
+@media(max-width:760px) {
+  .subjects { grid-template-columns: 1fr; gap: 1.5rem; }
+  .subjectGroup ul { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 0 2rem; }
+  .subjectGroup h3 { margin-bottom: .5rem; }
+}
 @media(max-width:600px) {
   .hero { position: relative; display: block; padding-block: 1.8rem 2.8rem; }
   .overline { max-width: 180px; min-height: 70px; font-size: 1.3rem; line-height: 1.2; padding-top: .4rem; margin-bottom: .7rem; }
@@ -39,9 +49,10 @@
   .heroArt figcaption { display: none; }
   .searchCaption { font-size: .68rem; gap: .4rem; }
   .start { padding-block: 2.4rem 2rem; }
-  .subjects { gap: .2rem 1.7rem; margin-block: 1.5rem 1rem; }
-  .subjects a { font-size: 1rem; min-height: 3rem; gap: .4rem; }
-  .browseLinks { gap: .15rem 1.3rem; }
+  .browseHeading { align-items: flex-start; flex-direction: column; gap: .35rem; }
+  .subjects { margin-block: 1.3rem 1rem; }
+  .subjectGroup ul { column-gap: 1.3rem; }
+  .subjects a { font-size: .94rem; min-height: 3rem; gap: .4rem; }
   .note { flex-direction: column; align-items: flex-start; gap: .65rem; padding: 1.2rem; margin-top: 1.5rem; }
   .note p { font-size: 1.6rem; }
 }
