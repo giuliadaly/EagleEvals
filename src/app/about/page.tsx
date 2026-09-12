@@ -8,9 +8,9 @@ export const metadata: Metadata = { alternates: { canonical: "/about" }, title: 
 export default async function AboutPage() {
   const stats = await getSiteStats();
   return (
-    <InfoPage eyebrow="About" title="EagleEvals for BC students" intro="EagleEvals helps Boston College students choose classes with course information, professor details, structured ratings, and written reviews from BC students past and present.">
+    <InfoPage eyebrow="About" title="EagleEvals for BC students" intro="EagleEvals (Eagle Evals) helps Boston College students choose classes with course information, professor details, numerical ratings, and written reviews from BC students past and present.">
       <h2>What is on EagleEvals</h2>
-      <p>Students can explore {formatCount(stats.courses)} courses, {formatCount(stats.professors)} professors, {formatCount(stats.reviews)} numerical rating records, and {formatCount(stats.comments)} anonymous written reviews. The written archive combines reviews recovered from the original EagleEval with new EagleEvals submissions, and each review is labeled by source.</p>
+      <p>Students can explore {formatCount(stats.courses)} courses, {formatCount(stats.professors)} professors, {formatCount(stats.reviews)} numerical rating records, and {formatCount(stats.comments)} anonymous written reviews. The written archive combines reviews recovered from the original Eagle Eval with new EagleEvals submissions, and each review is labeled by source. This site is at eagleevals.com; the original eagleeval.com is a separate website.</p>
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="info-stat"><strong>Useful</strong><span>Course, professor, rating, workload, and semester details stay connected.</span></div>
         <div className="info-stat"><strong>Anonymous</strong><span>New reviews require no account or identity fields.</span></div>

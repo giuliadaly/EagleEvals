@@ -5,6 +5,14 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/*": ["./src/assets/share/**/*"],
   },
+  redirects() {
+    return [{
+      source: "/:path*",
+      has: [{ type: "host", value: "www\\.eagleevals\\.com" }],
+      destination: "https://eagleevals.com/:path*",
+      permanent: true,
+    }];
+  },
   headers() {
     return [
       {
