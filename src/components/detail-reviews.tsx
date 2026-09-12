@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import Link from "next/link";
+import { ChevronIcon } from "@/components/icons";
 import { commentSourceLabel, formatCount, formatDate } from "@/data/format";
 import { browseReviews, type ReviewSort } from "@/data/review-browsing";
 import type { StudentComment } from "@/data/types";
@@ -36,7 +37,7 @@ export function DetailReviews({ comments, context, reviewHref, archiveHref }: { 
   return <section id="comments" className={styles.reviews} aria-labelledby={headingId}>
     <div className={styles.sectionHeading}>
       <div><h2 id={headingId}>Written reviews <span className={styles.count}>{formatCount(comments.length)}</span></h2>{comments.length ? <p className={styles.caption}>Anonymous student feedback, shown as submitted.</p> : null}</div>
-      <Link href={reviewHref} className={styles.writeReview}>Write a review <span aria-hidden="true">↗</span></Link>
+      <Link href={reviewHref} className={styles.writeReview}>Write a review</Link>
     </div>
     {comments.length ? <>
       <div className={styles.reviewFilters}>
@@ -51,7 +52,7 @@ export function DetailReviews({ comments, context, reviewHref, archiveHref }: { 
       <p className={styles.filterStatus} aria-live="polite">{formatCount(visible.length)} of {formatCount(comments.length)} reviews{sort === "term" ? " · Unknown semesters appear last" : ""}</p>
       <div className={styles.reviewList}>{visible.slice(0, 5).map(comment => <DetailReview key={comment.id} comment={comment} context={context} />)}</div>
       {remaining.length ? <details key={`${selected}-${sort}`} className={`${styles.disclosure} ${styles.moreReviews}`}><summary>Read {formatCount(remaining.length)} more reviews</summary><div className={styles.disclosureBody}><div className={styles.reviewList}>{remaining.map(comment => <DetailReview key={comment.id} comment={comment} context={context} />)}</div></div></details> : null}
-      {archiveHref ? <Link className={styles.textLink} href={archiveHref}>Browse the review archive <span aria-hidden="true">↗</span></Link> : null}
+      {archiveHref ? <Link className={styles.textLink} href={archiveHref}>Browse the review archive <ChevronIcon /></Link> : null}
     </> : <div className={styles.emptyState}><h3>No written reviews yet</h3><p>Numerical ratings and written feedback are separate. Be the first to share what you wish you’d known before taking this {context === "course" ? "course" : "professor’s class"}.</p></div>}
   </section>;
 }

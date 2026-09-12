@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { directoryMetadata, type DirectoryParams } from "@/data/seo";
 import Link from "next/link";
 import { CourseCard } from "@/components/cards";
-import { SearchIcon } from "@/components/icons";
+import { ChevronIcon, SearchIcon } from "@/components/icons";
 import { Pagination } from "@/components/page-parts";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -27,7 +27,7 @@ export default async function CoursesPage({ searchParams }: { searchParams: Prom
           <div className="page-shell">
             <h1 className="max-w-4xl break-words font-serif text-4xl font-semibold tracking-[-0.035em] text-[var(--ink)] sm:text-5xl">{subject ? `${subject} courses` : "Start with a course."}</h1>
             <p className="mt-3 text-sm text-[var(--muted)]">{formatCount(data.total)} matching courses · see what students thought</p>
-            {subject ? <Link href="/courses" className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-[var(--maroon-deep)] hover:underline">Browse all courses ↗</Link> : null}
+            {subject ? <Link href="/courses" className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[var(--maroon-deep)] hover:underline"><ChevronIcon direction="left" /> Browse all courses</Link> : null}
             <form role="search" className="directory-filters">
               {subject ? <input type="hidden" name="subject" value={subject} /> : null}
               <label className="relative"><span className="form-label">Course code, title, or subject</span><SearchIcon className="pointer-events-none absolute bottom-3.5 left-3.5 size-4 text-[var(--muted)]" /><input name="q" defaultValue={data.query} placeholder="e.g. ECON1101" className="form-control with-search-icon" /></label>

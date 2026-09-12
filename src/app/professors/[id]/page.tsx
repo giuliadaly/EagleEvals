@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ChevronIcon } from "@/components/icons";
 import { notFound } from "next/navigation";
 import { DetailDisclosure, DetailMetrics, DetailReviews, DetailRatingEvidence, DetailScore, preciseRating } from "@/components/detail-page";
 import { Breadcrumbs } from "@/components/page-parts";
@@ -79,7 +80,7 @@ export default async function ProfessorDetailPage({ params }: { params: Promise<
                 <p className={styles.ratingsNote}>Averages use numerical answers, including the ratings submitted with new reviews. Written comments are shown separately. Missing responses are shown as “Not collected.”</p>
                 <DetailMetrics metrics={metrics} />
               </DetailDisclosure>
-              <a className={styles.textLink} href="#history">Term and section history <span aria-hidden="true">↓</span></a>
+              <a className={styles.textLink} href="#history">Term and section history <ChevronIcon direction="down" /></a>
             </div>
           </aside>
         </div>

@@ -119,7 +119,7 @@ export function SearchBox({ compact = false, autoFocus = false, hero = false, in
         />
         {!compact ? (
           <button type="submit" className="absolute right-2 top-2 h-12 rounded-[.375rem] bg-[var(--maroon-deep)] px-5 text-sm font-bold text-[var(--on-maroon)] transition hover:bg-[var(--maroon)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--gold)]">
-            {hero ? <>Find out <span aria-hidden="true">↗</span></> : "Search"}
+            {hero ? "Find out" : "Search"}
           </button>
         ) : null}
       </form>

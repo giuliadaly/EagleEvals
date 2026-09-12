@@ -17,6 +17,7 @@
 .table tbody th { font-weight: 500; }
 .table tbody tr:nth-child(odd) { background: #f0eae0; }
 .table td { color: var(--maroon-deep); font-weight: 650; }
+.table td a { display: inline-flex; align-items: center; gap: .4rem; }
 .table a:hover { text-decoration: underline; }
 .reviewColumns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem; margin-top: 3rem; }
 .reviewColumns[data-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -24,7 +25,8 @@
 .professorReviews h2 { font-size: 1.4rem; font-weight: 650; letter-spacing: -.025em; }
 .professorReviews article { margin-block: 1.5rem 2.5rem; }
 .professorReviews summary { cursor: pointer; color: var(--maroon-deep); font-weight: 600; padding-block: .75rem; }
-.reviewLink { display: inline-flex; align-items: center; min-height: 44px; color: var(--maroon-deep); font-size: .85rem; font-weight: 650; }
+.reviewLink { display: inline-flex; align-items: center; gap: .4rem; text-decoration: underline; text-underline-offset: .2em; min-height: 44px; color: var(--maroon-deep); font-size: .85rem; font-weight: 650; }
+.reviewLink > svg, .table td a > svg { flex-shrink: 0; }
 .reviewLink:hover { text-decoration: underline; }
 @media (max-width: 760px) { .picker, .reviewColumns, .reviewColumns[data-count="3"] { grid-template-columns: minmax(0, 1fr); } .picker { padding: 1rem; } }
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ChevronIcon } from "@/components/icons";
 import { notFound } from "next/navigation";
 import { DetailReview } from "@/components/detail-reviews";
 import { Breadcrumbs } from "@/components/page-parts";
@@ -32,7 +33,7 @@ export default async function ComparePage({ params, searchParams }: { params: Pr
     {selected.length ? <section id="comparison" className={styles.results} aria-label={`Professor comparison for ${course.code}`}>
       <p className={styles.note}>Both ratings are out of 5 and use only {course.code} evaluations. Consider how many evaluations each average includes and when the class was taught.</p>
       <h2 className={styles.tableHeading}>Professor comparison for {course.code}</h2>
-      <p className={styles.scrollHint}>Swipe across the table to see each professor →</p>
+      <p className={styles.scrollHint}>Swipe across the table to see each professor</p>
       <div className={styles.tableWrap} tabIndex={0} role="region" aria-label="Comparison table; scroll horizontally on smaller screens"><table className={styles.table}>
         <caption className="sr-only">Professor comparison for {course.code}</caption>
         <thead><tr><th scope="col">For {course.code}</th>{selected.map(item => <th scope="col" key={item.id}><Link href={`/professors/${item.id}`}>{item.name}</Link></th>)}</tr></thead>
@@ -41,17 +42,17 @@ export default async function ComparePage({ params, searchParams }: { params: Pr
           <tr><th scope="row">Course rating</th>{selected.map(item => <td key={item.id}>{rating(item.courseOverall)}</td>)}</tr>
           <tr><th scope="row">Evaluations</th>{selected.map(item => <td key={item.id}>{formatCount(item.reviewCount)}</td>)}</tr>
           <tr><th scope="row">Latest recorded term</th>{selected.map(item => <td key={item.id}>{item.latestSemester ?? "Not recorded"}</td>)}</tr>
-          <tr><th scope="row">Written reviews</th>{selected.map(item => <td key={item.id}><a href={`#reviews-${item.id}`}>{comments.filter(comment => comment.professorId === item.id).length} reviews ↓</a></td>)}</tr>
+          <tr><th scope="row">Written reviews</th>{selected.map(item => <td key={item.id}><a href={`#reviews-${item.id}`}>{comments.filter(comment => comment.professorId === item.id).length} reviews <ChevronIcon direction="down" /></a></td>)}</tr>
         </tbody>
       </table></div>
       <div className={styles.reviewColumns} data-count={selected.length}>{selected.map(item => {
         const reviews = comments.filter(comment => comment.professorId === item.id);
         return <section key={item.id} id={`reviews-${item.id}`} className={styles.professorReviews}><h2>{item.name}</h2><p className={styles.note}>{course.code} · Newest posts first</p>
           {reviews.length ? <>{reviews.slice(0, 2).map(comment => <DetailReview key={comment.id} comment={comment} context="professor" />)}{reviews.length > 2 ? <details><summary>Read {reviews.length - 2} more reviews</summary>{reviews.slice(2).map(comment => <DetailReview key={comment.id} comment={comment} context="professor" />)}</details> : null}</> : <p className={styles.note}>No written reviews for this pairing yet.</p>}
-          <Link className={styles.reviewLink} href={`/review?course=${id}&professor=${item.id}`}>Review this class ↗</Link>
+          <Link className={styles.reviewLink} href={`/review?course=${id}&professor=${item.id}`}>Review this class</Link>
         </section>;
       })}</div>
     </section> : options.length >= 2 && !selection.error ? <p className={styles.note}>Choose the professors you’re considering to see their ratings and reviews together.</p> : null}
-    <Link className={styles.reviewLink} href={`/courses/${id}`}>← Back to {course.code}</Link>
+    <Link className={styles.reviewLink} href={`/courses/${id}`}><ChevronIcon direction="left" /> Back to {course.code}</Link>
   </div></main><SiteFooter /></>;
 }

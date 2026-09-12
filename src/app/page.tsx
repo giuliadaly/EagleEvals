@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronIcon } from "@/components/icons";
 import { HeroWing } from "@/components/hero-wing";
 import { SearchBox } from "@/components/search-box";
 import { SiteFooter } from "@/components/site-footer";
@@ -38,16 +39,16 @@ export default async function Home() {
           <h2 id="browse-heading">Start with what<br />you’re studying.</h2>
           <nav className={styles.subjects} aria-label="Browse courses by subject">
             {browseSubjects.map(subject => <Link key={subject} href={`/courses?subject=${encodeURIComponent(subject)}`}>
-              <span>{subject}</span><span aria-hidden="true">↗</span>
+              <span>{subject}</span><ChevronIcon />
             </Link>)}
           </nav>
           <div className={styles.browseLinks}>
-            <Link href="/courses">Browse all courses <span aria-hidden="true">↗</span></Link>
-            <Link href="/professors">Have a professor in mind? <span aria-hidden="true">↗</span></Link>
+            <Link href="/courses">Browse all courses</Link>
+            <Link href="/professors">Have a professor in mind?</Link>
           </div>
           <aside className={styles.note} aria-label="Pass on a little advice">
             <p>Someone’s about to take that class.</p>
-            <div><Link href="/review">Pass on a little advice <span aria-hidden="true">↗</span></Link><small>Your review is anonymous.</small></div>
+            <div><Link href="/review">Pass on a little advice</Link><small>Your review is anonymous.</small></div>
           </aside>
         </section>
       </main>
