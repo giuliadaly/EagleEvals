@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useId, useRef, useState } from "react";
 import { SemesterPicker } from "./semester-picker";
 import type { ReviewSelection } from "@/data/types";
 import type { QuickCourse, QuickProfessor } from "@/data/quick-search";
-import { useCatalogSearch } from "./use-catalog-search";
+import { refreshSearchEvidence, useCatalogSearch } from "./use-catalog-search";
 import { trackProductEvent } from "./site-telemetry";
 import { reviewDuration, type ProductEvent } from "@/data/telemetry";
 
@@ -147,6 +148,7 @@ export function AnonymousReviewForm({
   const [professor, setProfessor] = useState(initialProfessor);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const router = useRouter();
   const [success, setSuccess] = useState<SubmissionSuccess | null>(null);
   const successHeading = useRef<HTMLHeadingElement>(null);
   const startedAt = useRef<number | null>(null);
@@ -225,6 +227,8 @@ export function AnonymousReviewForm({
       failureReason = response.status === 409 ? "duplicate" : response.status === 400 || response.status === 413 ? "validation" : response.status === 404 ? "selection" : "server";
       const payload = (await response.json()) as SubmissionSuccess & { message: string };
       if (!response.ok) throw new Error(payload.message || "The review could not be saved.");
+      refreshSearchEvidence();
+      router.refresh();
       setSuccess(payload);
       trackProductEvent({ name: "review_submitted", duration: reviewDuration(performance.now() - (startedAt.current ?? performance.now())) });
     } catch (submissionError) {
@@ -239,7 +243,7 @@ export function AnonymousReviewForm({
     <p className="eyebrow">A little advice, passed on.</p>
     <h2 id="review-success-heading" ref={successHeading} tabIndex={-1} className="text-3xl font-bold text-[var(--maroon-deep)]">Your anonymous review is live.</h2>
     <p className="text-base leading-7 text-[var(--ink-soft)]">Thanks for helping the next student. Your ratings and written review are now included for {success.course.code} with {success.professor.name}.</p>
-    <div className="flex flex-wrap gap-4"><Link className="button-primary" href={`/courses/${success.course.id}#comments`}>View your course’s reviews</Link><Link className="button-secondary" href={`/professors/${success.professor.id}#comments`}>View professor reviews</Link></div>
+    <div className="flex flex-wrap gap-4"><a className="button-primary" href={`/courses/${success.course.id}#comments`}>View your course’s reviews</a><a className="button-secondary" href={`/professors/${success.professor.id}#comments`}>View professor reviews</a></div>
     <div className="pt-4"><h3 className="text-xl font-semibold">Have another class in mind?</h3><p className="mt-2 text-sm text-[var(--muted)]">An older class counts, too.</p><button className="button-secondary mt-4" type="button" onClick={() => { setSuccess(null); setCourse(null); setProfessor(null); setError(""); startedAt.current = null; validationReported.current = false; }}>Review another class</button></div>
   </section>;
 

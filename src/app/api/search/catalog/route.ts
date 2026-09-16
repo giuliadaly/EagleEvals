@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
-import { getQuickSearchCatalog } from "@/data/queries";
+import { getQuickSearchCatalog, getQuickSearchEvidence } from "@/data/queries";
+
+import { withQuickEvidence } from "@/data/quick-search";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return NextResponse.json(await getQuickSearchCatalog(), {
-    headers: { "Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=900" },
+  return NextResponse.json(withQuickEvidence(await getQuickSearchCatalog(), await getQuickSearchEvidence()), {
+    headers: { "Cache-Control": "private, no-store" },
   });
 }

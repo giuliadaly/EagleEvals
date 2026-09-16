@@ -102,7 +102,7 @@ test('real form handlers count starts once, report failures, and only count conf
   const react={useState:state,useRef:initial=>state({current:initial})[0],useId:()=>':id:',useEffect(){}};
   const fields={semester:'Fall 2026',courseOverall:'5',instructorOverall:'4',message:'Private draft written only for a mocked request.',reviewConfirmed:'on'};
   const {AnonymousReviewForm}=loadComponent('src/components/anonymous-review-form.tsx', {
-    react,'react/jsx-runtime':jsx,'next/link':{},'./semester-picker':{},'./use-catalog-search':{},
+    react,'react/jsx-runtime':jsx,'next/link':{},'./semester-picker':{},'./use-catalog-search':{refreshSearchEvidence(){}},'next/navigation':{useRouter:()=>({refresh(){}})},
     './site-telemetry':{trackProductEvent:event=>events.push(JSON.parse(JSON.stringify(event)))},
     '@/data/telemetry':{reviewDuration}
   }, {

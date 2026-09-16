@@ -1,10 +1,11 @@
 import "server-only";
 
 import { cache } from "react";
+import { publicQuery } from "@/data/public-cache";
 import { database } from "@/data/database";
 import { catalogMatch, catalogSearchSql, normalizeCatalogQuery } from "@/data/catalog-search";
 import { cleanTitle, semesterSortValue } from "@/data/format";
-import type { QuickResults } from "@/data/quick-search";
+import type { QuickEvidence, QuickResults } from "@/data/quick-search";
 import type {
   CourseDetail,
   CourseSummary,
@@ -84,7 +85,7 @@ function normalizePage(page: number): number {
   return Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
 }
 
-export const getSiteStats = cache(async (): Promise<SiteStats> => {
+const readSiteStats = async (): Promise<SiteStats> => {
   const sql = database();
   const rows = (await sql`
     SELECT
@@ -100,9 +101,9 @@ export const getSiteStats = cache(async (): Promise<SiteStats> => {
     reviews: asCount(row.reviews),
     comments: asCount(row.comments),
   };
-});
+};
 
-export const getFeaturedCourses = cache(async (): Promise<CourseSummary[]> => {
+const readFeaturedCourses = async (): Promise<CourseSummary[]> => {
   const sql = database();
   const rows = (await sql`
     SELECT * FROM course_summaries
@@ -111,9 +112,9 @@ export const getFeaturedCourses = cache(async (): Promise<CourseSummary[]> => {
     LIMIT 4
   `) as DbRow[];
   return rows.map(mapCourse);
-});
+};
 
-export const getFeaturedProfessors = cache(async (): Promise<ProfessorSummary[]> => {
+const readFeaturedProfessors = async (): Promise<ProfessorSummary[]> => {
   const sql = database();
   const rows = (await sql`
     SELECT * FROM professor_summaries
@@ -122,24 +123,22 @@ export const getFeaturedProfessors = cache(async (): Promise<ProfessorSummary[]>
     LIMIT 4
   `) as DbRow[];
   return rows.map(mapProfessor);
-});
+};
 
-export async function getQuickSearchCatalog(): Promise<QuickResults> {
+async function readQuickSearchCatalog(): Promise<QuickResults> {
   const sql = database();
   // Only public suggestion fields: no review text, contact details, or legacy documents.
   const [courses, professors] = await Promise.all([
-    sql`SELECT id, code, title, subject, comment_count, review_count FROM course_summaries ORDER BY code, id`,
-    sql`SELECT id, name, titles, comment_count, review_count FROM professor_summaries ORDER BY name, id`,
+    sql`SELECT id, code, title, subject FROM courses ORDER BY code, id`,
+    sql`SELECT id, name, titles FROM professors ORDER BY name, id`,
   ]) as [DbRow[], DbRow[]];
   return {
-    courses: courses.map(row => ({ id: String(row.id), code: String(row.code), title: String(row.title), subject: String(row.subject),
-      commentCount: asCount(row.comment_count), reviewCount: asCount(row.review_count) })),
-    professors: professors.map(row => ({ id: String(row.id), name: String(row.name), title: cleanTitle(asStringArray(row.titles)[0]),
-      commentCount: asCount(row.comment_count), reviewCount: asCount(row.review_count) })),
+    courses: courses.map(row => ({ id: String(row.id), code: String(row.code), title: String(row.title), subject: String(row.subject) })),
+    professors: professors.map(row => ({ id: String(row.id), name: String(row.name), title: cleanTitle(asStringArray(row.titles)[0]) })),
   };
 }
 
-export async function getShareIdentity(kind: "course" | "professor", id: string): Promise<{ title: string; subtitle: string } | null> {
+async function readShareIdentity(kind: "course" | "professor", id: string): Promise<{ title: string; subtitle: string } | null> {
   if (!/^[a-f0-9]{24}$/i.test(id)) return null;
   const sql = database();
   if (kind === "course") {
@@ -150,7 +149,7 @@ export async function getShareIdentity(kind: "course" | "professor", id: string)
   return rows[0] ? { title: String(rows[0].name), subtitle: "Advice from students who took the class." } : null;
 }
 
-export async function searchCatalog(rawQuery: string, limit = 12): Promise<SearchResults> {
+async function readSearchCatalog(rawQuery: string, limit = 12): Promise<SearchResults> {
   const query = normalizeCatalogQuery(rawQuery);
   if (!query) return { courses: [], professors: [] };
   const parameters = [query, query.replace(/ /g, ""), Math.max(1, Math.min(Math.floor(limit), 30))];
@@ -162,7 +161,7 @@ export async function searchCatalog(rawQuery: string, limit = 12): Promise<Searc
   return { courses: (courseRows as DbRow[]).map(mapCourse), professors: (professorRows as DbRow[]).map(mapProfessor) };
 }
 
-export async function getCoursesPage(rawQuery: string, rawPage: number, rawSort = "evidence", rawMinRating = 0, rawSubject = ""): Promise<PaginatedResult<CourseSummary>> {
+async function readCoursesPage(rawQuery: string, rawPage: number, rawSort = "evidence", rawMinRating = 0, rawSubject = ""): Promise<PaginatedResult<CourseSummary>> {
   const query = normalizeCatalogQuery(rawQuery);
   const page = normalizePage(rawPage);
   const offset = (page - 1) * PAGE_SIZE;
@@ -195,7 +194,7 @@ export async function getCoursesPage(rawQuery: string, rawPage: number, rawSort 
   return { items: rows.map(mapCourse), page, pageSize: PAGE_SIZE, total, totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)), query };
 }
 
-export async function getProfessorsPage(rawQuery: string, rawPage: number, rawSort = "evidence", rawMinRating = 0): Promise<PaginatedResult<ProfessorSummary>> {
+async function readProfessorsPage(rawQuery: string, rawPage: number, rawSort = "evidence", rawMinRating = 0): Promise<PaginatedResult<ProfessorSummary>> {
   const query = normalizeCatalogQuery(rawQuery);
   const page = normalizePage(rawPage);
   const offset = (page - 1) * PAGE_SIZE;
@@ -289,13 +288,11 @@ const evaluationSelect = `
   LEFT JOIN review_metrics m ON m.review_id = r.id
 `;
 
-export async function getEvaluationsPage(rawQuery: string, rawPage: number): Promise<PaginatedResult<EvaluationRecord>> {
+async function readEvaluationsPage(rawQuery: string, rawPage: number): Promise<PaginatedResult<EvaluationRecord>> {
   const query = normalizeQuery(rawQuery);
   const page = normalizePage(rawPage);
   const offset = (page - 1) * EVALUATION_PAGE_SIZE;
   const sql = database();
-  let rows: DbRow[];
-  let countRows: DbRow[];
   const order = `
     ORDER BY
       CASE WHEN r.source = 'eagleevals_anonymous' THEN 0 ELSE 1 END,
@@ -308,35 +305,26 @@ export async function getEvaluationsPage(rawQuery: string, rawPage: number): Pro
         ELSE 0
       END DESC,
       r.course_code ASC,
-      r.section ASC
+      r.section ASC,
+      r.id ASC
   `;
-
-  if (query) {
-    const pattern = `%${query}%`;
-    [rows, countRows] = (await Promise.all([
-      sql.query(`${evaluationSelect}
-        WHERE r.published AND (
-          r.course_code ILIKE $1 OR c.title ILIKE $1 OR
-          r.professor_name ILIKE $1 OR r.semester ILIKE $1
-        )
-        ${order}
-        LIMIT $2 OFFSET $3`, [pattern, EVALUATION_PAGE_SIZE, offset]),
-      sql.query(`SELECT count(*)::integer AS total
-        FROM reviews r
-        LEFT JOIN courses c ON c.id = r.course_id
-        WHERE r.published AND (
-          r.course_code ILIKE $1 OR c.title ILIKE $1 OR
-          r.professor_name ILIKE $1 OR r.semester ILIKE $1
-        )`, [pattern]),
-    ])) as [DbRow[], DbRow[]];
-  } else {
-    [rows, countRows] = (await Promise.all([
-      sql.query(`${evaluationSelect} WHERE r.published ${order} LIMIT $1 OFFSET $2`, [EVALUATION_PAGE_SIZE, offset]),
-      sql`SELECT count(*)::integer AS total FROM reviews WHERE published`,
-    ])) as [DbRow[], DbRow[]];
-  }
-
-  const total = asCount(countRows[0]?.total);
+  const pattern = `%${query}%`;
+  const where = query ? `r.published AND (
+    r.course_code ILIKE $1 OR c.title ILIKE $1 OR
+    r.professor_name ILIKE $1 OR r.semester ILIKE $1
+  )` : 'r.published';
+  const parameters = query ? [pattern, EVALUATION_PAGE_SIZE, offset] : [EVALUATION_PAGE_SIZE, offset];
+  const [rows, total] = await Promise.all([
+    sql.query(`WITH page AS MATERIALIZED (
+      SELECT r.id, r.semester, r.section, r.section_code, r.course_overall,
+        r.instructor_overall, r.course_id, r.course_code, r.professor_id,
+        r.professor_name, r.source, r.submitted_at FROM reviews r
+      ${query ? 'LEFT JOIN courses c ON c.id = r.course_id' : ''}
+      WHERE ${where} ${order}
+      LIMIT $${query ? 2 : 1} OFFSET $${query ? 3 : 2}
+    ) ${evaluationSelect.replace('FROM reviews r', 'FROM page r')} ${order}`, parameters) as Promise<DbRow[]>,
+    getEvaluationCount(query),
+  ]);
   return {
     items: rows.map(mapEvaluation),
     page,
@@ -347,7 +335,7 @@ export async function getEvaluationsPage(rawQuery: string, rawPage: number): Pro
   };
 }
 
-export async function getCommentsPage(rawQuery: string, rawPage: number): Promise<PaginatedResult<StudentComment>> {
+async function readCommentsPage(rawQuery: string, rawPage: number): Promise<PaginatedResult<StudentComment>> {
   const query = normalizeQuery(rawQuery);
   const page = normalizePage(rawPage);
   const offset = (page - 1) * EVALUATION_PAGE_SIZE;
@@ -401,7 +389,7 @@ export async function getCommentsPage(rawQuery: string, rawPage: number): Promis
   };
 }
 
-export async function getReviewSelections(courseId?: string, professorId?: string): Promise<{ course: ReviewSelection | null; professor: ReviewSelection | null }> {
+async function readReviewSelections(courseId?: string, professorId?: string): Promise<{ course: ReviewSelection | null; professor: ReviewSelection | null }> {
   const validCourseId = courseId && /^[0-9a-f]{24}$/.test(courseId) ? courseId : null;
   const validProfessorId = professorId && /^[0-9a-f]{24}$/.test(professorId) ? professorId : null;
   if (!validCourseId && !validProfessorId) return { course: null, professor: null };
@@ -421,7 +409,7 @@ export async function getReviewSelections(courseId?: string, professorId?: strin
   };
 }
 
-export const getCourseDetail = cache(async (id: string): Promise<CourseDetail | null> => {
+const readCourseDetail = async (id: string): Promise<CourseDetail | null> => {
   if (!/^[0-9a-f]{24}$/.test(id)) return null;
   const sql = database();
   const [courseRows, metricRows, instructorRows, commentRows, semesterRows] = (await Promise.all([
@@ -499,9 +487,9 @@ export const getCourseDetail = cache(async (id: string): Promise<CourseDetail | 
     comments: commentRows.map(mapComment),
     semesters,
   };
-});
+};
 
-export const getProfessorDetail = cache(async (id: string): Promise<ProfessorDetail | null> => {
+const readProfessorDetail = async (id: string): Promise<ProfessorDetail | null> => {
   if (!/^[0-9a-f]{24}$/.test(id)) return null;
   const sql = database();
   const [professorRows, metricRows, courseRows, commentRows, evaluationRows] = (await Promise.all([
@@ -606,16 +594,16 @@ export const getProfessorDetail = cache(async (id: string): Promise<ProfessorDet
     });
 
   return { professor: mapProfessor(professorRows[0]), metrics, courses, comments: commentRows.map(mapComment), evaluations };
-});
+};
 
-export async function getCatalogPaths(): Promise<string[]> {
+async function readCatalogPaths(): Promise<string[]> {
   const sql = database();
   const rows = await sql`SELECT '/courses/' || id AS path FROM courses
     UNION ALL SELECT '/professors/' || id AS path FROM professors`;
   return rows.map(row => String(row.path));
 }
 
-export async function getCourseProfessors(courseId: string): Promise<ReviewSelection[]> {
+async function readCourseProfessors(courseId: string): Promise<ReviewSelection[]> {
   if (!/^[0-9a-f]{24}$/.test(courseId)) return [];
   const sql = database();
   const rows = await sql`SELECT p.id, p.name, p.titles
@@ -625,3 +613,52 @@ export async function getCourseProfessors(courseId: string): Promise<ReviewSelec
     ORDER BY p.name, p.id`;
   return rows.map(row => ({ id: String(row.id), primary: String(row.name), secondary: asStringArray(row.titles).join(' · ') || 'Boston College faculty' }));
 }
+
+async function readEvaluationCount(query: string): Promise<number> {
+  const sql = database();
+  const rows = query ? await sql.query(`SELECT count(*)::integer AS total
+    FROM reviews r LEFT JOIN courses c ON c.id = r.course_id
+    WHERE r.published AND (r.course_code ILIKE $1 OR c.title ILIKE $1 OR
+      r.professor_name ILIKE $1 OR r.semester ILIKE $1)`, [`%${query}%`])
+    : await sql`SELECT count(*)::integer AS total FROM reviews WHERE published`;
+  return asCount(rows[0]?.total);
+}
+
+async function readQuickSearchEvidence(): Promise<QuickEvidence> {
+  const sql = database();
+  const [courses, professors] = await Promise.all([
+    sql`SELECT id, comment_count, review_count FROM course_summaries ORDER BY id`,
+    sql`SELECT id, comment_count, review_count FROM professor_summaries ORDER BY id`,
+  ]);
+  const counts = (rows: DbRow[]): [string, number, number][] => rows.map(row =>
+    [String(row.id), asCount(row.comment_count), asCount(row.review_count)]);
+  return { courses: counts(courses), professors: counts(professors) };
+}
+
+// Normalize before cache lookup to keep equivalent URLs on the same entry.
+// All review-derived values share one tag: a write also affects cross-course
+// professor summaries and comparisons, so expiring only two detail pages is insufficient.
+export const getSiteStats = publicQuery('stats', readSiteStats);
+export const getFeaturedCourses = publicQuery('featured-courses', readFeaturedCourses);
+export const getFeaturedProfessors = publicQuery('featured-professors', readFeaturedProfessors);
+export const getQuickSearchCatalog = publicQuery('catalog-v2', readQuickSearchCatalog, 'catalog');
+export const getQuickSearchEvidence = publicQuery('search-evidence', readQuickSearchEvidence);
+export const getCatalogPaths = publicQuery('paths', readCatalogPaths, 'catalog');
+export const getShareIdentity = publicQuery('share-identity', readShareIdentity, 'catalog');
+export const getReviewSelections = publicQuery('review-selections', readReviewSelections, 'catalog');
+export const getCourseProfessors = publicQuery('course-professors', readCourseProfessors);
+export const getCourseDetail = cache(publicQuery('course-detail', readCourseDetail));
+export const getProfessorDetail = cache(publicQuery('professor-detail', readProfessorDetail));
+const cachedSearch = publicQuery('search', readSearchCatalog);
+export const searchCatalog = (query: string, limit = 12) => cachedSearch(normalizeCatalogQuery(query), Number.isFinite(limit) ? Math.max(1, Math.min(Math.floor(limit), 30)) : 12);
+const cachedCourses = publicQuery('courses', readCoursesPage);
+export const getCoursesPage = (query: string, page: number, sort = 'evidence', minRating = 0, subject = '') =>
+  cachedCourses(normalizeCatalogQuery(query), normalizePage(page), ['rating', 'instructor', 'name'].includes(sort) ? sort : 'evidence', [4, 4.5].includes(minRating) ? minRating : 0, subject.trim().slice(0, 100));
+const cachedProfessors = publicQuery('professors', readProfessorsPage);
+export const getProfessorsPage = (query: string, page: number, sort = 'evidence', minRating = 0) =>
+  cachedProfessors(normalizeCatalogQuery(query), normalizePage(page), ['rating', 'course', 'comments', 'name'].includes(sort) ? sort : 'evidence', [4, 4.5].includes(minRating) ? minRating : 0);
+const getEvaluationCount = publicQuery('evaluation-count', readEvaluationCount);
+const cachedEvaluations = publicQuery('evaluations', readEvaluationsPage);
+export const getEvaluationsPage = (query: string, page: number) => cachedEvaluations(normalizeQuery(query), normalizePage(page));
+const cachedComments = publicQuery('comments', readCommentsPage);
+export const getCommentsPage = (query: string, page: number) => cachedComments(normalizeQuery(query), normalizePage(page));

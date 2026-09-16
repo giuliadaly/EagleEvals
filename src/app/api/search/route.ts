@@ -12,6 +12,6 @@ export async function GET(request: NextRequest) {
       courses: results.courses.map(({ id, code, title, subject, commentCount }) => ({ id, code, title, subject, commentCount })),
       professors: results.professors.map(({ id, name, titles, commentCount }) => ({ id, name, title: cleanTitle(titles[0]), commentCount })),
     },
-    { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=900" } },
+    { headers: { "Cache-Control": "private, no-store" } },
   );
 }
