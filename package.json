@@ -7,6 +7,7 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
+    "test:cache": "node scripts/check-cache-freshness.mjs",
     "test:migration": "node --test scripts/*.test.mjs",
     "db:validate-snapshot": "node scripts/validate-recovery-snapshot.mjs",
     "db:test-full-migration": "node scripts/test-full-migration-locally.mjs",

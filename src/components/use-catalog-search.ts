@@ -1,24 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { EMPTY_RESULTS, filterQuickCatalog, indexQuickCatalog, quickSearchText, type QuickCatalogIndex, type QuickResults } from "@/data/quick-search";
+import { EMPTY_RESULTS, filterQuickCatalog, quickSearchText, type QuickCatalogIndex, type QuickResults } from "@/data/quick-search";
 
-let catalogRequest: Promise<QuickCatalogIndex> | undefined;
-let catalogRequestedAt = 0;
-
-function loadCatalog() {
-  if (!catalogRequest || Date.now() - catalogRequestedAt > 300_000) {
-    catalogRequestedAt = Date.now();
-    catalogRequest = fetch("/api/search/catalog")
-      .then(response => {
-        if (!response.ok) throw new Error("Catalog unavailable");
-        return response.json() as Promise<QuickResults>;
-      })
-      .then(indexQuickCatalog)
-      .catch(error => { catalogRequest = undefined; throw error; });
-  }
-  return catalogRequest;
-}
+import { prepareSearchCatalog, refreshSearchEvidence, subscribeToCatalog } from "./search-catalog-store";
+export { refreshSearchEvidence } from "./search-catalog-store";
 
 export function useCatalogSearch(rawQuery: string, enabled = true, kind?: "course" | "professor") {
   const query = quickSearchText(rawQuery.slice(0, 160)).slice(0, 80);
@@ -28,10 +14,23 @@ export function useCatalogSearch(rawQuery: string, enabled = true, kind?: "cours
 
   useEffect(() => {
     let active = true;
-    // One shared public catalog download, prepared before the first keystroke.
-    loadCatalog().then(index => { if (active) setCatalog(index); })
+    let hasEvidence = false;
+    const unsubscribe = subscribeToCatalog(index => {
+      hasEvidence = true;
+      if (active) setCatalog(index);
+    });
+    prepareSearchCatalog().then(index => { if (active && !hasEvidence) setCatalog(index); })
       .catch(() => { if (active) setCatalogFailed(true); });
-    return () => { active = false; };
+    const refresh = () => { if (document.visibilityState === "visible") refreshSearchEvidence(false); };
+    refresh();
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      active = false;
+      unsubscribe();
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
   }, []);
 
   const local = useMemo(() => catalog && enabled ? filterQuickCatalog(catalog, query) : EMPTY_RESULTS, [catalog, enabled, query]);
@@ -50,7 +49,7 @@ export function useCatalogSearch(rawQuery: string, enabled = true, kind?: "cours
       .then(results => { if (!controller.signal.aborted) setRemote({ query, results, failed: false }); })
       .catch(() => { if (!controller.signal.aborted) setRemote({ query, results: EMPTY_RESULTS, failed: true }); });
     return () => controller.abort();
-  }, [query, needsRemote]);
+  }, [query, needsRemote, catalog]);
 
   const currentRemote = remote?.query === query ? remote : null;
   return {

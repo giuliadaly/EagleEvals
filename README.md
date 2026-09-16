@@ -66,6 +66,7 @@ Pull requests receive Vercel previews. Merging into `main` deploys to
 [eagleevals.com](https://eagleevals.com). Verify schema compatibility before
 deploying a change that depends on a database migration.
 
+- [Data freshness, cache checks, and crawler controls](docs/DATA_FRESHNESS.md)
 - [Database setup, recovery, and anonymous review storage](docs/DATABASE.md)
 - [SEO and privacy-conscious telemetry](docs/SEO_AND_TELEMETRY.md)
 - [Design direction](DESIGN.md)

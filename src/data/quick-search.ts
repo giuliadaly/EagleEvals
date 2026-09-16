@@ -1,6 +1,15 @@
-export type QuickCourse = { id: string; code: string; title: string; subject: string; commentCount: number; reviewCount?: number };
-export type QuickProfessor = { id: string; name: string; title: string | null; commentCount: number; reviewCount?: number };
+export type QuickCourse = { id: string; code: string; title: string; subject: string; commentCount?: number; reviewCount?: number };
+export type QuickProfessor = { id: string; name: string; title: string | null; commentCount?: number; reviewCount?: number };
 export type QuickResults = { courses: QuickCourse[]; professors: QuickProfessor[] };
+export type QuickEvidence = { courses: [string, number, number][]; professors: [string, number, number][] };
+
+export function withQuickEvidence(catalog: QuickResults, evidence: QuickEvidence): QuickResults {
+  function merge<T extends { id: string }>(items: T[], counts: [string, number, number][]) {
+    const byId = new Map(counts.map(([id, commentCount, reviewCount]) => [id, { commentCount, reviewCount }]));
+    return items.map(item => ({ ...item, ...byId.get(item.id) }));
+  }
+  return { courses: merge(catalog.courses, evidence.courses), professors: merge(catalog.professors, evidence.professors) };
+}
 
 export const EMPTY_RESULTS: QuickResults = { courses: [], professors: [] };
 

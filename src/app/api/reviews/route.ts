@@ -2,6 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { database } from "@/data/database";
+import { expireReviewData } from "@/data/public-cache";
 import { validateReviewSubmission } from "@/data/review-validation";
 
 type DbRow = Record<string, unknown>;
@@ -106,7 +107,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "The review could not be saved. Please try again." }, { status: 500 });
   }
 
+  expireReviewData();
   revalidatePath("/");
+  revalidatePath("/courses");
+  revalidatePath("/professors");
+  revalidatePath("/search");
   revalidatePath("/evaluations");
   revalidatePath("/comments");
   revalidatePath(`/courses/${review.courseId}/compare`);

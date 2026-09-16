@@ -64,6 +64,7 @@ test('search and real submission queries preserve course context and old reviews
   assert.equal((await sql.query(catalogSearchSql('course'), ['zzzzqqqq', 'zzzzqqqq', 6])).length, 0);
 
   const route = loadTs('src/app/api/reviews/route.ts', {
+    '@/data/public-cache': { expireReviewData() {} },
     'node:crypto': { createHash, randomBytes }, 'next/cache': { revalidatePath() {} },
     'next/server': { NextResponse: Response }, '@/data/database': { database: () => sql },
     '@/data/review-validation': { validateReviewSubmission },
@@ -87,6 +88,7 @@ test('search and real submission queries preserve course context and old reviews
   assert.equal((await submit({ ...payload, courseId: otherCourse, courseOverall: 1, instructorOverall: 1 })).status, 201);
   assert.equal((await submit({ ...payload, professorId: otherProfessor, semester: 'Spring 2025', instructorOverall: 3 })).status, 201);
   const queries = loadTs('src/data/queries.ts', {
+    '@/data/public-cache': { publicQuery: (_name, fn) => fn },
     'server-only': {}, react: { cache: fn => fn }, '@/data/database': { database: () => sql },
     '@/data/catalog-search': loadTs('src/data/catalog-search.ts', {}),
     '@/data/format': loadTs('src/data/format.ts', {}),
@@ -95,9 +97,12 @@ test('search and real submission queries preserve course context and old reviews
   const quickCatalog = await queries.getQuickSearchCatalog();
   assert.equal(quickCatalog.courses.length, 2);
   assert.equal(quickCatalog.professors.length, 2);
-  assert.deepEqual(Object.keys(quickCatalog.courses[0]).sort(), ['code', 'commentCount', 'id', 'reviewCount', 'subject', 'title']);
-  assert.deepEqual(Object.keys(quickCatalog.professors[0]).sort(), ['commentCount', 'id', 'name', 'reviewCount', 'title']);
+  assert.deepEqual(Object.keys(quickCatalog.courses[0]).sort(), ['code', 'id', 'subject', 'title']);
+  assert.deepEqual(Object.keys(quickCatalog.professors[0]).sort(), ['id', 'name', 'title']);
   assert.equal((await queries.searchCatalog('E')).courses.length, 2);
+  assert.equal((await queries.getQuickSearchEvidence()).courses.find(row => row[0] === course)[1], 3);
+  assert.equal((await queries.getEvaluationsPage('', 1)).total, 3);
+  assert.equal((await queries.getEvaluationsPage('Literature', 1)).total, 1);
   const paired = detail.instructors.find(item => item.id === professor);
   assert.equal(paired.instructorOverall, 5);
   assert.equal(paired.reviewCount, 1);
@@ -120,6 +125,20 @@ test('search and real submission queries preserve course context and old reviews
   const oldSchemaRows = await pg.query(`SELECT r.semester FROM (SELECT id, professor_id, course_id FROM student_comments) sc
     LEFT JOIN reviews r ON r.id = (to_jsonb(sc)->>'review_id')`);
   assert.ok(oldSchemaRows.rows.every(row => row.semester === null));
+  // Multi-page archive keeps fresh submissions first, excludes unpublished rows,
+  // and uses deterministic section ordering even after moving the metrics join.
+  await pg.query(`INSERT INTO reviews (id, course_id, professor_id, course_code, professor_name,
+    semester, section, source, published, legacy_document, source_snapshot)
+    SELECT lpad(to_hex(100 + n), 24, '0'), $1, $2, 'ENGL1010', 'Brian Zimmerman',
+      'Fall 2025', n, 'legacy_eagleeval', n <> 65, '{}', 'test'
+    FROM generate_series(1,65) n`, [course, professor]);
+  const archivePages = await Promise.all([1, 2, 3].map(page => queries.getEvaluationsPage('ENGL1010', page)));
+  assert.deepEqual(archivePages.map(page => page.total), [66,66,66]);
+  const archive = archivePages.flatMap(page => page.items);
+  assert.equal(new Set(archive.map(item => item.id)).size, 66);
+  assert.ok(archive.slice(0,2).every(item => item.source === 'eagleevals_anonymous'));
+  assert.deepEqual(Array.from(archive.slice(2), item => item.section), Array.from({length:64}, (_, i) => i + 1));
+  assert.ok(archive.slice(2).every(item => item.metrics.every(metric => metric.value === null)));
   // Reapplying migrations preserves the old comment and the new semester link.
   await applyMigrations(sql, path.join(process.cwd(), 'database/migrations'));
   assert.equal((await pg.query("SELECT review_id FROM student_comments WHERE id = 'legacy'")).rows[0].review_id, null);
