@@ -69,3 +69,21 @@ checks at localhost:3134. Stop it with Ctrl-C when finished.
 Actual compute savings depend on traffic and remaining unique page visits.
 Compare Neon compute use and Vercel crawler traffic over similar periods;
 these changes cannot recover compute hours already consumed.
+
+## Read connection recovery
+
+Public queries use `readDatabase()` to retry only the individual failed SQL read,
+at most once after 100–199 ms, for Neon HTTP transport errors `UND_ERR_SOCKET`
+or `ECONNRESET`. SQL/authentication errors, quota responses, aborts, and unknown
+failures are not retried. `database()` and review submission transactions retain
+their single-attempt behavior. Cache lifetimes and immediate invalidation after
+a published review are unchanged.
+
+Recovery emits one structured `database_read` warning; an exhausted or
+non-retryable read emits one structured error and propagates the original error.
+The fields are operation label, query ordinal, outcome, attempts, elapsed
+milliseconds, and bounded error codes. These diagnostics contain no SQL text,
+parameters, error messages, credentials, or review contents. Successful first
+attempts are silent. Next may also emit its existing cache-revalidation error
+when a failure propagates; count `database_read` events separately when measuring
+recovered versus failed reads. These are read counts, not visitor counts.

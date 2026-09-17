@@ -89,7 +89,7 @@ test('search and real submission queries preserve course context and old reviews
   assert.equal((await submit({ ...payload, professorId: otherProfessor, semester: 'Spring 2025', instructorOverall: 3 })).status, 201);
   const queries = loadTs('src/data/queries.ts', {
     '@/data/public-cache': { publicQuery: (_name, fn) => fn },
-    'server-only': {}, react: { cache: fn => fn }, '@/data/database': { database: () => sql },
+    'server-only': {}, react: { cache: fn => fn }, '@/data/database': { readDatabase: () => sql },
     '@/data/catalog-search': loadTs('src/data/catalog-search.ts', {}),
     '@/data/format': loadTs('src/data/format.ts', {}),
   });

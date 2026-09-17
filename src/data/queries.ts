@@ -2,7 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 import { publicQuery } from "@/data/public-cache";
-import { database } from "@/data/database";
+import { readDatabase } from "@/data/database";
 import { catalogMatch, catalogSearchSql, normalizeCatalogQuery } from "@/data/catalog-search";
 import { cleanTitle, semesterSortValue } from "@/data/format";
 import type { QuickEvidence, QuickResults } from "@/data/quick-search";
@@ -86,7 +86,7 @@ function normalizePage(page: number): number {
 }
 
 const readSiteStats = async (): Promise<SiteStats> => {
-  const sql = database();
+  const sql = readDatabase('stats');
   const rows = (await sql`
     SELECT
       (SELECT count(*)::integer FROM courses) AS courses,
@@ -104,7 +104,7 @@ const readSiteStats = async (): Promise<SiteStats> => {
 };
 
 const readFeaturedCourses = async (): Promise<CourseSummary[]> => {
-  const sql = database();
+  const sql = readDatabase('featured-courses');
   const rows = (await sql`
     SELECT * FROM course_summaries
     WHERE comment_count > 0
@@ -115,7 +115,7 @@ const readFeaturedCourses = async (): Promise<CourseSummary[]> => {
 };
 
 const readFeaturedProfessors = async (): Promise<ProfessorSummary[]> => {
-  const sql = database();
+  const sql = readDatabase('featured-professors');
   const rows = (await sql`
     SELECT * FROM professor_summaries
     WHERE comment_count > 0
@@ -126,7 +126,7 @@ const readFeaturedProfessors = async (): Promise<ProfessorSummary[]> => {
 };
 
 async function readQuickSearchCatalog(): Promise<QuickResults> {
-  const sql = database();
+  const sql = readDatabase('catalog-v2');
   // Only public suggestion fields: no review text, contact details, or legacy documents.
   const [courses, professors] = await Promise.all([
     sql`SELECT id, code, title, subject FROM courses ORDER BY code, id`,
@@ -140,7 +140,7 @@ async function readQuickSearchCatalog(): Promise<QuickResults> {
 
 async function readShareIdentity(kind: "course" | "professor", id: string): Promise<{ title: string; subtitle: string } | null> {
   if (!/^[a-f0-9]{24}$/i.test(id)) return null;
-  const sql = database();
+  const sql = readDatabase('share-identity');
   if (kind === "course") {
     const rows = await sql`SELECT code, title FROM courses WHERE id = ${id} LIMIT 1` as DbRow[];
     return rows[0] ? { title: String(rows[0].code), subtitle: String(rows[0].title) } : null;
@@ -153,7 +153,7 @@ async function readSearchCatalog(rawQuery: string, limit = 12): Promise<SearchRe
   const query = normalizeCatalogQuery(rawQuery);
   if (!query) return { courses: [], professors: [] };
   const parameters = [query, query.replace(/ /g, ""), Math.max(1, Math.min(Math.floor(limit), 30))];
-  const sql = database();
+  const sql = readDatabase('search');
   const [courseRows, professorRows] = await Promise.all([
     sql.query(catalogSearchSql("course"), parameters),
     sql.query(catalogSearchSql("professor"), parameters),
@@ -165,7 +165,7 @@ async function readCoursesPage(rawQuery: string, rawPage: number, rawSort = "evi
   const query = normalizeCatalogQuery(rawQuery);
   const page = normalizePage(rawPage);
   const offset = (page - 1) * PAGE_SIZE;
-  const sql = database();
+  const sql = readDatabase('courses');
   const sort = ["rating", "instructor", "name"].includes(rawSort) ? rawSort : "evidence";
   const minRating = [4, 4.5].includes(rawMinRating) ? rawMinRating : 0;
   const compact = query.replace(/ /g, "");
@@ -198,7 +198,7 @@ async function readProfessorsPage(rawQuery: string, rawPage: number, rawSort = "
   const query = normalizeCatalogQuery(rawQuery);
   const page = normalizePage(rawPage);
   const offset = (page - 1) * PAGE_SIZE;
-  const sql = database();
+  const sql = readDatabase('professors');
   const sort = ["rating", "course", "comments", "name"].includes(rawSort) ? rawSort : "evidence";
   const minRating = [4, 4.5].includes(rawMinRating) ? rawMinRating : 0;
   const compact = query.replace(/ /g, "");
@@ -292,7 +292,7 @@ async function readEvaluationsPage(rawQuery: string, rawPage: number): Promise<P
   const query = normalizeQuery(rawQuery);
   const page = normalizePage(rawPage);
   const offset = (page - 1) * EVALUATION_PAGE_SIZE;
-  const sql = database();
+  const sql = readDatabase('evaluations');
   const order = `
     ORDER BY
       CASE WHEN r.source = 'eagleevals_anonymous' THEN 0 ELSE 1 END,
@@ -339,7 +339,7 @@ async function readCommentsPage(rawQuery: string, rawPage: number): Promise<Pagi
   const query = normalizeQuery(rawQuery);
   const page = normalizePage(rawPage);
   const offset = (page - 1) * EVALUATION_PAGE_SIZE;
-  const sql = database();
+  const sql = readDatabase('comments');
   const select = `
     SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source, r.semester AS review_semester,
       sc.professor_id, p.name AS professor_name,
@@ -393,7 +393,7 @@ async function readReviewSelections(courseId?: string, professorId?: string): Pr
   const validCourseId = courseId && /^[0-9a-f]{24}$/.test(courseId) ? courseId : null;
   const validProfessorId = professorId && /^[0-9a-f]{24}$/.test(professorId) ? professorId : null;
   if (!validCourseId && !validProfessorId) return { course: null, professor: null };
-  const sql = database();
+  const sql = readDatabase('review-selections');
   const [courseRows, professorRows] = (await Promise.all([
     validCourseId ? sql`SELECT id, code, title FROM courses WHERE id = ${validCourseId} LIMIT 1` : Promise.resolve([]),
     validProfessorId ? sql`SELECT id, name, titles FROM professors WHERE id = ${validProfessorId} LIMIT 1` : Promise.resolve([]),
@@ -411,7 +411,7 @@ async function readReviewSelections(courseId?: string, professorId?: string): Pr
 
 const readCourseDetail = async (id: string): Promise<CourseDetail | null> => {
   if (!/^[0-9a-f]{24}$/.test(id)) return null;
-  const sql = database();
+  const sql = readDatabase('course-detail');
   const [courseRows, metricRows, instructorRows, commentRows, semesterRows] = (await Promise.all([
     sql`SELECT * FROM course_summaries WHERE id = ${id} LIMIT 1`,
     sql`
@@ -491,7 +491,7 @@ const readCourseDetail = async (id: string): Promise<CourseDetail | null> => {
 
 const readProfessorDetail = async (id: string): Promise<ProfessorDetail | null> => {
   if (!/^[0-9a-f]{24}$/.test(id)) return null;
-  const sql = database();
+  const sql = readDatabase('professor-detail');
   const [professorRows, metricRows, courseRows, commentRows, evaluationRows] = (await Promise.all([
     sql`SELECT * FROM professor_summaries WHERE id = ${id} LIMIT 1`,
     sql`
@@ -597,7 +597,7 @@ const readProfessorDetail = async (id: string): Promise<ProfessorDetail | null> 
 };
 
 async function readCatalogPaths(): Promise<string[]> {
-  const sql = database();
+  const sql = readDatabase('paths');
   const rows = await sql`SELECT '/courses/' || id AS path FROM courses
     UNION ALL SELECT '/professors/' || id AS path FROM professors`;
   return rows.map(row => String(row.path));
@@ -605,7 +605,7 @@ async function readCatalogPaths(): Promise<string[]> {
 
 async function readCourseProfessors(courseId: string): Promise<ReviewSelection[]> {
   if (!/^[0-9a-f]{24}$/.test(courseId)) return [];
-  const sql = database();
+  const sql = readDatabase('course-professors');
   const rows = await sql`SELECT p.id, p.name, p.titles
     FROM professors p
     WHERE EXISTS (SELECT 1 FROM reviews r WHERE r.published AND r.course_id = ${courseId} AND r.professor_id = p.id)
@@ -615,7 +615,7 @@ async function readCourseProfessors(courseId: string): Promise<ReviewSelection[]
 }
 
 async function readEvaluationCount(query: string): Promise<number> {
-  const sql = database();
+  const sql = readDatabase('evaluation-count');
   const rows = query ? await sql.query(`SELECT count(*)::integer AS total
     FROM reviews r LEFT JOIN courses c ON c.id = r.course_id
     WHERE r.published AND (r.course_code ILIKE $1 OR c.title ILIKE $1 OR
@@ -625,7 +625,7 @@ async function readEvaluationCount(query: string): Promise<number> {
 }
 
 async function readQuickSearchEvidence(): Promise<QuickEvidence> {
-  const sql = database();
+  const sql = readDatabase('search-evidence');
   const [courses, professors] = await Promise.all([
     sql`SELECT id, comment_count, review_count FROM course_summaries ORDER BY id`,
     sql`SELECT id, comment_count, review_count FROM professor_summaries ORDER BY id`,
