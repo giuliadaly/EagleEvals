@@ -23,6 +23,10 @@ await pg.query(`INSERT INTO courses (id, code, title, subject, description, lega
 await pg.query(`INSERT INTO professors (id, name, legacy_document, source_snapshot) VALUES
   ($1, 'Brian Zimmerman', '{}', 'test'), ($2, 'Jane O’Neill', '{}', 'test')`, [professor, otherProfessor]);
 let reads = 0;
+let failCourseRead = false;
+let courseReadAttempts = 0;
+let loseWriteResponse = false;
+let writeAttempts = 0;
 function raw(value, oid) {
   if (value == null) return null;
   if (value instanceof Date) return value.toISOString().replace('T', ' ').replace('Z', '+00');
@@ -41,9 +45,23 @@ const proxy = createServer(async (request, response) => {
     let body = '';
     for await (const chunk of request) body += chunk;
     const query = JSON.parse(body);
+    if (query.query?.includes('SELECT * FROM course_summaries WHERE id')) {
+      courseReadAttempts++;
+      if (failCourseRead) {
+        failCourseRead = false;
+        request.socket.destroy();
+        return;
+      }
+    }
+    if (query.queries) writeAttempts++;
     const result = query.queries
       ? { results: await pg.transaction(async tx => { const rows = []; for (const q of query.queries) rows.push(await runQuery(tx, q)); return rows; }) }
       : await runQuery(pg, query);
+    if (query.queries && loseWriteResponse) {
+      loseWriteResponse = false;
+      request.socket.destroy(); // The transaction committed, but acknowledgement was lost.
+      return;
+    }
     response.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify(result));
   } catch (error) {
     response.writeHead(400, { 'content-type': 'application/json' }).end(JSON.stringify({ message: error.message, code: error.code }));
@@ -118,6 +136,26 @@ try {
   console.log('PASS: new reviews, averages, search counts, archive and known professors refresh immediately, then reuse the new cache.');
   const duplicate = await fetch(base + '/api/reviews', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
   assert.equal(duplicate.status, 409);
+  const thirdPayload = { ...payload, semester: 'Fall 2002', message: 'The latest review must appear even when a read connection drops.' };
+  const third = await fetch(base + '/api/reviews', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(thirdPayload) });
+  assert.equal(third.status, 201);
+  const beforeReads = courseReadAttempts;
+  failCourseRead = true;
+  assert.ok((await (await get(`/courses/${course}`)).text()).includes(thirdPayload.message));
+  assert.equal(courseReadAttempts - beforeReads, 2, 'Only the failed course read gets a second attempt');
+  assert.ok((await (await get(`/professors/${professor}`)).text()).includes(thirdPayload.message));
+  assert.equal((await (await get('/api/search/evidence')).json()).courses.find(row => row[0] === course)[1], 3);
+  const recovery = serverLog.split('\n').filter(line => line.startsWith('{"event":"database_read"')).map(line => JSON.parse(line));
+  assert.ok(recovery.some(event => event.operation === 'course-detail' && event.outcome === 'recovered' && event.attempts === 2));
+  console.log('PASS: actual dropped HTTP read recovers and the first post-submission page shows the new review.');
+
+  const beforeWrites = writeAttempts;
+  loseWriteResponse = true;
+  const uncertain = await fetch(base + '/api/reviews', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...payload, semester: 'Fall 2003' }) });
+  assert.equal(uncertain.status, 500);
+  assert.equal(writeAttempts - beforeWrites, 1, 'A lost write acknowledgement must not cause an automatic retry');
+  assert.equal((await pg.query("SELECT count(*)::integer AS total FROM reviews WHERE semester = 'Fall 2003'")).rows[0].total, 1);
+  console.log('PASS: an uncertain committed submission is not automatically replayed.');
   if (process.argv.includes('--keep-server')) {
     console.log(`Fixture server ready for browser checks: ${base}. Press Ctrl-C to stop.`);
     await new Promise(resolve => process.once('SIGINT', resolve));
