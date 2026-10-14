@@ -33,7 +33,7 @@ export function DetailReviews({ comments, context, reviewHref, archiveHref, inst
   const remaining = visible.slice(5);
   return <section id="comments" className={styles.reviews} aria-labelledby={headingId}>
     <div className={styles.sectionHeading}>
-      <div><h2 id={headingId}>Student reviews <span className={styles.count}>{formatCount(comments.length)}</span></h2><p className={styles.caption}>Student experiences, shown as submitted.</p></div>
+      <div><h2 id={headingId}>Written reviews <span className={styles.count}>{formatCount(comments.length)}</span></h2><p className={styles.caption}>Student experiences, shown as submitted.</p></div>
       <Link href={reviewHref} className={styles.writeReview}>Write a review</Link>
     </div>
     {comments.length ? <label className={styles.reviewSearch}><span className="form-label">Search these reviews</span><input className="form-control" type="search" maxLength={160} value={query} onChange={event => setQuery(event.target.value)} placeholder="Exams, grading, attendance…" /></label> : null}
