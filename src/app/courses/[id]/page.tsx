@@ -70,7 +70,7 @@ export default async function CourseDetailPage({ params, searchParams }: { param
         </header>
 
         <div className={styles.body}>
-          <DetailReviews comments={comments} context="course" reviewHref={`/review?course=${course.id}`} archiveHref={`/comments?q=${encodeURIComponent(course.code)}`} />
+          <DetailReviews comments={comments} context="course" course={{ id: course.id, code: course.code }} instructors={instructors} reviewHref={`/review?course=${course.id}`} archiveHref={`/comments?q=${encodeURIComponent(course.code)}`} />
           <aside className={styles.margin} aria-label="Instructors and course details">
             <section>
               <div className={styles.marginHeading}><h2>Who teaches this? <span className={styles.count}>{formatCount(instructors.length)}</span></h2></div>

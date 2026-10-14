@@ -24,6 +24,12 @@ EagleEvals submissions, labeled by source. Historical numerical records summariz
 course sections and may have no written feedback. Rating counts and written-review
 counts are shown separately.
 
+Matched professor pages also load clearly attributed **Rate My Professors**
+reviews. Course pages and comparisons request reviews only for the selected
+professor and course. RMP feedback stays separate from the recovered archive,
+site-wide review counts, and EagleEvals numerical scores. Ambiguous names are
+not automatically matched.
+
 ## Development
 
 Built with Next.js App Router, React, TypeScript, and Tailwind CSS. Data lives in
