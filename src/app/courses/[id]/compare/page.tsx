@@ -3,7 +3,6 @@ import Link from "next/link";
 import { ChevronIcon } from "@/components/icons";
 import { notFound } from "next/navigation";
 import { DetailReview } from "@/components/detail-review";
-import { RmpReviews } from "@/components/rmp-reviews";
 import { Breadcrumbs } from "@/components/page-parts";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -43,15 +42,14 @@ export default async function ComparePage({ params, searchParams }: { params: Pr
           <tr><th scope="row">Course rating</th>{selected.map(item => <td key={item.id}>{rating(item.courseOverall)}</td>)}</tr>
           <tr><th scope="row">Evaluations</th>{selected.map(item => <td key={item.id}>{formatCount(item.reviewCount)}</td>)}</tr>
           <tr><th scope="row">Latest recorded term</th>{selected.map(item => <td key={item.id}>{item.latestSemester ?? "Not recorded"}</td>)}</tr>
-          <tr><th scope="row">EagleEvals written reviews</th>{selected.map(item => <td key={item.id}><a href={`#reviews-${item.id}`}>{comments.filter(comment => comment.professorId === item.id).length} reviews <ChevronIcon direction="down" /></a></td>)}</tr>
+          <tr><th scope="row">Written reviews</th>{selected.map(item => <td key={item.id}><a href={`#reviews-${item.id}`}>{comments.filter(comment => comment.professorId === item.id).length} reviews <ChevronIcon direction="down" /></a></td>)}</tr>
         </tbody>
       </table></div>
       <div className={styles.reviewColumns} data-count={selected.length}>{selected.map(item => {
         const reviews = comments.filter(comment => comment.professorId === item.id);
         return <section key={item.id} id={`reviews-${item.id}`} className={styles.professorReviews}><h2>{item.name}</h2><p className={styles.note}>{course.code} · Newest posts first</p>
-          {reviews.length ? <>{reviews.slice(0, 2).map(comment => <DetailReview key={comment.id} comment={comment} context="professor" />)}{reviews.length > 2 ? <details><summary>Read {reviews.length - 2} more reviews</summary>{reviews.slice(2).map(comment => <DetailReview key={comment.id} comment={comment} context="professor" />)}</details> : null}</> : <p className={styles.note}>No written EagleEvals reviews for this pairing yet.</p>}
+          {reviews.length ? <>{reviews.slice(0, 2).map(comment => <DetailReview key={comment.id} comment={comment} context="professor" />)}{reviews.length > 2 ? <details><summary>Read {reviews.length - 2} more reviews</summary>{reviews.slice(2).map(comment => <DetailReview key={comment.id} comment={comment} context="professor" />)}</details> : null}</> : <p className={styles.note}>No written reviews for this pairing yet.</p>}
           <Link className={styles.reviewLink} href={`/review?course=${id}&professor=${item.id}`}>Review this class</Link>
-          <RmpReviews professor={{ id: item.id, name: item.name }} course={{ id: course.id, code: course.code }} context="professor" />
         </section>;
       })}</div>
     </section> : options.length >= 2 && !selection.error ? <p className={styles.note}>Choose the professors you’re considering to see their ratings and reviews together.</p> : null}

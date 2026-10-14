@@ -57,7 +57,7 @@ export default async function ProfessorDetailPage({ params }: { params: Promise<
         </header>
 
         <div className={styles.body}>
-          <DetailReviews comments={comments} context="professor" professor={{ id: professor.id, name: professor.name }} courses={courses} reviewHref={`/review?professor=${professor.id}`} />
+          <DetailReviews comments={comments} context="professor" courses={courses} reviewHref={`/review?professor=${professor.id}`} />
           <aside className={styles.margin} aria-label="Courses and professor details">
             <section id="courses">
               <div className={styles.marginHeading}><h2>Courses taught <span className={styles.count}>{formatCount(courses.length)}</span></h2></div>

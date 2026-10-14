@@ -92,7 +92,7 @@ const readSiteStats = async (): Promise<SiteStats> => {
       (SELECT count(*)::integer FROM courses) AS courses,
       (SELECT count(*)::integer FROM professors) AS professors,
       (SELECT count(*)::integer FROM reviews WHERE published) AS reviews,
-      (SELECT count(*)::integer FROM student_comments WHERE published) AS comments
+      (SELECT count(*)::integer FROM public_written_reviews) AS comments
   `) as DbRow[];
   const row = rows[0] ?? {};
   return {
@@ -226,8 +226,8 @@ async function readProfessorsPage(rawQuery: string, rawPage: number, rawSort = "
   return { items: rows.map(mapProfessor), page, pageSize: PAGE_SIZE, total, totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)), query };
 }
 
-// Reading the optional link through the row JSON keeps read-only previews usable
-// before the additive migration runs. No semester is inferred for unlinked rows.
+// External source IDs remain namespaced, including profiles not yet linked to
+// the native professor catalog. Their reviews still belong in the public archive.
 function mapComment(row: DbRow): StudentComment {
   return {
     id: String(row.id),
@@ -235,12 +235,13 @@ function mapComment(row: DbRow): StudentComment {
     wouldTakeAgain: row.would_take_again == null ? null : Boolean(row.would_take_again),
     createdAt: new Date(String(row.created_at)).toISOString(),
     semester: row.review_semester ? String(row.review_semester) : null,
-    professorId: String(row.professor_id),
+    professorId: row.professor_id ? String(row.professor_id) : `rmp:${row.source_professor_id}`,
     professorName: String(row.professor_name),
     courseId: row.course_id ? String(row.course_id) : null,
     courseCode: row.course_code ? String(row.course_code) : null,
     courseTitle: row.course_title ? String(row.course_title) : null,
     source: String(row.source ?? "legacy_eagleeval"),
+    ...(row.source_url ? { sourceUrl: String(row.source_url) } : {}),
   };
 }
 
@@ -341,13 +342,10 @@ async function readCommentsPage(rawQuery: string, rawPage: number): Promise<Pagi
   const offset = (page - 1) * EVALUATION_PAGE_SIZE;
   const sql = readDatabase('comments');
   const select = `
-    SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source, r.semester AS review_semester,
-      sc.professor_id, p.name AS professor_name,
-      sc.course_id, c.code AS course_code, c.title AS course_title
-    FROM student_comments sc
-    LEFT JOIN reviews r ON r.id = (to_jsonb(sc)->>'review_id') AND r.published AND r.course_id = sc.course_id AND r.professor_id = sc.professor_id
-    JOIN professors p ON p.id = sc.professor_id
-    LEFT JOIN courses c ON c.id = sc.course_id
+    SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source, sc.review_semester,
+      sc.professor_id, sc.professor_name, sc.course_id, sc.course_code, sc.course_title,
+      sc.source_url, sc.source_professor_id
+    FROM public_written_reviews sc
   `;
   let rows: DbRow[];
   let countRows: DbRow[];
@@ -357,24 +355,22 @@ async function readCommentsPage(rawQuery: string, rawPage: number): Promise<Pagi
     [rows, countRows] = (await Promise.all([
       sql.query(`${select}
         WHERE sc.published AND (
-          sc.message ILIKE $1 OR p.name ILIKE $1 OR
-          c.code ILIKE $1 OR c.title ILIKE $1
+          sc.message ILIKE $1 OR sc.professor_name ILIKE $1 OR
+          sc.course_code ILIKE $1 OR sc.course_title ILIKE $1
         )
         ORDER BY sc.created_at DESC, sc.id DESC
         LIMIT $2 OFFSET $3`, [pattern, EVALUATION_PAGE_SIZE, offset]),
       sql.query(`SELECT count(*)::integer AS total
-        FROM student_comments sc
-        JOIN professors p ON p.id = sc.professor_id
-        LEFT JOIN courses c ON c.id = sc.course_id
+        FROM public_written_reviews sc
         WHERE sc.published AND (
-          sc.message ILIKE $1 OR p.name ILIKE $1 OR
-          c.code ILIKE $1 OR c.title ILIKE $1
+          sc.message ILIKE $1 OR sc.professor_name ILIKE $1 OR
+          sc.course_code ILIKE $1 OR sc.course_title ILIKE $1
         )`, [pattern]),
     ])) as [DbRow[], DbRow[]];
   } else {
     [rows, countRows] = (await Promise.all([
       sql.query(`${select} WHERE sc.published ORDER BY sc.created_at DESC, sc.id DESC LIMIT $1 OFFSET $2`, [EVALUATION_PAGE_SIZE, offset]),
-      sql`SELECT count(*)::integer AS total FROM student_comments WHERE published`,
+      sql`SELECT count(*)::integer AS total FROM public_written_reviews`,
     ])) as [DbRow[], DbRow[]];
   }
 
@@ -428,7 +424,7 @@ const readCourseDetail = async (id: string): Promise<CourseDetail | null> => {
     sql`
       WITH known_instructors AS (
         SELECT professor_id FROM reviews WHERE published AND course_id = ${id} AND professor_id IS NOT NULL
-        UNION SELECT professor_id FROM student_comments WHERE published AND course_id = ${id}
+        UNION SELECT professor_id FROM public_written_reviews WHERE course_id = ${id} AND professor_id IS NOT NULL
       )
       SELECT p.id, p.name, p.titles, count(r.id)::integer AS review_count,
         avg(r.course_overall) AS course_overall,
@@ -440,14 +436,11 @@ const readCourseDetail = async (id: string): Promise<CourseDetail | null> => {
       ORDER BY review_count DESC, p.name ASC
     `,
     sql`
-      SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source, r.semester AS review_semester,
-        sc.professor_id, p.name AS professor_name,
-        sc.course_id, c.code AS course_code, c.title AS course_title
-      FROM student_comments sc
-      LEFT JOIN reviews r ON r.id = (to_jsonb(sc)->>'review_id') AND r.published AND r.course_id = sc.course_id AND r.professor_id = sc.professor_id
-      JOIN professors p ON p.id = sc.professor_id
-      LEFT JOIN courses c ON c.id = sc.course_id
-      WHERE sc.published AND sc.course_id = ${id}
+      SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source, sc.review_semester,
+        sc.professor_id, sc.professor_name, sc.course_id, sc.course_code, sc.course_title,
+        sc.source_url, sc.source_professor_id
+      FROM public_written_reviews sc
+      WHERE sc.course_id = ${id}
       ORDER BY sc.created_at DESC, sc.id DESC
     `,
     sql`
@@ -525,7 +518,7 @@ const readProfessorDetail = async (id: string): Promise<ProfessorDetail | null> 
     sql`
       WITH known_courses AS (
         SELECT course_id FROM reviews WHERE published AND professor_id = ${id} AND course_id IS NOT NULL
-        UNION SELECT course_id FROM student_comments WHERE published AND professor_id = ${id} AND course_id IS NOT NULL
+        UNION SELECT course_id FROM public_written_reviews WHERE professor_id = ${id} AND course_id IS NOT NULL
       )
       SELECT c.id, c.code, c.title, c.subject, count(r.id)::integer AS review_count,
         avg(r.course_overall) AS course_overall,
@@ -537,15 +530,12 @@ const readProfessorDetail = async (id: string): Promise<ProfessorDetail | null> 
       ORDER BY review_count DESC, c.code ASC
     `,
     sql`
-      SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source, r.semester AS review_semester,
-        sc.professor_id, p.name AS professor_name,
-        sc.course_id, c.code AS course_code, c.title AS course_title
-      FROM student_comments sc
-      LEFT JOIN reviews r ON r.id = (to_jsonb(sc)->>'review_id') AND r.published AND r.course_id = sc.course_id AND r.professor_id = sc.professor_id
-      JOIN professors p ON p.id = sc.professor_id
-      LEFT JOIN courses c ON c.id = sc.course_id
-      WHERE sc.published AND sc.professor_id = ${id}
-      ORDER BY sc.created_at DESC
+      SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source, sc.review_semester,
+        sc.professor_id, sc.professor_name, sc.course_id, sc.course_code, sc.course_title,
+        sc.source_url, sc.source_professor_id
+      FROM public_written_reviews sc
+      WHERE sc.professor_id = ${id}
+      ORDER BY sc.created_at DESC, sc.id DESC
     `,
     sql`
       SELECT r.id, r.semester, r.section, r.course_id, r.course_code,
@@ -617,7 +607,7 @@ async function readCourseProfessors(courseId: string): Promise<ReviewSelection[]
   const rows = await sql`SELECT p.id, p.name, p.titles
     FROM professors p
     WHERE EXISTS (SELECT 1 FROM reviews r WHERE r.published AND r.course_id = ${courseId} AND r.professor_id = p.id)
-      OR EXISTS (SELECT 1 FROM student_comments sc WHERE sc.published AND sc.course_id = ${courseId} AND sc.professor_id = p.id)
+      OR EXISTS (SELECT 1 FROM public_written_reviews sc WHERE sc.course_id = ${courseId} AND sc.professor_id = p.id)
     ORDER BY p.name, p.id`;
   return rows.map(row => ({ id: String(row.id), primary: String(row.name), secondary: asStringArray(row.titles).join(' · ') || 'Boston College faculty' }));
 }

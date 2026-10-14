@@ -2,8 +2,16 @@ import type { StudentComment } from "./types";
 
 export type ReviewSort = "newest" | "oldest" | "term";
 
+export function reviewCourseKey(comment: StudentComment): string {
+  return comment.courseId ?? (comment.courseCode ? `code:${comment.courseCode.toUpperCase().replace(/[^A-Z0-9]/g, "")}` : "general");
+}
+
+export function reviewProfessorHref(comment: StudentComment): string {
+  return comment.professorId.startsWith("rmp:") ? `/comments?q=${encodeURIComponent(comment.professorName)}` : `/professors/${comment.professorId}`;
+}
+
 export function browseReviews(comments: StudentComment[], context: "course" | "professor", selected: string, sort: ReviewSort): StudentComment[] {
-  return comments.filter(comment => !selected || (context === "course" ? comment.professorId : comment.courseId ?? "general") === selected)
+  return comments.filter(comment => !selected || (context === "course" ? comment.professorId : reviewCourseKey(comment)) === selected)
     .sort((a, b) => {
       if (sort === "term") {
         const termValue = (term: string | null) => {

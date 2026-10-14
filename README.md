@@ -20,15 +20,15 @@ No account needed. Not affiliated with or operated by Boston College.
 - Share course and professor pages with their own branded previews.
 
 The archive includes recovered reviews from the original **EagleEval** and new
-EagleEvals submissions, labeled by source. Historical numerical records summarize
+EagleEvals submissions. Historical numerical records summarize
 course sections and may have no written feedback. Rating counts and written-review
 counts are shown separately.
 
-Matched professor pages also load clearly attributed **Rate My Professors**
-reviews. Course pages and comparisons request reviews only for the selected
-professor and course. RMP feedback stays separate from the recovered archive,
-site-wide review counts, and EagleEvals numerical scores. Ambiguous names are
-not automatically matched.
+Written feedback appears in one collection across course pages, professor pages,
+comparisons, search counts, and the review archive. The collection includes a
+recovered Boston College Rate My Professors snapshot. Original documents and IDs
+remain separate internally; imported comments do not change numerical evaluation
+averages. Comments without a verified catalog match remain searchable in the archive.
 
 ## Development
 

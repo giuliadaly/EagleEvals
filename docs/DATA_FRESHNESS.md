@@ -36,17 +36,20 @@ Any future editing or moderation endpoint must call the same expiration helper.
 
 ## Query work
 
-RMP reviews are requested after the detail page renders, for one selected
-professor and optionally one course. No RMP request is part of the homepage,
-catalog, core page render, submission transaction, or database import. A failed
-provider request produces a retry state while native content remains readable.
-Verified profile matches cache for 24 hours; successful ten-review pages
-revalidate after 15 minutes. Provider errors are thrown before entering the
-result cache and API error responses are not cached. Existing pages can remain
-visible while a stale entry revalidates under Next's Data Cache semantics.
-Pagination uses RMP cursors and IDs rather than a fixed total-review limit.
-Source IDs, original posting dates and class codes are preserved; unknown
-semesters remain unknown, and RMP text is never imported as native EagleEval data.
+Recovered external comments live in separate source tables and join native
+comments through `public_written_reviews`. Detail pages query only the selected
+course or professor, while the archive paginates the combined collection. Catalog
+and search counts use that same collection. Visitors do not trigger a separate
+provider crawl. Numerical evaluation averages still use only `reviews`.
+
+External recovery is an explicit snapshot/import operation, not a live
+subscription. Future source changes require another verified import. The recovery
+command queries every BC profile, including those reporting zero ratings, and
+follows cursors to exhaustion. Imported IDs, text, dates, class codes and raw
+documents are retained. Uncertain catalog links remain null, with comments still
+available in the archive. A complete replacement snapshot can unpublish removed
+external rows without deleting their retained documents or touching native data.
+After publishing an import, purge the public Data Cache before verifying counts.
 
 The ratings archive sorts and selects only the requested review page before
 joining detailed metric columns. Its filtered total is cached independently of
