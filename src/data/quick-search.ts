@@ -1,5 +1,5 @@
 export type QuickCourse = { id: string; code: string; title: string; subject: string; commentCount?: number; reviewCount?: number };
-export type QuickProfessor = { id: string; name: string; title: string | null; commentCount?: number; reviewCount?: number };
+export type QuickProfessor = { id: string; name: string; title: string | null; aliases?: string[]; commentCount?: number; reviewCount?: number };
 export type QuickResults = { courses: QuickCourse[]; professors: QuickProfessor[] };
 export type QuickEvidence = { courses: [string, number, number][]; professors: [string, number, number][] };
 
@@ -24,7 +24,7 @@ export function indexQuickCatalog(catalog: QuickResults) {
   return {
     courses: catalog.courses.map(item => ({ item, text: quickSearchText(`${item.code} ${item.title} ${item.subject}`),
       label: item.code, compact: quickSearchText(item.code).replace(/ /g, ""), title: quickSearchText(item.title), count: item.reviewCount ?? 0 })),
-    professors: catalog.professors.map(item => ({ item, text: quickSearchText(item.name),
+    professors: catalog.professors.map(item => ({ item, text: quickSearchText([item.name, ...(item.aliases ?? [])].join(" ")),
       label: item.name, compact: quickSearchText(item.name).replace(/ /g, ""), title: quickSearchText(item.name), count: item.reviewCount ?? 0 })),
   };
 }

@@ -87,8 +87,6 @@
 .margin .metric { grid-template-columns: minmax(0,1fr); gap: .3rem; }
 .margin .metric dd[data-empty] { text-align: left; max-width: none; }
 .ratingsNote { margin-bottom: 1.4rem; color: var(--muted); font-size: .73rem; line-height: 1.7; }
-.workload { margin-top: 1.6rem; }
-.workload strong { display: block; font-size: 1.2rem; font-weight: 600; color: var(--maroon-deep); margin-bottom: .35rem; }
 .history { margin-top: 3rem; background: var(--detail-margin); border-radius: .3rem; padding: .25rem 1.5rem; }
 .history > summary { font-size: .95rem; padding-block: 1.2rem; }
 .tableWrap { min-width: 0; }
@@ -139,5 +137,6 @@
 .reviewTerm { font-size: .73rem; color: var(--muted); margin: -.25rem 0 .85rem; }
 .reviewFilters { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; margin-bottom: 1rem; }
 .reviewFilters label { min-width: 0; }
-.reviewFoot a.reviewSource { text-decoration: underline; text-underline-offset: .2em; }
+.reviewSearch { display: grid; gap: .45rem; margin-bottom: 1rem; }
+.reviewFoot a.reviewSource { display: inline-flex; align-items: center; min-height: 2.75rem; text-decoration: underline; text-underline-offset: .2em; }
 @media (max-width: 520px) { .reviewFilters { grid-template-columns: minmax(0, 1fr); } }

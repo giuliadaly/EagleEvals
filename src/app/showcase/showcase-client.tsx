@@ -367,7 +367,7 @@ function GuideConcept({ items, selectedIds, toggle, query, setQuery, clearFilter
           <div><span>Challenge</span><strong>High challenge</strong><small>4.3 / 5</small></div>
           <div><span>Attendance</span><strong>Usually matters</strong><small>4.4 / 5 necessary</small></div>
           <div><span>Assignments</span><strong>Usually helpful</strong><small>4.3 / 5</small></div>
-          <div><span>Weekly effort</span><strong>About 4h</strong><small>per week</small></div>
+          <div><span>Weekly effort</span><strong>3.0 / 5</strong><small>1 is very light; 5 is very heavy</small></div>
         </section>
         <section className={styles.guideIndex} aria-labelledby="guide-heading">
           <div className={styles.guideIndexIntro}>

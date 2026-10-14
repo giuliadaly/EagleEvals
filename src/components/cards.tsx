@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { ArrowIcon, BookIcon, PersonIcon } from "@/components/icons";
-import { cleanTitle, commentSourceLabel, formatDate, formatEvaluationCount, formatRating, formatWrittenReviewCount } from "@/data/format";
+import { cleanTitle, commentSourceLabel, formatDate, formatEvaluationCount, formatRating, formatReviewAvailability } from "@/data/format";
 import { reviewProfessorHref } from "@/data/review-browsing";
 import type { CourseSummary, EvaluationRecord, MetricValue, ProfessorSummary, StudentComment } from "@/data/types";
+import { reportHref } from "@/data/report-validation";
 
 export function RatingBadge({ value, label = "Overall", large = false }: { value: number | null; label?: string; large?: boolean }) {
   return <div className={`rating-badge ${large ? "rating-badge-large" : ""}`}><strong>{formatRating(value)}</strong><span>{value === null ? "No rating" : `${label} / 5`}</span></div>;
@@ -11,7 +12,7 @@ export function RatingBadge({ value, label = "Overall", large = false }: { value
 export function CourseCard({ course }: { course: CourseSummary }) {
   return (
     <Link href={`/courses/${course.id}`} className="catalog-record">
-      <div><span className="catalog-code">{course.code}</span><h3>{course.title}</h3><p className="catalog-context">{course.subject}</p><div className="catalog-evidence"><span>{formatEvaluationCount(course.reviewCount)}</span><span className="written-review-status" data-empty={course.commentCount === 0}>{formatWrittenReviewCount(course.commentCount)}</span></div></div>
+      <div><span className="catalog-code">{course.code}</span><h3>{course.title}</h3><p className="catalog-context">{course.subject}</p><div className="catalog-evidence"><span>{formatEvaluationCount(course.reviewCount)}</span><span className="written-review-status" data-empty={course.commentCount === 0}>{formatReviewAvailability(course.commentCount, course.reviewCount, course.courseOverall !== null)}</span></div></div>
       <RatingBadge value={course.courseOverall} label="Course" /><ArrowIcon className="size-4 text-[var(--muted)]" />
     </Link>
   );
@@ -20,7 +21,7 @@ export function CourseCard({ course }: { course: CourseSummary }) {
 export function ProfessorCard({ professor }: { professor: ProfessorSummary }) {
   return (
     <Link href={`/professors/${professor.id}`} className="catalog-record">
-      <div><h3>{professor.name}</h3><p className="catalog-context">{cleanTitle(professor.titles[0]) ?? "Boston College faculty"}</p><div className="catalog-evidence"><span>{formatEvaluationCount(professor.reviewCount)}</span><span className="written-review-status" data-empty={professor.commentCount === 0}>{formatWrittenReviewCount(professor.commentCount)}</span></div></div>
+      <div><h3>{professor.name}</h3><p className="catalog-context">{cleanTitle(professor.titles[0]) ?? "Boston College faculty"}</p><div className="catalog-evidence"><span>{formatEvaluationCount(professor.reviewCount)}</span><span className="written-review-status" data-empty={professor.commentCount === 0}>{formatReviewAvailability(professor.commentCount, professor.reviewCount, professor.instructorOverall !== null)}</span></div></div>
       <RatingBadge value={professor.instructorOverall} label="Instructor" /><ArrowIcon className="size-4 text-[var(--muted)]" />
     </Link>
   );
@@ -67,6 +68,7 @@ export function CommentCard({ comment, context }: { comment: StudentComment; con
         </span> : null}
       </div>
       <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-[var(--ink-soft)]">{comment.message}</p>
+      <Link className="mt-2 inline-flex min-h-11 items-center text-xs text-[var(--muted)] underline underline-offset-4" href={reportHref("review", comment.id)}>Report review</Link>
     </article>
   );
 }
@@ -108,10 +110,12 @@ export function CommentArchiveCard({ comment }: { comment: StudentComment }) {
           <p className="mt-3 font-bold text-[var(--navy)]"><Link href={reviewProfessorHref(comment)} className="hover:text-[var(--blue)]">{comment.professorName}</Link></p>
           {comment.courseId && comment.courseCode ? <p className="mt-1 text-sm text-[var(--muted)]"><Link href={`/courses/${comment.courseId}`} className="hover:text-[var(--blue)]">{comment.courseCode}{comment.courseTitle ? ` · ${comment.courseTitle}` : ""}</Link></p> : null}
           {!comment.courseId && comment.courseCode ? <p className="mt-1 text-sm text-[var(--muted)]">{comment.courseCode}</p> : null}
+          {comment.contextNote ? <p className="mt-1 text-sm text-[var(--muted)]">{comment.contextNote}</p> : null}
         </div>
         {comment.wouldTakeAgain !== null ? <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${comment.wouldTakeAgain ? "bg-[var(--green-pale)] text-[var(--green)]" : "bg-[var(--rose-pale)] text-[var(--rose)]"}`}>{comment.wouldTakeAgain ? "Would take again" : "Would not take again"}</span> : null}
       </div>
       <p className="mt-5 whitespace-pre-wrap border-t border-[var(--line)] pt-5 text-sm leading-7 text-[var(--ink-soft)]">{comment.message}</p>
+      <Link className="mt-2 inline-flex min-h-11 items-center text-xs text-[var(--muted)] underline underline-offset-4" href={reportHref("review", comment.id)}>Report review</Link>
     </article>
   );
 }

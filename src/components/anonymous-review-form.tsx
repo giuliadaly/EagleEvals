@@ -2,121 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useId, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { SemesterPicker } from "./semester-picker";
 import type { ReviewSelection } from "@/data/types";
-import type { QuickCourse, QuickProfessor } from "@/data/quick-search";
-import { refreshSearchEvidence, useCatalogSearch } from "./use-catalog-search";
+import { refreshSearchEvidence } from "./use-catalog-search";
+import { CatalogPicker } from "./catalog-picker";
+import { readReviewSubmissionResponse, uncertainSubmissionMessage, type SubmissionSuccess } from "@/data/review-submission-response";
 import { trackProductEvent } from "./site-telemetry";
 import { reviewDuration, type ProductEvent } from "@/data/telemetry";
-
-type SubmissionSuccess = {
-  message: string;
-  course: { id: string; code: string; title: string };
-  professor: { id: string; name: string };
-};
-
-function CatalogPicker({
-  kind,
-  label,
-  selected,
-  onSelect,
-}: {
-  kind: "course" | "professor";
-  label: string;
-  selected: ReviewSelection | null;
-  onSelect: (value: ReviewSelection | null) => void;
-}) {
-  const inputId = useId();
-  const [query, setQuery] = useState(selected ? selected.primary : "");
-  const { results, loading, failed } = useCatalogSearch(query, !selected, kind);
-  const [open, setOpen] = useState(false);
-  const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => { if (blurTimer.current) clearTimeout(blurTimer.current); }, []);
-
-  const choices = kind === "course" ? results.courses : results.professors;
-
-  return (
-    <div className="relative">
-      <label className="form-label" htmlFor={inputId}>{label}</label>
-      <input
-        id={inputId}
-        className={`form-control ${selected ? "has-selection" : ""}`}
-        value={query}
-        onChange={(event) => {
-          setQuery(event.target.value);
-          onSelect(null);
-          setOpen(event.target.value.trim().length > 0);
-        }}
-        onFocus={() => {
-          if (blurTimer.current) clearTimeout(blurTimer.current);
-          if (!selected && query.trim()) setOpen(true);
-        }}
-        onBlur={() => { blurTimer.current = setTimeout(() => setOpen(false), 120); }}
-        autoComplete="off"
-        role="combobox"
-        aria-expanded={open}
-        aria-controls={`${inputId}-choices`}
-        placeholder={kind === "course" ? "Search course code or title" : "Search professor name"}
-        required
-      />
-      {selected ? (
-        <button
-          type="button"
-          className="absolute bottom-3 right-3 text-xs font-bold text-[var(--blue)]"
-          onClick={() => {
-            onSelect(null);
-            setQuery("");
-            setOpen(false);
-          }}
-        >
-          Change
-        </button>
-      ) : null}
-      {open ? (
-        <div id={`${inputId}-choices`} role="listbox" className="absolute left-0 right-0 top-full z-30 mt-2 max-h-72 overflow-y-auto rounded-[.375rem] border border-[var(--line-strong)] bg-[var(--paper-raised)] p-2 shadow-xl">
-          {loading && choices.length === 0 ? <p className="p-3 text-sm text-[var(--muted)]">Searching…</p> : null}
-          {!loading && choices.length === 0 ? <p className="p-3 text-sm text-[var(--muted)]">{failed ? "Search is temporarily unavailable. Please try again." : "No matches found."}</p> : null}
-          {kind === "course" ? (choices as QuickCourse[]).map((course) => (
-            <button
-              key={course.id}
-              type="button"
-              role="option"
-              aria-selected="false"
-              className="result-row w-full text-left"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => {
-                const value = { id: course.id, primary: course.code, secondary: course.title };
-                onSelect(value);
-                setQuery(value.primary);
-                setOpen(false);
-              }}
-            >
-              <span><strong className="block text-sm text-[var(--ink)]">{course.code} · {course.title}</strong><span className="text-xs text-[var(--muted)]">{course.subject}</span></span>
-            </button>
-          )) : (choices as QuickProfessor[]).map((professor) => (
-            <button
-              key={professor.id}
-              type="button"
-              role="option"
-              aria-selected="false"
-              className="result-row w-full text-left"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => {
-                const value = { id: professor.id, primary: professor.name, secondary: professor.title ?? "Boston College faculty" };
-                onSelect(value);
-                setQuery(value.primary);
-                setOpen(false);
-              }}
-            >
-              <span><strong className="block text-sm text-[var(--ink)]">{professor.name}</strong>{professor.title ? <span className="text-xs text-[var(--muted)]">{professor.title}</span> : null}</span>
-            </button>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
 
 function RatingField({ name, label, hint, required = false }: { name: string; label: string; hint?: string; required?: boolean }) {
   return (
@@ -225,15 +118,14 @@ export function AnonymousReviewForm({
         }),
       });
       failureReason = response.status === 409 ? "duplicate" : response.status === 400 || response.status === 413 ? "validation" : response.status === 404 ? "selection" : "server";
-      const payload = (await response.json()) as SubmissionSuccess & { message: string };
-      if (!response.ok) throw new Error(payload.message || "The review could not be saved.");
+      const payload = await readReviewSubmissionResponse(response);
       refreshSearchEvidence();
       router.refresh();
       setSuccess(payload);
       trackProductEvent({ name: "review_submitted", duration: reviewDuration(performance.now() - (startedAt.current ?? performance.now())) });
     } catch (submissionError) {
       trackProductEvent({ name: "review_error", reason: failureReason });
-      setError(submissionError instanceof Error ? submissionError.message : "The review could not be saved.");
+      setError(failureReason === "network" ? uncertainSubmissionMessage : submissionError instanceof Error ? submissionError.message : "Publishing is temporarily unavailable. Your review is still here. Please try again in a moment.");
     } finally {
       setPending(false);
     }
@@ -255,7 +147,7 @@ export function AnonymousReviewForm({
           <CatalogPicker kind="course" label="Course" selected={course} onSelect={setCourse} />
           <div>
             {course && suggestions?.courseId === course.id && suggestions.professors.length > 0 && !professor ? <label className="mb-4 block"><span className="form-label">Known professors for {course.primary}</span><select className="form-control" value="" onChange={event => setProfessor(suggestions.professors.find(item => item.id === event.target.value) ?? null)}><option value="">Choose one, or search below</option>{suggestions.professors.map(item => <option key={item.id} value={item.id}>{item.primary}</option>)}</select></label> : null}
-            <CatalogPicker key={professor?.id ?? "professor-search"} kind="professor" label="Professor" selected={professor} onSelect={setProfessor} />
+            <CatalogPicker kind="professor" label="Professor" selected={professor} onSelect={setProfessor} />
             {course && !professor ? <p className="mt-2 text-xs leading-5 text-[var(--muted)]">Someone else taught you? Search for any professor.</p> : null}
           </div>
           <SemesterPicker currentYear={currentYear} />

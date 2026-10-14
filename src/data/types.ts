@@ -20,6 +20,7 @@ export type CourseSummary = {
 
 export type ProfessorSummary = {
   id: string;
+  catalogSource?: "legacy_eagleeval" | "external_rmp";
   name: string;
   titles: string[];
   education: string[];
@@ -42,7 +43,6 @@ export type MetricValue = {
   label: string;
   value: number | null;
   description?: string;
-  kind?: "rating" | "hours";
   sampleCount?: number;
 };
 
@@ -92,6 +92,7 @@ export type StudentComment = {
   courseTitle: string | null;
   source: string;
   sourceUrl?: string;
+  contextNote?: string | null;
 };
 
 export type RmpReviewsPage = {
@@ -136,7 +137,6 @@ export type SemesterSummary = {
 export type CourseDetail = {
   course: CourseSummary;
   metrics: MetricValue[];
-  estimatedWeeklyHours: number | null;
   instructors: InstructorCourseRow[];
   comments: StudentComment[];
   semesters: SemesterSummary[];

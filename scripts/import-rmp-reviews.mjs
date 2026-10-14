@@ -1,6 +1,19 @@
 import { pathToFileURL } from 'node:url';
 import { connectDatabase, databaseUrl } from './lib/database.mjs';
 import { loadRmpSnapshot, prepareRmpImport, UPSERT_PROFILES, UPSERT_REVIEWS } from './lib/rmp-recovery.mjs';
+import {recoveryDiff,assertRecoveryCoverage} from './lib/review-associations.mjs';
+
+export async function prepareDatabaseImport(sql,snapshot) {
+  const [professors,courses,relationships,existingProfiles,existingReviews]=await Promise.all([
+    sql.query('SELECT id,name,titles,phone,catalog_source FROM professors'),
+    sql.query('SELECT id,code,title FROM courses'),
+    sql.query('SELECT DISTINCT professor_id,course_id FROM public_rating_records WHERE published AND professor_id IS NOT NULL AND course_id IS NOT NULL'),
+    sql.query('SELECT source_teacher_id,professor_id,fetched_at FROM external_review_profiles'),
+    sql.query('SELECT source_review_id,course_id,published FROM external_reviews'),
+  ]);
+  const plan=prepareRmpImport(snapshot,professors,courses,{catalogProfiles:true,relationships});
+  return {plan,diff:recoveryDiff(plan,existingProfiles,existingReviews)};
+}
 
 export async function stageRmpImport(sql, snapshot, plan, batchSize = 200) {
   await sql.query(`INSERT INTO migration_runs(snapshot_id,source_url,status,expected_counts,verification_manifest)
@@ -8,12 +21,27 @@ export async function stageRmpImport(sql, snapshot, plan, batchSize = 200) {
     ON CONFLICT(snapshot_id) DO UPDATE SET status='importing',expected_counts=EXCLUDED.expected_counts,
       verification_manifest=EXCLUDED.verification_manifest,updated_at=now()`,
   [snapshot.snapshotId, JSON.stringify(plan.coverage), JSON.stringify({ sha256: snapshot.sha256, completeSchoolInventory: true })]);
+  const catalogProfiles=plan.catalogProfiles ?? [];
+  for (let start=0;start<catalogProfiles.length;start+=batchSize) {
+    await sql.query(`INSERT INTO professors(id,name,titles,legacy_document,source_snapshot,catalog_source)
+      SELECT id,name,titles,'{}',$2,'external_rmp'
+      FROM jsonb_to_recordset($1::jsonb) AS x(id text,name text,titles text[])
+      ON CONFLICT(id) DO UPDATE SET name=EXCLUDED.name,titles=EXCLUDED.titles,source_snapshot=EXCLUDED.source_snapshot
+      WHERE professors.catalog_source='external_rmp'`,[JSON.stringify(catalogProfiles.slice(start,start+batchSize)),snapshot.snapshotId]);
+  }
+  for (const alias of plan.nativeAliases ?? []) {
+    await sql.query(`INSERT INTO professor_aliases(alias_id,canonical_id,evidence) VALUES($1,$2,$3::jsonb)
+      ON CONFLICT(alias_id) DO UPDATE SET canonical_id=EXCLUDED.canonical_id,evidence=EXCLUDED.evidence`,[alias.aliasId,alias.canonicalId,JSON.stringify(alias)]);
+  }
   for (const [label, rows, query] of [['profiles', plan.profiles, UPSERT_PROFILES], ['reviews', plan.reviews, UPSERT_REVIEWS]]) {
     for (let start = 0; start < rows.length; start += batchSize) {
       await sql.query(query, [JSON.stringify(rows.slice(start, start + batchSize)), snapshot.snapshotId]);
     }
     console.log(JSON.stringify({ staged: label, records: rows.length }));
   }
+  await sql.query(`UPDATE professors p SET search_names=ARRAY(SELECT DISTINCT n FROM unnest(p.search_names || x.names) n ORDER BY n)
+    FROM (SELECT professor_id,array_agg(DISTINCT display_name) AS names FROM external_review_profiles
+      WHERE professor_id IS NOT NULL GROUP BY professor_id) x WHERE x.professor_id=p.id`);
   const [check] = await sql.query(`SELECT count(*)::integer AS ratings,
     count(*) FILTER(WHERE length(btrim(message))>0)::integer AS written,
     count(*) FILTER(WHERE source_review_id IS DISTINCT FROM source_document->>'id'
@@ -45,18 +73,15 @@ async function run() {
   if (!root) throw new Error('--snapshot is required');
   const snapshot = await loadRmpSnapshot(root);
   const sql = connectDatabase();
-  const [professors, courses] = await Promise.all([
-    sql.query('SELECT id,name,titles FROM professors ORDER BY id'),
-    sql.query('SELECT id,code FROM courses ORDER BY id'),
-  ]);
-  const plan = prepareRmpImport(snapshot, professors, courses);
+  const {plan,diff} = await prepareDatabaseImport(sql,snapshot);
   if (!args.includes('--apply')) {
-    console.log(JSON.stringify({ dryRun: true, sha256: snapshot.sha256, coverage: plan.coverage }, null, 2));
+    console.log(JSON.stringify({ dryRun: true, sha256: snapshot.sha256, coverage: plan.coverage, diff }, null, 2));
     return;
   }
   if (value('--expect-sha256') !== snapshot.sha256 || value('--expected-host') !== new URL(databaseUrl()).hostname) {
     throw new Error('Explicit verified snapshot digest and expected database host are required');
   }
+  assertRecoveryCoverage(diff,snapshot.sha256,value('--approve-coverage-change-sha256'));
   await stageRmpImport(sql, snapshot, plan);
   const results = await sql.transaction(publicationStatements(snapshot.snapshotId).map(([query, parameters]) => sql.query(query, parameters)));
   if (results[2][0].written !== plan.coverage.writtenReviews) throw new Error('Published written-review count mismatch');

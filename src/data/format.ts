@@ -4,13 +4,24 @@ export function formatCount(value: number): string {
   return integerFormatter.format(value);
 }
 
+export function formatReviewCount(value: number, singular = "review", plural = "reviews"): string {
+  return `${formatCount(value)} ${value === 1 ? singular : plural}`;
+}
+
 export function formatWrittenReviewCount(value: number): string {
   if (value === 0) return "No written reviews yet";
   return `${formatCount(value)} written ${value === 1 ? "review" : "reviews"}`;
 }
 
 export function formatEvaluationCount(value: number): string {
-  return `${formatCount(value)} rating ${value === 1 ? "record" : "records"}`;
+  return `${formatCount(value)} numerical ${value === 1 ? "evaluation" : "evaluations"}`;
+}
+
+export function formatReviewAvailability(writtenCount: number, evaluationCount: number, hasOverallRating: boolean): string {
+  if (writtenCount === 0 && evaluationCount > 0) {
+    return hasOverallRating ? "Ratings only · no comments" : "No written comments";
+  }
+  return formatWrittenReviewCount(writtenCount);
 }
 
 export function formatRating(value: number | null): string {

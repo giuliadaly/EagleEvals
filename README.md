@@ -1,10 +1,14 @@
-# EagleEvals
+# EagleEvals (Eagle Evals)
 
-**A little advice before you register.**
+**Independent Boston College course and professor reviews.**
+
+*A little advice before you register.*
 
 [EagleEvals](https://eagleevals.com) is an independent resource for Boston College
 students to find courses, compare professors, and share anonymous reviews.
 No account needed. Not affiliated with or operated by Boston College.
+
+**Live website: [eagleevals.com](https://eagleevals.com)**
 
 [Explore courses](https://eagleevals.com/courses) ·
 [Find a professor](https://eagleevals.com/professors) ·
@@ -13,11 +17,12 @@ No account needed. Not affiliated with or operated by Boston College.
 ## What you can do
 
 - Search courses and professors as you type, including spaced course codes and small typos.
-- Read student reviews alongside numerical ratings, workload details, and semester history.
+- Read student reviews alongside numerical ratings, weekly effort on a 1–5 scale, and semester history.
 - Compare two or three professors for the same course.
-- Filter written reviews by professor or course and sort by posting date or known semester.
+- Search written reviews for exam tips and other details, filter by professor or course, and sort by posting date or known semester.
 - Leave an anonymous review with two overall ratings and a short comment; detailed ratings are optional.
 - Share course and professor pages with their own branded previews.
+- Report a review or request a correction through a private, anonymous form.
 
 The archive includes recovered reviews from the original **EagleEval** and new
 EagleEvals submissions. Historical numerical records summarize
@@ -27,15 +32,18 @@ counts are shown separately.
 Written feedback appears in one collection across course pages, professor pages,
 comparisons, search counts, and the review archive. The collection includes a
 recovered Boston College Rate My Professors snapshot. Original documents and IDs
-remain separate internally; imported comments do not change numerical evaluation
-averages. Comments without a verified catalog match remain searchable in the archive.
+remain separate internally; external ratings are not mixed into numerical evaluation
+averages. Imported archive profiles keep unmatched instructors' comments findable,
+and unverified course codes remain visible in the review archive. Archive profiles
+do not imply a verified current faculty appointment.
 
 ## Development
 
 Built with Next.js App Router, React, TypeScript, and Tailwind CSS. Data lives in
 Neon Postgres; the site is deployed on Vercel.
 
-Use Node.js 22 or newer and the pnpm version specified in `package.json`.
+Use a current Node.js 22 LTS release or newer and the pnpm version specified in
+`package.json`.
 
 ```bash
 git clone https://github.com/giuliadaly/EagleEvals.git
@@ -60,11 +68,19 @@ Open [localhost:3000](http://localhost:3000).
 pnpm lint
 pnpm exec tsc --noEmit
 pnpm test:migration
+python3 -B scripts/recover-rmp-reviews.test.py
 pnpm build
 ```
 
-The tests cover database migration, anonymous submissions, search, and review
-context. A production build needs access to the configured database.
+The tests cover database migration and restoration, preserved source records,
+course/professor associations, anonymous submissions and reports, search,
+keyboard controls, review context, and effort ratings. The Python recovery tests
+require Python 3.10 or newer. A production build needs access to the configured
+database.
+
+`pnpm test:cache` builds and runs the application against an isolated fixture
+database to check fresh submissions and caching without production writes.
+Its build output contains fixture data; rebuild normally before any manual deployment.
 
 ## Deployment and project notes
 
@@ -74,6 +90,7 @@ deploying a change that depends on a database migration.
 
 - [Data freshness, cache checks, and crawler controls](docs/DATA_FRESHNESS.md)
 - [Database setup, recovery, and anonymous review storage](docs/DATABASE.md)
+- [Anonymous reports, moderation, and submission protection](docs/MODERATION.md)
 - [SEO and privacy-conscious telemetry](docs/SEO_AND_TELEMETRY.md)
 - [Design direction](DESIGN.md)
 - [Privacy](https://eagleevals.com/privacy) and [terms](https://eagleevals.com/terms)

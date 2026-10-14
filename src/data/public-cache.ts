@@ -11,7 +11,7 @@ export function publicQuery<Args extends unknown[], Result>(
   read: (...args: Args) => Promise<Result>,
   kind: "reviews" | "catalog" = "reviews",
 ) {
-  return unstable_cache(read, ["public-data-v3-unified-reviews", name], {
+  return unstable_cache(read, ["public-data-v4-review-associations", name], {
     tags: [kind === "catalog" ? CATALOG_DATA : REVIEW_DATA],
     revalidate: kind === "catalog" ? 86_400 : 3_600,
   });

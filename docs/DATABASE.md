@@ -100,3 +100,61 @@ pass. Publication and source reconciliation run in one transaction.
 Unmatched professors and course codes remain searchable in the review archive.
 Do not create false catalog relationships or relabel imported rows as native
 submissions. Source URLs are available through unobtrusive “Original review” links.
+
+## Manual external-review refresh
+
+`scripts/refresh-written-reviews.mjs` combines the existing collector and importer
+with a fresh private database backup and an isolated restore/import check. It is
+a manual maintenance command; no schedule, background service, or new paid
+dependency is enabled. Use an already authorized `DATABASE_URL` supplied through
+the environment or a private environment file.
+The command uses the corresponding direct Neon endpoint for maintenance while
+leaving the application's pooled environment variable unchanged. The expected
+host flag must still match the supplied `DATABASE_URL` hostname exactly.
+Use Node with native WebSocket support. Maintenance holds one session connection
+and reads each table sequentially inside the consistent backup transaction,
+avoiding the aggregate result-size cap of Neon's HTTP transport. Connections
+have bounded timeouts and close when the command completes or fails.
+
+Start a fresh recovery and inspect the plan:
+
+```bash
+node --env-file=.env.local scripts/refresh-written-reviews.mjs --recover
+```
+
+Each `--recover` creates a new private snapshot folder. An optional
+`--output /path/to/new/private/folder` must name a folder that does not already
+exist. Only `--resume /path/to/private/recovery` reuses completed checkpoints from
+an interrupted recovery. To inspect a completed snapshot again, use
+`--snapshot /path/to/private/recovery`; it does not contact the source provider.
+
+The default is a dry run. It backs up every public database table, including
+source documents, private correction reports, relationship evidence, and
+migration metadata, under one read-only repeatable-read snapshot. Backups and
+reports stay outside Git with private permissions. Compressed-file,
+uncompressed-content, and per-table checksums are verified, then every captured
+column is restored into disposable local Postgres before an import is tested.
+New schema columns use their defaults; existing native source rows stay intact.
+
+After reviewing the private plan, apply that exact snapshot to the intended host:
+
+```bash
+node --env-file=.env.local scripts/refresh-written-reviews.mjs \
+  --snapshot /path/to/private/recovery \
+  --apply --expect-sha256 EXACT_SNAPSHOT_DIGEST --expected-host EXACT_DATABASE_HOST
+```
+
+Applying makes another fresh backup and repeats the isolated test before any
+remote changes. Missing source profiles, removed published comments, and lost
+course/professor links block publication. The affected source IDs are written to
+the private `coverage-plan.json`. An owner may approve a reviewed coverage change
+only with `--approve-coverage-change-sha256 EXACT_SNAPSHOT_DIGEST`. Disappeared
+records are retained in storage and unpublished rather than deleted. Review
+text, class codes, dates, and original source JSON are preserved.
+An older source snapshot also cannot replace the newest verified source snapshot
+without that exact approval digest for a deliberate rollback.
+
+After an applied refresh, [purge the production Data Cache and CDN cache](DATA_FRESHNESS.md)
+and verify course, professor, and archive counts. The command does not operate
+Vercel or create an automatic refresh job. Retain the verified backup and source
+snapshot independently of the working checkout.

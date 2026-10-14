@@ -10,6 +10,7 @@ import { SharePage } from "@/components/share-page";
 import { detailSharingMetadata } from "@/data/sharing";
 import { cleanTitle, collegeName, formatCount, formatRating } from "@/data/format";
 import { getCourseDetail } from "@/data/queries";
+import { reportHref } from "@/data/report-validation";
 import type { InstructorCourseRow } from "@/data/types";
 import styles from "@/components/detail-page.module.css";
 
@@ -34,7 +35,7 @@ export default async function CourseDetailPage({ params, searchParams }: { param
   const filters = await searchParams;
   const detail = await getCourseDetail(id);
   if (!detail) notFound();
-  const { course, metrics, estimatedWeeklyHours, instructors, comments, semesters } = detail;
+  const { course, metrics, instructors, comments, semesters } = detail;
   const sort = ["rating", "course", "name"].includes(filters.sort ?? "") ? filters.sort! : "evidence";
   const min = [4, 4.5].includes(Number(filters.min)) ? Number(filters.min) : 0;
   const filtersActive = sort !== "evidence" || min !== 0;
@@ -60,12 +61,13 @@ export default async function CourseDetailPage({ params, searchParams }: { param
             <div className={styles.actions}>
               {instructors.length >= 2 ? <Link className={styles.textLink} href={`/courses/${course.id}/compare`}>Compare professors <ChevronIcon /></Link> : null}
               <SharePage path={`/courses/${course.id}`} title={`${course.code}: ${course.title}`} />
+              <Link href={reportHref("course", course.id)}>Suggest a correction</Link>
             </div>
           </div>
           <div>
-            <p className={styles.ratingLabel}>Numerical ratings</p>
+            <p className={styles.ratingLabel}>Scores from numerical evaluations</p>
             <DetailScore value={course.courseOverall} label="Course rating" precision={1} />
-            <DetailRatingEvidence evaluationCount={course.reviewCount} writtenCount={course.commentCount}>Across {formatCount(instructors.length)} instructor{instructors.length === 1 ? "" : "s"}</DetailRatingEvidence>
+            <DetailRatingEvidence evaluationCount={course.reviewCount} writtenCount={course.commentCount} hasOverallRating={course.courseOverall !== null}>Across {formatCount(instructors.length)} instructor{instructors.length === 1 ? "" : "s"}</DetailRatingEvidence>
           </div>
         </header>
 
@@ -91,7 +93,6 @@ export default async function CourseDetailPage({ params, searchParams }: { param
               <DetailDisclosure id="metrics" title="All evaluation ratings">
                 <p className={styles.ratingsNote}>Averages use numerical 1–5 ratings, including the ratings submitted with new anonymous reviews.</p>
                 <DetailMetrics metrics={metrics} />
-                <div className={styles.workload}><strong>Weekly effort: {estimatedWeeklyHours === null ? "Not collected" : `~${estimatedWeeklyHours} hours`}</strong><p className={styles.detailText}>Estimated from the original workload response buckets. Individual sections may differ.</p></div>
               </DetailDisclosure>
               <a className={styles.textLink} href="#history">Evaluation history <ChevronIcon direction="down" /></a>
               <Link className={styles.textLink} href={`/evaluations?q=${encodeURIComponent(course.code)}`}>Browse all evaluations <ChevronIcon /></Link>

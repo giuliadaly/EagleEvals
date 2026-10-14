@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { database } from "@/data/database";
 import { expireReviewData } from "@/data/public-cache";
 import { validateReviewSubmission } from "@/data/review-validation";
+import { readAnonymousJson } from "@/data/anonymous-request";
 
 type DbRow = Record<string, unknown>;
 
@@ -12,49 +13,43 @@ function newObjectId(): string {
 }
 
 export async function POST(request: Request) {
-  const declaredLength = Number(request.headers.get("content-length") ?? 0);
-  if (declaredLength > 20_000) {
-    return NextResponse.json({ message: "The review is too large." }, { status: 413 });
-  }
-
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ message: "The review could not be read." }, { status: 400 });
-  }
-
-  const result = validateReviewSubmission(body);
+  const parsed = await readAnonymousJson(request);
+  if (!parsed.ok) return NextResponse.json({ message: parsed.message }, { status: parsed.status });
+  const result = validateReviewSubmission(parsed.body);
   if (!result.ok) return NextResponse.json({ message: result.message }, { status: 400 });
   const review = result.data;
-  const sql = database();
-  const selections = (await sql`
-    SELECT c.id AS course_id, c.code AS course_code, c.title AS course_title,
-      p.id AS professor_id, p.name AS professor_name
-    FROM courses c
-    CROSS JOIN professors p
-    WHERE c.id = ${review.courseId} AND p.id = ${review.professorId}
-    LIMIT 1
-  `) as DbRow[];
-  const selected = selections[0];
-  if (!selected) {
-    return NextResponse.json({ message: "That course or professor is no longer available." }, { status: 404 });
-  }
-
+  let selected: DbRow;
   const reviewId = newObjectId();
-  const metricId = newObjectId();
-  const courseCode = String(selected.course_code);
-  const professorName = String(selected.professor_name);
-  const sectionCode = review.section === null ? null : `${courseCode}${String(review.section).padStart(2, "0")}`;
-  const fingerprint = createHash("sha256")
-    .update(JSON.stringify({
-      ...review,
-      message: review.message.toLowerCase().replace(/\s+/g, " "),
-    }))
-    .digest("hex");
-
   try {
+    const sql = database();
+    const selections = (await sql`
+      SELECT c.id AS course_id, c.code AS course_code, c.title AS course_title,
+        p.id AS professor_id, p.name AS professor_name
+      FROM courses c
+      CROSS JOIN professors requested
+      LEFT JOIN professor_aliases a ON a.alias_id=requested.id
+      JOIN professors p ON p.id=COALESCE(a.canonical_id,requested.id)
+      WHERE c.id = ${review.courseId} AND requested.id = ${review.professorId}
+      LIMIT 1
+    `) as DbRow[];
+    if (!selections[0]) {
+      return NextResponse.json({ message: "That course or professor is no longer available." }, { status: 404 });
+    }
+    selected = selections[0];
+    review.professorId = String(selected.professor_id);
+    const metricId = newObjectId();
+    const courseCode = String(selected.course_code);
+    const professorName = String(selected.professor_name);
+    const sectionCode = review.section === null ? null : `${courseCode}${String(review.section).padStart(2, "0")}`;
+    const fingerprint = createHash("sha256")
+      .update(JSON.stringify({
+        ...review,
+        message: review.message.toLowerCase().replace(/\s+/g, " "),
+      }))
+      .digest("hex");
+
     await sql.transaction([
+      sql`SELECT guard_anonymous_review_submission(${review.courseId}, ${review.professorId}, ${review.semester}, ${review.message})`,
       sql`
         INSERT INTO reviews (
           id, course_id, professor_id, section_code, course_code, professor_name,
@@ -99,8 +94,11 @@ export async function POST(request: Request) {
     ]);
   } catch (error) {
     const code = typeof error === "object" && error !== null && "code" in error ? String(error.code) : "";
+    if (code === "P0429") {
+      return NextResponse.json({ message: "Several reviews were just submitted for this class. Please wait a minute and try again." }, { status: 429, headers: { "Retry-After": "60" } });
+    }
     if (code === "23505") {
-      return NextResponse.json({ message: "This exact review has already been submitted." }, { status: 409 });
+      return NextResponse.json({ message: "This review or a very similar one has already been submitted. Please do not submit it again." }, { status: 409 });
     }
     // Database errors can contain submitted values. Log only a bounded category.
     console.error("Anonymous review submission failed", { code: /^[A-Z0-9]{5}$/.test(code) ? code : "unknown" });
@@ -121,7 +119,7 @@ export async function POST(request: Request) {
   return NextResponse.json({
     message: "Your anonymous review is live.",
     reviewId,
-    course: { id: review.courseId, code: courseCode, title: String(selected.course_title) },
-    professor: { id: review.professorId, name: professorName },
+    course: { id: review.courseId, code: String(selected.course_code), title: String(selected.course_title) },
+    professor: { id: review.professorId, name: String(selected.professor_name) },
   }, { status: 201 });
 }
