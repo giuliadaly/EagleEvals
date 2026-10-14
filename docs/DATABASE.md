@@ -70,4 +70,33 @@ are stored as SQL `NULL` and excluded from category averages.
   “Semester not recorded”; never infer a class semester from the posting date.
 
 Apply the required migrations to each target database before deploying code
-that depends on them. The general schema command includes both migrations.
+that depends on them. The general schema command includes all versioned migrations.
+
+## External written-review recovery
+
+Migration `005_external_written_reviews.sql` adds external profile/review tables
+and a unified public written-review view. Apply it before deploying code that
+queries `public_written_reviews`. Original course, professor, evaluation and
+comment rows are preserved. Numerical rating averages do not include external
+rating values.
+
+Use Python 3.10 or newer for a resumable recovery of the public BC profile list:
+
+```bash
+python3 scripts/recover-rmp-reviews.py --output /path/to/private/recovery
+```
+
+Snapshots must remain outside this repository. The collector preserves all
+reachable review pages, queries zero-count profiles too, and stops on an access
+denial. It does not collect reviewer account fields. A complete snapshot is
+required for import; interrupted runs resume from verified profile checkpoints.
+
+Run the importer without `--apply` to inspect matching coverage and the snapshot
+digest. Applying requires that exact digest, an explicit expected database host,
+an owner-approved production connection, a current backup, and an isolated
+restore/import test. New rows remain unpublished until record-content checks
+pass. Publication and source reconciliation run in one transaction.
+
+Unmatched professors and course codes remain searchable in the review archive.
+Do not create false catalog relationships or relabel imported rows as native
+submissions. Source URLs are available through unobtrusive “Original review” links.

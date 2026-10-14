@@ -16,7 +16,7 @@ export function DetailScore({ value, label, precision = 2 }: { value: number | n
 export function DetailRatingEvidence({ evaluationCount, writtenCount, children }: { evaluationCount: number; writtenCount: number; children?: ReactNode }) {
   return <>
     <p className={styles.evidence}>From {formatEvaluationCount(evaluationCount)}{children ? <><br />{children}</> : null}</p>
-    <a className={styles.reviewAvailability} data-empty={writtenCount === 0} href="#comments">{formatWrittenReviewCount(writtenCount)} on EagleEvals <ChevronIcon direction="down" /></a>
+    <a className={styles.reviewAvailability} data-empty={writtenCount === 0} href="#comments">{formatWrittenReviewCount(writtenCount)} <ChevronIcon direction="down" /></a>
     <p className={styles.ratingExplanation}>Older rating records summarize course sections and may have no written feedback. New reviews add ratings and a comment. <Link href="/about#ratings">How scores work</Link></p>
   </>;
 }

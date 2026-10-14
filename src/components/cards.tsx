@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowIcon, BookIcon, PersonIcon } from "@/components/icons";
 import { cleanTitle, commentSourceLabel, formatDate, formatEvaluationCount, formatRating, formatWrittenReviewCount } from "@/data/format";
+import { reviewProfessorHref } from "@/data/review-browsing";
 import type { CourseSummary, EvaluationRecord, MetricValue, ProfessorSummary, StudentComment } from "@/data/types";
 
 export function RatingBadge({ value, label = "Overall", large = false }: { value: number | null; label?: string; large?: boolean }) {
@@ -48,8 +49,8 @@ export function MetricGrid({ metrics }: { metrics: MetricValue[] }) {
 }
 
 export function CommentCard({ comment, context }: { comment: StudentComment; context: "course" | "professor" }) {
-  const href = context === "course" ? `/professors/${comment.professorId}` : comment.courseId ? `/courses/${comment.courseId}` : null;
-  const title = context === "course" ? comment.professorName : comment.courseCode ? `${comment.courseCode} · ${comment.courseTitle}` : "General comment";
+  const href = context === "course" ? reviewProfessorHref(comment) : comment.courseId ? `/courses/${comment.courseId}` : null;
+  const title = context === "course" ? comment.professorName : comment.courseCode ? [comment.courseCode, comment.courseTitle].filter(Boolean).join(" · ") : "General comment";
   return (
     <article className="review-paper">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -100,12 +101,13 @@ export function CommentArchiveCard({ comment }: { comment: StudentComment }) {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
-            <span className={`rounded-full px-3 py-1 ${comment.source === "eagleevals_anonymous" ? "bg-[var(--green-pale)] text-[var(--green)]" : "bg-[var(--wash)] text-[var(--muted)]"}`}>{commentSourceLabel(comment.source)}</span>
+            {comment.sourceUrl ? <a className="text-[var(--muted)] underline underline-offset-4" href={comment.sourceUrl} target="_blank" rel="noopener noreferrer">Original review</a> : null}
             <span className="text-[var(--muted)]">Posted {formatDate(comment.createdAt)}</span>
             <span className="text-[var(--muted)]">{comment.semester ? `Taken ${comment.semester}` : "Semester not recorded"}</span>
           </div>
-          <p className="mt-3 font-bold text-[var(--navy)]"><Link href={`/professors/${comment.professorId}`} className="hover:text-[var(--blue)]">{comment.professorName}</Link></p>
+          <p className="mt-3 font-bold text-[var(--navy)]"><Link href={reviewProfessorHref(comment)} className="hover:text-[var(--blue)]">{comment.professorName}</Link></p>
           {comment.courseId && comment.courseCode ? <p className="mt-1 text-sm text-[var(--muted)]"><Link href={`/courses/${comment.courseId}`} className="hover:text-[var(--blue)]">{comment.courseCode}{comment.courseTitle ? ` · ${comment.courseTitle}` : ""}</Link></p> : null}
+          {!comment.courseId && comment.courseCode ? <p className="mt-1 text-sm text-[var(--muted)]">{comment.courseCode}</p> : null}
         </div>
         {comment.wouldTakeAgain !== null ? <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${comment.wouldTakeAgain ? "bg-[var(--green-pale)] text-[var(--green)]" : "bg-[var(--rose-pale)] text-[var(--rose)]"}`}>{comment.wouldTakeAgain ? "Would take again" : "Would not take again"}</span> : null}
       </div>

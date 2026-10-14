@@ -29,7 +29,7 @@ export function formatDate(value: string): string {
 export function commentSourceLabel(source: string): string {
   if (source === "legacy_eagleeval") return "Original EagleEval review";
   if (source === "eagleevals_anonymous") return "New EagleEvals review";
-  if (source === "ratemyprofessors") return "Rate My Professors review";
+  if (source === "ratemyprofessors") return "Original review";
   return "Attributed external review";
 }
 
