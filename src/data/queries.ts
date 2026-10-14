@@ -64,6 +64,7 @@ function mapProfessor(row: DbRow): ProfessorSummary {
   return {
     id: String(row.id),
     name: String(row.name),
+    catalogSource: row.catalog_source === "external_rmp" ? "external_rmp" : "legacy_eagleeval",
     titles: asStringArray(row.titles),
     education: asStringArray(row.education),
     phone: row.phone ? String(row.phone) : null,
@@ -90,8 +91,8 @@ const readSiteStats = async (): Promise<SiteStats> => {
   const rows = (await sql`
     SELECT
       (SELECT count(*)::integer FROM courses) AS courses,
-      (SELECT count(*)::integer FROM professors) AS professors,
-      (SELECT count(*)::integer FROM reviews WHERE published) AS reviews,
+      (SELECT count(*)::integer FROM professor_summaries) AS professors,
+      (SELECT count(*)::integer FROM public_rating_records WHERE published) AS reviews,
       (SELECT count(*)::integer FROM public_written_reviews) AS comments
   `) as DbRow[];
   const row = rows[0] ?? {};
@@ -130,11 +131,14 @@ async function readQuickSearchCatalog(): Promise<QuickResults> {
   // Only public suggestion fields: no review text, contact details, or legacy documents.
   const [courses, professors] = await Promise.all([
     sql`SELECT id, code, title, subject FROM courses ORDER BY code, id`,
-    sql`SELECT id, name, titles FROM professors ORDER BY name, id`,
+    sql`SELECT id, name, titles, search_names FROM professor_summaries ORDER BY name, id`,
   ]) as [DbRow[], DbRow[]];
   return {
     courses: courses.map(row => ({ id: String(row.id), code: String(row.code), title: String(row.title), subject: String(row.subject) })),
-    professors: professors.map(row => ({ id: String(row.id), name: String(row.name), title: cleanTitle(asStringArray(row.titles)[0]) })),
+    professors: professors.map(row => {
+      const aliases = asStringArray(row.search_names).filter(name => name !== String(row.name));
+      return { id: String(row.id), name: String(row.name), ...(aliases.length ? { aliases } : {}), title: cleanTitle(asStringArray(row.titles)[0]) };
+    }),
   };
 }
 
@@ -242,6 +246,7 @@ function mapComment(row: DbRow): StudentComment {
     courseTitle: row.course_title ? String(row.course_title) : null,
     source: String(row.source ?? "legacy_eagleeval"),
     ...(row.source_url ? { sourceUrl: String(row.source_url) } : {}),
+    contextNote: row.context_note ? String(row.context_note) : null,
   };
 }
 
@@ -269,7 +274,7 @@ function mapEvaluation(row: DbRow): EvaluationRecord {
       { label: "Clear explanations", value: asNumber(row.instructor_clear_explanations) },
       { label: "Available for help", value: asNumber(row.available_for_help_outside_class) },
       { label: "Stimulated interest", value: asNumber(row.stimulated_interest) },
-      { label: "Weekly effort", value: asNumber(row.effort_average_hours_weekly) },
+      { label: "Weekly effort", value: asNumber(row.effort_average_hours_weekly), description: "1 is very light; 5 is very heavy" },
     ],
   };
 }
@@ -284,7 +289,7 @@ const evaluationSelect = `
     m.instructor_clear_explanations, m.instructor_prepared,
     m.stimulated_interest, m.assignments_helpful,
     m.effort_average_hours_weekly
-  FROM reviews r
+  FROM public_rating_records r
   LEFT JOIN courses c ON c.id = r.course_id
   LEFT JOIN review_metrics m ON m.review_id = r.id
 `;
@@ -319,11 +324,11 @@ async function readEvaluationsPage(rawQuery: string, rawPage: number): Promise<P
     sql.query(`WITH page AS MATERIALIZED (
       SELECT r.id, r.semester, r.section, r.section_code, r.course_overall,
         r.instructor_overall, r.course_id, r.course_code, r.professor_id,
-        r.professor_name, r.source, r.submitted_at FROM reviews r
+        r.professor_name, r.source, r.submitted_at FROM public_rating_records r
       ${query ? 'LEFT JOIN courses c ON c.id = r.course_id' : ''}
       WHERE ${where} ${order}
       LIMIT $${query ? 2 : 1} OFFSET $${query ? 3 : 2}
-    ) ${evaluationSelect.replace('FROM reviews r', 'FROM page r')} ${order}`, parameters) as Promise<DbRow[]>,
+    ) ${evaluationSelect.replace('FROM public_rating_records r', 'FROM page r')} ${order}`, parameters) as Promise<DbRow[]>,
     getEvaluationCount(query),
   ]);
   return {
@@ -344,7 +349,7 @@ async function readCommentsPage(rawQuery: string, rawPage: number): Promise<Pagi
   const select = `
     SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source, sc.review_semester,
       sc.professor_id, sc.professor_name, sc.course_id, sc.course_code, sc.course_title,
-      sc.source_url, sc.source_professor_id
+      sc.source_url, sc.source_professor_id, sc.context_note
     FROM public_written_reviews sc
   `;
   let rows: DbRow[];
@@ -392,7 +397,7 @@ async function readReviewSelections(courseId?: string, professorId?: string): Pr
   const sql = readDatabase('review-selections');
   const [courseRows, professorRows] = (await Promise.all([
     validCourseId ? sql`SELECT id, code, title FROM courses WHERE id = ${validCourseId} LIMIT 1` : Promise.resolve([]),
-    validProfessorId ? sql`SELECT id, name, titles FROM professors WHERE id = ${validProfessorId} LIMIT 1` : Promise.resolve([]),
+    validProfessorId ? sql`SELECT p.id,p.name,p.titles FROM professors requested LEFT JOIN professor_aliases a ON a.alias_id=requested.id JOIN professors p ON p.id=COALESCE(a.canonical_id,requested.id) WHERE requested.id=${validProfessorId} LIMIT 1` : Promise.resolve([]),
   ])) as [DbRow[], DbRow[]];
 
   return {
@@ -416,14 +421,15 @@ const readCourseDetail = async (id: string): Promise<CourseDetail | null> => {
         avg(m.course_intellectually_challenging) AS challenging,
         avg(m.attendance_necessary) AS attendance,
         avg(m.assignments_helpful) AS assignments,
-        avg(m.effort_average_hours_weekly) AS effort
-      FROM reviews r
+        avg(m.effort_average_hours_weekly) AS effort,
+        count(m.effort_average_hours_weekly)::integer AS effort_count
+      FROM public_rating_records r
       JOIN review_metrics m ON m.review_id = r.id
       WHERE r.published AND r.course_id = ${id}
     `,
     sql`
       WITH known_instructors AS (
-        SELECT professor_id FROM reviews WHERE published AND course_id = ${id} AND professor_id IS NOT NULL
+        SELECT professor_id FROM public_rating_records WHERE published AND course_id = ${id} AND professor_id IS NOT NULL
         UNION SELECT professor_id FROM public_written_reviews WHERE course_id = ${id} AND professor_id IS NOT NULL
       )
       SELECT p.id, p.name, p.titles, count(r.id)::integer AS review_count,
@@ -431,14 +437,14 @@ const readCourseDetail = async (id: string): Promise<CourseDetail | null> => {
         avg(r.instructor_overall) AS instructor_overall, array_agg(DISTINCT r.semester) AS semesters
       FROM known_instructors k
       JOIN professors p ON p.id = k.professor_id
-      LEFT JOIN reviews r ON r.professor_id = p.id AND r.published AND r.course_id = ${id}
+      LEFT JOIN public_rating_records r ON r.professor_id = p.id AND r.published AND r.course_id = ${id}
       GROUP BY p.id, p.name, p.titles
       ORDER BY review_count DESC, p.name ASC
     `,
     sql`
       SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source, sc.review_semester,
         sc.professor_id, sc.professor_name, sc.course_id, sc.course_code, sc.course_title,
-        sc.source_url, sc.source_professor_id
+        sc.source_url, sc.source_professor_id, sc.context_note
       FROM public_written_reviews sc
       WHERE sc.course_id = ${id}
       ORDER BY sc.created_at DESC, sc.id DESC
@@ -447,7 +453,7 @@ const readCourseDetail = async (id: string): Promise<CourseDetail | null> => {
       SELECT semester, count(*)::integer AS review_count,
         avg(course_overall) AS course_overall,
         avg(instructor_overall) AS instructor_overall
-      FROM reviews
+      FROM public_rating_records
       WHERE published AND course_id = ${id}
       GROUP BY semester
     `,
@@ -460,8 +466,8 @@ const readCourseDetail = async (id: string): Promise<CourseDetail | null> => {
     { label: "Challenge", value: asNumber(metric.challenging), description: "How intellectually challenging students found it" },
     { label: "Attendance", value: asNumber(metric.attendance), description: "How necessary attendance was" },
     { label: "Assignments", value: asNumber(metric.assignments), description: "How helpful assignments were" },
+    { label: "Weekly effort", value: asNumber(metric.effort), sampleCount: asCount(metric.effort_count), description: "1 is very light; 5 is very heavy" },
   ];
-  const effort = asNumber(metric.effort);
 
   const instructors: InstructorCourseRow[] = instructorRows.map((row) => ({
     latestSemester: asStringArray(row.semesters).sort((a, b) => semesterSortValue(b) - semesterSortValue(a))[0] ?? null,
@@ -479,7 +485,6 @@ const readCourseDetail = async (id: string): Promise<CourseDetail | null> => {
   return {
     course: mapCourse(courseRows[0]),
     metrics,
-    estimatedWeeklyHours: effort === null ? null : Math.max(1, Math.round(effort * 4) / 2 - 1),
     instructors,
     comments: commentRows.map(mapComment),
     semesters,
@@ -489,6 +494,9 @@ const readCourseDetail = async (id: string): Promise<CourseDetail | null> => {
 const readProfessorDetail = async (id: string): Promise<ProfessorDetail | null> => {
   if (!/^[0-9a-f]{24}$/.test(id)) return null;
   const sql = readDatabase('professor-detail');
+  const identity = await sql`SELECT COALESCE(a.canonical_id,p.id) AS id FROM professors p LEFT JOIN professor_aliases a ON a.alias_id=p.id WHERE p.id=${id}`;
+  if (!identity[0]) return null;
+  id = String(identity[0].id);
   const [professorRows, metricRows, courseRows, commentRows, evaluationRows] = (await Promise.all([
     sql`SELECT * FROM professor_summaries WHERE id = ${id} LIMIT 1`,
     sql`
@@ -511,13 +519,13 @@ const readProfessorDetail = async (id: string): Promise<ProfessorDetail | null> 
         count(m.assignments_helpful)::integer AS assignments_count,
         avg(m.effort_average_hours_weekly) AS effort,
         count(m.effort_average_hours_weekly)::integer AS effort_count
-      FROM reviews r
+      FROM public_rating_records r
       JOIN review_metrics m ON m.review_id = r.id
       WHERE r.published AND r.professor_id = ${id}
     `,
     sql`
       WITH known_courses AS (
-        SELECT course_id FROM reviews WHERE published AND professor_id = ${id} AND course_id IS NOT NULL
+        SELECT course_id FROM public_rating_records WHERE published AND professor_id = ${id} AND course_id IS NOT NULL
         UNION SELECT course_id FROM public_written_reviews WHERE professor_id = ${id} AND course_id IS NOT NULL
       )
       SELECT c.id, c.code, c.title, c.subject, count(r.id)::integer AS review_count,
@@ -525,14 +533,14 @@ const readProfessorDetail = async (id: string): Promise<ProfessorDetail | null> 
         avg(r.instructor_overall) AS instructor_overall
       FROM known_courses k
       JOIN courses c ON c.id = k.course_id
-      LEFT JOIN reviews r ON r.course_id = c.id AND r.published AND r.professor_id = ${id}
+      LEFT JOIN public_rating_records r ON r.course_id = c.id AND r.published AND r.professor_id = ${id}
       GROUP BY c.id, c.code, c.title, c.subject
       ORDER BY review_count DESC, c.code ASC
     `,
     sql`
       SELECT sc.id, sc.message, sc.would_take_again, sc.created_at, sc.source, sc.review_semester,
         sc.professor_id, sc.professor_name, sc.course_id, sc.course_code, sc.course_title,
-        sc.source_url, sc.source_professor_id
+        sc.source_url, sc.source_professor_id, sc.context_note
       FROM public_written_reviews sc
       WHERE sc.professor_id = ${id}
       ORDER BY sc.created_at DESC, sc.id DESC
@@ -541,7 +549,7 @@ const readProfessorDetail = async (id: string): Promise<ProfessorDetail | null> 
       SELECT r.id, r.semester, r.section, r.course_id, r.course_code,
         c.title AS course_title, r.course_overall, r.instructor_overall,
         r.source, r.submitted_at
-      FROM reviews r
+      FROM public_rating_records r
       LEFT JOIN courses c ON c.id = r.course_id
       WHERE r.published AND r.professor_id = ${id}
     `,
@@ -556,7 +564,7 @@ const readProfessorDetail = async (id: string): Promise<ProfessorDetail | null> 
     { label: "Assignments helpful", value: asNumber(metric.assignments), sampleCount: asCount(metric.assignments_count) },
     { label: "Attendance necessary", value: asNumber(metric.attendance), sampleCount: asCount(metric.attendance_count) },
     { label: "Course intellectually challenging", value: asNumber(metric.challenging), sampleCount: asCount(metric.challenging_count), description: "Higher means more challenging" },
-    { label: "Average weekly effort", value: asNumber(metric.effort), sampleCount: asCount(metric.effort_count), kind: "hours", description: "Reported time outside class" },
+    { label: "Weekly effort", value: asNumber(metric.effort), sampleCount: asCount(metric.effort_count), description: "1 is very light; 5 is very heavy" },
     { label: "Instructor prepared", value: asNumber(metric.prepared), sampleCount: asCount(metric.prepared_count) },
     { label: "Clear explanations", value: asNumber(metric.clear_explanations), sampleCount: asCount(metric.clear_explanations_count) },
   ];
@@ -597,7 +605,7 @@ const readProfessorDetail = async (id: string): Promise<ProfessorDetail | null> 
 async function readCatalogPaths(): Promise<string[]> {
   const sql = readDatabase('paths');
   const rows = await sql`SELECT '/courses/' || id AS path FROM courses
-    UNION ALL SELECT '/professors/' || id AS path FROM professors`;
+    UNION ALL SELECT '/professors/' || id AS path FROM professor_summaries`;
   return rows.map(row => String(row.path));
 }
 
@@ -605,8 +613,8 @@ async function readCourseProfessors(courseId: string): Promise<ReviewSelection[]
   if (!/^[0-9a-f]{24}$/.test(courseId)) return [];
   const sql = readDatabase('course-professors');
   const rows = await sql`SELECT p.id, p.name, p.titles
-    FROM professors p
-    WHERE EXISTS (SELECT 1 FROM reviews r WHERE r.published AND r.course_id = ${courseId} AND r.professor_id = p.id)
+    FROM professor_summaries p
+    WHERE EXISTS (SELECT 1 FROM public_rating_records r WHERE r.published AND r.course_id = ${courseId} AND r.professor_id = p.id)
       OR EXISTS (SELECT 1 FROM public_written_reviews sc WHERE sc.course_id = ${courseId} AND sc.professor_id = p.id)
     ORDER BY p.name, p.id`;
   return rows.map(row => ({ id: String(row.id), primary: String(row.name), secondary: asStringArray(row.titles).join(' · ') || 'Boston College faculty' }));
@@ -615,10 +623,10 @@ async function readCourseProfessors(courseId: string): Promise<ReviewSelection[]
 async function readEvaluationCount(query: string): Promise<number> {
   const sql = readDatabase('evaluation-count');
   const rows = query ? await sql.query(`SELECT count(*)::integer AS total
-    FROM reviews r LEFT JOIN courses c ON c.id = r.course_id
+    FROM public_rating_records r LEFT JOIN courses c ON c.id = r.course_id
     WHERE r.published AND (r.course_code ILIKE $1 OR c.title ILIKE $1 OR
       r.professor_name ILIKE $1 OR r.semester ILIKE $1)`, [`%${query}%`])
-    : await sql`SELECT count(*)::integer AS total FROM reviews WHERE published`;
+    : await sql`SELECT count(*)::integer AS total FROM public_rating_records WHERE published`;
   return asCount(rows[0]?.total);
 }
 

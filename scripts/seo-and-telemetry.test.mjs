@@ -5,6 +5,7 @@ import vm from 'node:vm';
 import ts from 'typescript';
 import { directoryMetadata, breadcrumbData, serializeJsonLd } from '../src/data/seo.ts';
 import { telemetryUrl, redactTelemetry, reviewDuration, productEventData } from '../src/data/telemetry.ts';
+import { readReviewSubmissionResponse, uncertainSubmissionMessage } from '../src/data/review-submission-response.ts';
 
 const id = '65c4299149939741c6777cc2';
 test('telemetry strips search, prefill, campaign, credential and fragment data', () => {
@@ -103,11 +104,12 @@ test('real form handlers count starts once, report failures, and only count conf
   const fields={semester:'Fall 2026',courseOverall:'5',instructorOverall:'4',message:'Private draft written only for a mocked request.',reviewConfirmed:'on'};
   const {AnonymousReviewForm}=loadComponent('src/components/anonymous-review-form.tsx', {
     react,'react/jsx-runtime':jsx,'next/link':{},'./semester-picker':{},'./use-catalog-search':{refreshSearchEvidence(){}},'next/navigation':{useRouter:()=>({refresh(){}})},
+    './catalog-picker':{}, '@/data/review-submission-response':{readReviewSubmissionResponse,uncertainSubmissionMessage},
     './site-telemetry':{trackProductEvent:event=>events.push(JSON.parse(JSON.stringify(event)))},
     '@/data/telemetry':{reviewDuration}
   }, {
     performance:{now:()=>clock}, FormData:class {get(key){return fields[key]??null;}},
-    fetch:async()=>{posts++; if(offline)throw new Error('offline');return {ok:status===201,status,json:async()=>({message:'server message',course:{id,code:'ENGL1010'},professor:{id,name:'Fixture'}})};}
+    fetch:async()=>{posts++; if(offline)throw new Error('offline');return {ok:status===201,status,json:async()=>({message:'server message',course:{id,code:'ENGL1010',title:'Fixture course'},professor:{id,name:'Fixture'}})};}
   });
   const selection={id,primary:'Fixture',secondary:'Fixture'};
   const render=()=>{cursor=0;return AnonymousReviewForm({initialCourse:selection,initialProfessor:selection,currentYear:2026});};

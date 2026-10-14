@@ -6,7 +6,7 @@ export const metadata: Metadata = { alternates: { canonical: "/privacy" }, title
 export default function PrivacyPage() {
   return (
     <InfoPage eyebrow="Policy" title="Privacy" intro="EagleEvals makes course and professor evaluations publicly readable and accepts new reviews without user accounts or identity fields.">
-      <p><strong>Last updated: September 8, 2026.</strong></p>
+      <p><strong>Last updated: October 14, 2026.</strong></p>
       <h2>Information on EagleEvals</h2>
       <p>The site displays course information, public faculty details, aggregated rating results, and anonymous written student reviews. Reviews recovered from the original EagleEval are not connected to names, accounts, or other user identifiers.</p>
       <h2>Information collected when you visit</h2>
@@ -21,6 +21,7 @@ export default function PrivacyPage() {
       <h2>Searches and cookies</h2>
       <p>Search terms are used to return matching database records. The application does not set an advertising profile and does not include third-party advertising. Essential hosting or security cookies may be used by infrastructure providers.</p>
       <h2>Corrections and future changes</h2>
+      <p>The contact and correction form saves a private report containing the relevant public record reference, reason, message, status, and timestamps. It does not request or attach identifying information. Please do not put identifying details in the message. Reports are reviewed manually and do not automatically remove content. We cannot send a personal response because the form does not collect contact details.</p>
       <p>Records and submissions may be corrected, unpublished, or removed when necessary. This policy will be updated if EagleEvals later adds accounts or additional data collection.</p>
     </InfoPage>
   );

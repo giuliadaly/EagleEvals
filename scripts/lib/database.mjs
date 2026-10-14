@@ -1,4 +1,5 @@
 import { neon } from '@neondatabase/serverless';
+import { createHash } from 'node:crypto';
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -38,9 +39,22 @@ export async function applyMigrations(sql, migrationsPath) {
   const files = (await readdir(migrationsPath))
     .filter((file) => /^\d+.*\.sql$/.test(file))
     .sort();
+  await sql.query(`CREATE TABLE IF NOT EXISTS schema_migrations (
+    filename text PRIMARY KEY, sha256 text NOT NULL,
+    applied_at timestamptz NOT NULL DEFAULT now()
+  )`);
+  const result = await sql.query('SELECT filename,sha256 FROM schema_migrations');
+  const rows = Array.isArray(result) ? result : result.rows;
+  const applied = new Map(rows.map(row => [row.filename,row.sha256]));
   for (const file of files) {
     const source = await readFile(path.join(migrationsPath, file), 'utf8');
+    const digest = createHash('sha256').update(source).digest('hex');
+    if (applied.has(file)) {
+      if (applied.get(file) !== digest) throw new Error(`Applied migration ${file} has changed; add a new migration instead`);
+      continue;
+    }
     await applySchema(sql, sqlStatements(source));
+    await sql.query('INSERT INTO schema_migrations(filename,sha256) VALUES($1,$2)', [file,digest]);
   }
   return files;
 }

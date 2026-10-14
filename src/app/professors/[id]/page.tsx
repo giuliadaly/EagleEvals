@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronIcon } from "@/components/icons";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { DetailDisclosure, DetailMetrics, DetailReviews, DetailRatingEvidence, DetailScore, preciseRating } from "@/components/detail-page";
 import { Breadcrumbs } from "@/components/page-parts";
 import { SiteFooter } from "@/components/site-footer";
@@ -10,6 +10,7 @@ import { SharePage } from "@/components/share-page";
 import { detailSharingMetadata } from "@/data/sharing";
 import { cleanTitle, formatCount } from "@/data/format";
 import { getProfessorDetail } from "@/data/queries";
+import { reportHref } from "@/data/report-validation";
 import type { ProfessorCourseRow } from "@/data/types";
 import styles from "@/components/detail-page.module.css";
 
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const detail = await getProfessorDetail(id);
   if (!detail) return { alternates: { canonical: `/professors/${id}` }, title: "Professor not found", robots: { index: false, follow: false } };
-  return detailSharingMetadata(`/professors/${id}`, `${detail.professor.name} — Boston College professor reviews`, `Ratings, courses, evaluation history, and anonymous written reviews for ${detail.professor.name} at Boston College.`);
+  return detailSharingMetadata(`/professors/${detail.professor.id}`, `${detail.professor.name} — Boston College professor reviews`, `Ratings, courses, evaluation history, and anonymous written reviews for ${detail.professor.name} at Boston College.`);
 }
 
 function CoursePairing({ course }: { course: ProfessorCourseRow }) {
@@ -33,6 +34,7 @@ export default async function ProfessorDetailPage({ params }: { params: Promise<
   const { id } = await params;
   const detail = await getProfessorDetail(id);
   if (!detail) notFound();
+  if (detail.professor.id !== id) permanentRedirect(`/professors/${detail.professor.id}`);
   const { professor, metrics, courses, comments, evaluations } = detail;
   const titles = professor.titles.map(cleanTitle).filter(Boolean);
   const hasFacultyDetails = Boolean(professor.office || professor.email || professor.phone || professor.education.length);
@@ -47,12 +49,13 @@ export default async function ProfessorDetailPage({ params }: { params: Promise<
             <p className={styles.eyebrow}>Professor profile</p>
             <h1>{professor.name}</h1>
             <p className={styles.subtitle}>{titles.length ? titles.join(" · ") : "Boston College faculty"}</p>
-            <div className={styles.actions}><SharePage path={`/professors/${professor.id}`} title={professor.name} /></div>
+            {professor.catalogSource === "external_rmp" ? <p className={styles.caption}>Imported review profile. A current faculty appointment has not been verified.</p> : null}
+            <div className={styles.actions}><SharePage path={`/professors/${professor.id}`} title={professor.name} /><Link href={reportHref("professor", professor.id)}>Suggest a correction</Link></div>
           </div>
           <div>
-            <p className={styles.ratingLabel}>Numerical ratings</p>
+            <p className={styles.ratingLabel}>Scores from numerical evaluations</p>
             <div className={styles.scoreGroup} aria-label="Professor rating summary"><DetailScore value={professor.instructorOverall} label="Instructor" /><DetailScore value={professor.courseOverall} label="Course" /></div>
-            <DetailRatingEvidence evaluationCount={professor.reviewCount} writtenCount={professor.commentCount}>Latest term: {evaluations[0]?.semester ?? "Unavailable"}</DetailRatingEvidence>
+            <DetailRatingEvidence evaluationCount={professor.reviewCount} writtenCount={professor.commentCount} hasOverallRating={professor.instructorOverall !== null || professor.courseOverall !== null}>Latest term: {evaluations[0]?.semester ?? "Unavailable"}</DetailRatingEvidence>
           </div>
         </header>
 

@@ -10,8 +10,10 @@ export function reviewProfessorHref(comment: StudentComment): string {
   return comment.professorId.startsWith("rmp:") ? `/comments?q=${encodeURIComponent(comment.professorName)}` : `/professors/${comment.professorId}`;
 }
 
-export function browseReviews(comments: StudentComment[], context: "course" | "professor", selected: string, sort: ReviewSort): StudentComment[] {
-  return comments.filter(comment => !selected || (context === "course" ? comment.professorId : reviewCourseKey(comment)) === selected)
+export function browseReviews(comments: StudentComment[], context: "course" | "professor", selected: string, sort: ReviewSort, text = ""): StudentComment[] {
+  const words = text.normalize("NFKC").toLocaleLowerCase().trim().split(/\s+/).filter(Boolean);
+  return comments.filter(comment => (!selected || (context === "course" ? comment.professorId : reviewCourseKey(comment)) === selected)
+    && words.every(word => [comment.message, comment.professorName, comment.courseCode, comment.courseTitle, comment.contextNote].filter(Boolean).join(" ").normalize("NFKC").toLocaleLowerCase().includes(word)))
     .sort((a, b) => {
       if (sort === "term") {
         const termValue = (term: string | null) => {

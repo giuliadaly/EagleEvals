@@ -2,6 +2,7 @@ import Link from "next/link";
 import { formatDate } from "@/data/format";
 import { reviewProfessorHref } from "@/data/review-browsing";
 import type { StudentComment } from "@/data/types";
+import { reportHref } from "@/data/report-validation";
 import styles from "./detail-page.module.css";
 
 export function DetailReview({ comment, context }: { comment: StudentComment; context: "professor" | "course" }) {
@@ -13,10 +14,12 @@ export function DetailReview({ comment, context }: { comment: StudentComment; co
       <time dateTime={comment.createdAt}>Posted {formatDate(comment.createdAt)}</time>
     </div>
     <p className={styles.reviewTerm}>{comment.semester ? `Taken ${comment.semester}` : "Semester not recorded"}</p>
+    {comment.contextNote ? <p className={styles.reviewTerm}>{comment.contextNote}</p> : null}
     <p className={styles.reviewMessage}>{comment.message}</p>
     <div className={styles.reviewFoot}>
       {comment.wouldTakeAgain !== null ? <span className={`${styles.verdict} ${comment.wouldTakeAgain ? styles.positive : styles.negative}`}><span aria-hidden="true">{comment.wouldTakeAgain ? "✓" : "−"}</span>{comment.wouldTakeAgain ? "Would take again" : "Would not take again"}</span> : null}
       {comment.sourceUrl ? <a className={styles.reviewSource} href={comment.sourceUrl} target="_blank" rel="noopener noreferrer">Original review</a> : null}
+      <Link className={styles.reviewSource} href={reportHref("review", comment.id)}>Report review</Link>
     </div>
   </article>;
 }

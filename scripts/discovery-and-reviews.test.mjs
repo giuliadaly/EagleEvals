@@ -12,6 +12,7 @@ import { normalizeCatalogQuery, catalogSearchSql } from '../src/data/catalog-sea
 import { browseReviews } from '../src/data/review-browsing.ts';
 import { comparisonSelection } from '../src/data/comparison.ts';
 import { validateReviewSubmission } from '../src/data/review-validation.ts';
+import { readAnonymousJson } from '../src/data/anonymous-request.ts';
 
 function loadTs(file, dependencies) {
   const source = ts.transpileModule(readFileSync(file, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
@@ -68,10 +69,11 @@ test('search and real submission queries preserve course context and old reviews
     'node:crypto': { createHash, randomBytes }, 'next/cache': { revalidatePath() {} },
     'next/server': { NextResponse: Response }, '@/data/database': { database: () => sql },
     '@/data/review-validation': { validateReviewSubmission },
+    '@/data/anonymous-request': { readAnonymousJson },
   });
   const payload = { courseId: course, professorId: professor, semester: 'Fall 2001', courseOverall: 4,
     instructorOverall: 5, message: 'Clear lectures with useful written feedback on every assignment.', firsthandConfirmed: true, guidelinesAccepted: true };
-  const submit = data => route.POST(new Request('http://localhost/api/reviews', { method: 'POST', body: JSON.stringify(data) }));
+  const submit = data => route.POST(new Request('http://localhost/api/reviews', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }));
   const response = await submit(payload);
   assert.equal(response.status, 201);
   const published = await response.json();

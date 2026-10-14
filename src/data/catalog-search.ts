@@ -5,7 +5,7 @@ export function normalizeCatalogQuery(value: string): string {
 // Both search suggestions and directory filters use the same matching rules.
 // $1 is normalized text; $2 is that text with spaces removed.
 export function catalogMatch(kind: "course" | "professor"): string {
-  const text = kind === "course" ? "code || ' ' || title || ' ' || subject" : "name";
+  const text = kind === "course" ? "code || ' ' || title || ' ' || subject" : "name || ' ' || array_to_string(search_names, ' ')";
   const normalized = `regexp_replace(lower(${text}), '[^[:alnum:]]+', ' ', 'g')`;
   const compact = kind === "course"
     ? "regexp_replace(lower(code), '[^[:alnum:]]', '', 'g')"
