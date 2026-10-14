@@ -91,6 +91,16 @@ export type StudentComment = {
   courseCode: string | null;
   courseTitle: string | null;
   source: string;
+  sourceUrl?: string;
+};
+
+export type RmpReviewsPage = {
+  status: "matched" | "not_found" | "ambiguous";
+  profile: { name: string; url: string; ratingCount: number } | null;
+  comments: StudentComment[];
+  hasNextPage: boolean;
+  endCursor: string | null;
+  courseCode: string | null;
 };
 
 export type EvaluationRecord = {

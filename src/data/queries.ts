@@ -426,12 +426,16 @@ const readCourseDetail = async (id: string): Promise<CourseDetail | null> => {
       WHERE r.published AND r.course_id = ${id}
     `,
     sql`
+      WITH known_instructors AS (
+        SELECT professor_id FROM reviews WHERE published AND course_id = ${id} AND professor_id IS NOT NULL
+        UNION SELECT professor_id FROM student_comments WHERE published AND course_id = ${id}
+      )
       SELECT p.id, p.name, p.titles, count(r.id)::integer AS review_count,
         avg(r.course_overall) AS course_overall,
         avg(r.instructor_overall) AS instructor_overall, array_agg(DISTINCT r.semester) AS semesters
-      FROM reviews r
-      JOIN professors p ON p.id = r.professor_id
-      WHERE r.published AND r.course_id = ${id}
+      FROM known_instructors k
+      JOIN professors p ON p.id = k.professor_id
+      LEFT JOIN reviews r ON r.professor_id = p.id AND r.published AND r.course_id = ${id}
       GROUP BY p.id, p.name, p.titles
       ORDER BY review_count DESC, p.name ASC
     `,
@@ -519,12 +523,16 @@ const readProfessorDetail = async (id: string): Promise<ProfessorDetail | null> 
       WHERE r.published AND r.professor_id = ${id}
     `,
     sql`
+      WITH known_courses AS (
+        SELECT course_id FROM reviews WHERE published AND professor_id = ${id} AND course_id IS NOT NULL
+        UNION SELECT course_id FROM student_comments WHERE published AND professor_id = ${id} AND course_id IS NOT NULL
+      )
       SELECT c.id, c.code, c.title, c.subject, count(r.id)::integer AS review_count,
         avg(r.course_overall) AS course_overall,
         avg(r.instructor_overall) AS instructor_overall
-      FROM reviews r
-      JOIN courses c ON c.id = r.course_id
-      WHERE r.published AND r.professor_id = ${id}
+      FROM known_courses k
+      JOIN courses c ON c.id = k.course_id
+      LEFT JOIN reviews r ON r.course_id = c.id AND r.published AND r.professor_id = ${id}
       GROUP BY c.id, c.code, c.title, c.subject
       ORDER BY review_count DESC, c.code ASC
     `,
@@ -647,8 +655,8 @@ export const getCatalogPaths = publicQuery('paths', readCatalogPaths, 'catalog')
 export const getShareIdentity = publicQuery('share-identity', readShareIdentity, 'catalog');
 export const getReviewSelections = publicQuery('review-selections', readReviewSelections, 'catalog');
 export const getCourseProfessors = publicQuery('course-professors', readCourseProfessors);
-export const getCourseDetail = cache(publicQuery('course-detail', readCourseDetail));
-export const getProfessorDetail = cache(publicQuery('professor-detail', readProfessorDetail));
+export const getCourseDetail = cache(publicQuery('course-detail-v2', readCourseDetail));
+export const getProfessorDetail = cache(publicQuery('professor-detail-v2', readProfessorDetail));
 const cachedSearch = publicQuery('search', readSearchCatalog);
 export const searchCatalog = (query: string, limit = 12) => cachedSearch(normalizeCatalogQuery(query), Number.isFinite(limit) ? Math.max(1, Math.min(Math.floor(limit), 30)) : 12);
 const cachedCourses = publicQuery('courses', readCoursesPage);

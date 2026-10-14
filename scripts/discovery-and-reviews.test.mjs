@@ -139,6 +139,23 @@ test('search and real submission queries preserve course context and old reviews
   assert.ok(archive.slice(0,2).every(item => item.source === 'eagleevals_anonymous'));
   assert.deepEqual(Array.from(archive.slice(2), item => item.section), Array.from({length:64}, (_, i) => i + 1));
   assert.ok(archive.slice(2).every(item => item.metrics.every(metric => metric.value === null)));
+  // Written feedback alone also establishes a course/professor relationship.
+  // Multiple comments must not multiply the numerical evaluation aggregates.
+  const commentOnlyProfessor = '000000000000000000000005';
+  await pg.query(`INSERT INTO professors (id, name, legacy_document, source_snapshot)
+    VALUES ($1, 'Comment Only Professor', '{}', 'test')`, [commentOnlyProfessor]);
+  await pg.query(`INSERT INTO student_comments (id, course_id, professor_id, message, source)
+    VALUES ('comment-only-1', $1, $2, 'First fixture comment.', 'legacy_eagleeval'),
+      ('comment-only-2', $1, $2, 'Second fixture comment.', 'legacy_eagleeval')`, [course, commentOnlyProfessor]);
+  const withCommentOnly = await queries.getCourseDetail(course);
+  const instructor = withCommentOnly.instructors.find(p => p.id === commentOnlyProfessor);
+  assert.equal(instructor.reviewCount, 0);
+  assert.equal(instructor.instructorOverall, null);
+  assert.equal(instructor.latestSemester, null);
+  assert.equal(withCommentOnly.instructors.find(p => p.id === professor).reviewCount, 65);
+  const writtenCourses = (await queries.getProfessorDetail(commentOnlyProfessor)).courses;
+  assert.equal(writtenCourses[0].id, course);
+  assert.equal(writtenCourses[0].reviewCount, 0);
   // Reapplying migrations preserves the old comment and the new semester link.
   await applyMigrations(sql, path.join(process.cwd(), 'database/migrations'));
   assert.equal((await pg.query("SELECT review_id FROM student_comments WHERE id = 'legacy'")).rows[0].review_id, null);
