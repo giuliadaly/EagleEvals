@@ -57,6 +57,6 @@ export function DetailReviews({ comments, context, reviewHref, archiveHref, prof
       {remaining.length ? <details key={`${selected}-${sort}`} className={`${styles.disclosure} ${styles.moreReviews}`}><summary>Read {formatCount(remaining.length)} more reviews</summary><div className={styles.disclosureBody}><div className={styles.reviewList}>{remaining.map(comment => <DetailReview key={comment.id} comment={comment} context={context} />)}</div></div></details> : null}
       {archiveHref ? <Link className={styles.textLink} href={archiveHref}>Browse the review archive <ChevronIcon /></Link> : null}
     </> : <div className={styles.emptyState}><h3>No written reviews on EagleEvals yet</h3><p>Be the first to share what you wish you’d known before taking this {context === "course" ? "course" : "professor’s class"}.</p></div>}
-    {selected !== "general" ? <RmpReviews professor={selectedProfessor} course={selectedCourse} context={context} /> : null}
+    {selected !== "general" && (context === "professor" || choices.length > 0) ? <RmpReviews professor={selectedProfessor} course={selectedCourse} context={context} /> : null}
   </section>;
 }
