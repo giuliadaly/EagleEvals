@@ -7,6 +7,8 @@ export type SiteStats = {
 
 export type CourseSummary = {
   id: string;
+  catalogSource?: "legacy_eagleeval" | "historical_archive";
+  catalogEvidence?: { url: string; label: string }[];
   code: string;
   title: string;
   subject: string;

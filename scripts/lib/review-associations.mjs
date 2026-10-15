@@ -2,6 +2,7 @@ import {createHash} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 
 export const associationEvidence=JSON.parse(readFileSync(new URL('../../database/reference/review-associations.json',import.meta.url),'utf8'));
+export const historicalCourseEvidence=JSON.parse(readFileSync(new URL('../../database/reference/historical-course-codes.json',import.meta.url),'utf8'));
 export const normalizedName=value=>value.normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase()
   .replace(/^(?:dr\.?|prof\.?|professor)\s+/,'').replace(/(?:,?\s+)(?:jr\.?|sr\.?|ii|iii|iv)$/,'')
   .replace(/[’'\.\-]/g,'').replace(/[^\p{L}\p{N}]+/gu,' ').trim();
@@ -9,6 +10,17 @@ export const normalizedCourse=value=>String(value??'').toUpperCase().replace(/[^
 const shortName=value=>{const w=normalizedName(value).split(' ');return w.length>=2?`${w[0]} ${w.at(-1)}`:'';};
 const middle=value=>normalizedName(value).split(' ').slice(1,-1).map(w=>w[0]).join('');
 export const sourceProfessorId=teacherId=>createHash('sha256').update(`eagleevals:external-rmp-teacher:${teacherId}`).digest('hex').slice(0,24);
+export const historicalCourseId=code=>createHash('sha256').update(`eagleevals:historical-course:${code}`).digest('hex').slice(0,24);
+
+export function prepareHistoricalCourses(courses){
+ return historicalCourseEvidence.archiveCourses.map(e=>{
+  const existing=courses.filter(c=>normalizedCourse(c.code)===normalizedCourse(e.code));
+  if(existing.length>1 || (existing.length===1 && (existing[0].id!==historicalCourseId(e.code) || existing[0].catalog_source!=='historical_archive')))
+   throw Error('Historical course conflicts with an existing catalog record; review its evidence before import');
+  return {id:historicalCourseId(e.code),code:e.code,title:e.title,subject:e.department,college:e.college,description:e.description,
+   catalog_source:'historical_archive',catalog_evidence:{verifiedOn:historicalCourseEvidence.verifiedOn,evidence:e.evidence,sources:e.catalogSources}};
+ });
+}
 
 export function verifiedNativeAliases(professors){
  return associationEvidence.nativeAliases.filter(a=>{
@@ -44,8 +56,17 @@ const onePrefixEdit=(a,b)=>{
  return [...longer].some((_,i)=>longer.slice(0,i)+longer.slice(i+1)===shorter);
 };
 
-export function matchReviewCourse(raw,courses,knownCourseIds=[]){
+export function matchReviewCourse(raw,courses,knownCourseIds=[],teacherId=null){
  const key=normalizedCourse(raw);
+ const historical=historicalCourseEvidence.mappings.filter(m=>m.allowedTeacherIds.includes(teacherId)
+  && (key===normalizedCourse(m.sourceCode)||(m.allowSectionSuffix&&key.length===normalizedCourse(m.sourceCode).length+2&&/^\d{2}$/.test(key.slice(-2))&&key.startsWith(normalizedCourse(m.sourceCode)))));
+ if(historical.length===1){
+  const targets=courses.filter(c=>normalizedCourse(c.code)===normalizedCourse(historical[0].targetCode));
+  if(targets.length===1)return {courseId:targets[0].id,method:'verified_historical_course_code'};
+ }
+ // Archive entries are bounded to the reviewed instructors. A code alone does
+ // not establish that another source profile refers to the same historical class.
+ courses=courses.filter(c=>c.catalog_source!=='historical_archive'||historicalCourseEvidence.archiveCourses.some(e=>normalizedCourse(e.code)===normalizedCourse(c.code)&&e.allowedTeacherIds.includes(teacherId)));
  const exact=courses.filter(c=>normalizedCourse(c.code)===key);
  if(exact.length===1)return {courseId:exact[0].id,method:'exact_source_code'};
  // BC section identifiers append exactly two digits to the eight-character code.
@@ -70,7 +91,7 @@ export function matchReviewCourse(raw,courses,knownCourseIds=[]){
 }
 
 export function sourceCourseException(teacher,review){
- return associationEvidence.courseExclusions.find(e=>e.teacherId===teacher.legacyId&&e.reviewId===review.id&&e.class===review.class&&review.comment.includes(e.requiredText));
+ return [...associationEvidence.courseExclusions,...historicalCourseEvidence.courseExclusions].find(e=>e.teacherId===teacher.legacyId&&e.reviewId===review.id&&e.class===review.class&&review.comment.includes(e.requiredText));
 }
 
 export function planNativeLinkRepairs(reviews,professors,courses){

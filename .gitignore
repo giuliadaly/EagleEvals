@@ -30,6 +30,11 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+/.pnpm-store/
+
+# Private operational exports and local recovery work
+/output/owner-growth-baseline-*
+/output/growth-*.json
 
 # env files (can opt-in for committing if needed)
 .env*

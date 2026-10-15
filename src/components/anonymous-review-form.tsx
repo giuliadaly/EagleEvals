@@ -136,7 +136,7 @@ export function AnonymousReviewForm({
     <h2 id="review-success-heading" ref={successHeading} tabIndex={-1} className="text-3xl font-bold text-[var(--maroon-deep)]">Your anonymous review is live.</h2>
     <p className="text-base leading-7 text-[var(--ink-soft)]">Thanks for helping the next student. Your ratings and written review are now included for {success.course.code} with {success.professor.name}.</p>
     <div className="flex flex-wrap gap-4"><a className="button-primary" href={`/courses/${success.course.id}#comments`}>View your course’s reviews</a><a className="button-secondary" href={`/professors/${success.professor.id}#comments`}>View professor reviews</a></div>
-    <div className="pt-4"><h3 className="text-xl font-semibold">Have another class in mind?</h3><p className="mt-2 text-sm text-[var(--muted)]">An older class counts, too.</p><button className="button-secondary mt-4" type="button" onClick={() => { setSuccess(null); setCourse(null); setProfessor(null); setError(""); startedAt.current = null; validationReported.current = false; }}>Review another class</button></div>
+    <div className="pt-4"><h3 className="text-xl font-semibold">Have another class in mind?</h3><p className="mt-2 text-sm text-[var(--muted)]">An older class counts, too.</p><button className="button-secondary mt-4" type="button" onClick={() => { setSuccess(null); setCourse(null); setProfessor(null); setError(""); startedAt.current = null; validationReported.current = false; }}>Review another class</button><p className="mt-5 text-sm"><Link href="/contribute" className="underline underline-offset-4">Find another class to pass a little advice on.</Link></p></div>
   </section>;
 
   return (

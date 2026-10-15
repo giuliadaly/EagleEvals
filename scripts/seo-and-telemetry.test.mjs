@@ -9,10 +9,10 @@ import { readReviewSubmissionResponse, uncertainSubmissionMessage } from '../src
 
 const id = '65c4299149939741c6777cc2';
 test('telemetry strips search, prefill, campaign, credential and fragment data', () => {
-  for (const path of ['/review', '/search', '/courses', `/courses/${id}`, `/professors/${id}`]) {
+  for (const path of ['/review', '/contribute', '/search', '/courses', `/courses/${id}`, `/professors/${id}`]) {
     assert.equal(telemetryUrl(`https://user:password@eagleevals.com${path}?q=private+text&professor=${id}&utm_source=private#review-id`), `https://eagleevals.com${path}`);
   }
-  for (const path of ['/api/reviews', '/not-a-page/private-name', '/showcase', '/courses/private-name', '/review/private-id']) {
+  for (const path of ['/api/reviews', '/owner', '/owner/reports', '/api/owner/manage', '/api/owner/auth/callback/github', '/not-a-page/private-name', '/showcase', '/courses/private-name', '/review/private-id']) {
     assert.equal(telemetryUrl(`https://eagleevals.com${path}`), null);
   }
   assert.equal(telemetryUrl('javascript:alert(1)'), null);

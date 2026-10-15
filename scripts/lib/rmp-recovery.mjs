@@ -51,7 +51,7 @@ export function prepareRmpImport(snapshot, professors, courses, context = {}) {
   const reviews = [];
   const seen = new Set();
   const coverage = { profiles: teachers.length, linkedProfiles: 0, unlinkedProfiles: 0, ratingRecords: 0,
-    writtenReviews: 0, courseLinkedWrittenReviews: 0, professorLinkedWrittenReviews: 0, ambiguousProfiles: 0, archiveProfiles: 0, sectionCodeLinks: 0, contextualCourseLinks: 0, otherCampusReviews: 0 };
+    writtenReviews: 0, courseLinkedWrittenReviews: 0, professorLinkedWrittenReviews: 0, ambiguousProfiles: 0, archiveProfiles: 0, sectionCodeLinks: 0, contextualCourseLinks: 0, otherCampusReviews: 0, historicalCourseLinks: 0, conflictingCourseLabels: 0 };
   for (const saved of snapshot.snapshots) {
     const p = saved.teacher;
     const match = matchRecoveredProfessor(p, professors, teachers);
@@ -77,7 +77,7 @@ export function prepareRmpImport(snapshot, professors, courses, context = {}) {
       seen.add(r.id);
       const rawCourse = typeof r.class === 'string' ? r.class : null;
       const exception = sourceCourseException(p,r);
-      const courseMatch = exception ? {courseId:null,method:'other_campus_experience'} : matchReviewCourse(rawCourse,courses,knownCourses);
+      const courseMatch = exception ? {courseId:null,method:exception.method??'other_campus_experience'} : matchReviewCourse(rawCourse,courses,knownCourses,p.legacyId);
       const courseId = courseMatch.courseId;
       const written = Boolean(r.comment.trim());
       coverage.ratingRecords++;
@@ -87,7 +87,9 @@ export function prepareRmpImport(snapshot, professors, courses, context = {}) {
         if (match.professorId) coverage.professorLinkedWrittenReviews++;
         if (courseMatch.method === 'course_section_code') coverage.sectionCodeLinks++;
         if (['unique_professor_course_number','professor_course_prefix_variant','exact_professor_course_title'].includes(courseMatch.method)) coverage.contextualCourseLinks++;
-        if (exception) coverage.otherCampusReviews++;
+        if (courseMatch.method === 'verified_historical_course_code') coverage.historicalCourseLinks++;
+        if (courseMatch.method === 'other_campus_experience') coverage.otherCampusReviews++;
+        if (courseMatch.method === 'source_course_conflict') coverage.conflictingCourseLabels++;
       }
       reviews.push({ source_review_id: r.id, source_teacher_id: p.id, course_id: courseId, course_code: rawCourse,
         message: r.comment, would_take_again: r.wouldTakeAgain === 'Yes' ? true : r.wouldTakeAgain === 'No' ? false : null,

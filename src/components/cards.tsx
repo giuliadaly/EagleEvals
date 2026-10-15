@@ -12,7 +12,7 @@ export function RatingBadge({ value, label = "Overall", large = false }: { value
 export function CourseCard({ course }: { course: CourseSummary }) {
   return (
     <Link href={`/courses/${course.id}`} className="catalog-record">
-      <div><span className="catalog-code">{course.code}</span><h3>{course.title}</h3><p className="catalog-context">{course.subject}</p><div className="catalog-evidence"><span>{formatEvaluationCount(course.reviewCount)}</span><span className="written-review-status" data-empty={course.commentCount === 0}>{formatReviewAvailability(course.commentCount, course.reviewCount, course.courseOverall !== null)}</span></div></div>
+      <div><span className="catalog-code">{course.code}</span><h3>{course.title}</h3><p className="catalog-context">{course.subject}{course.catalogSource === "historical_archive" ? " · Historical course archive" : ""}</p><div className="catalog-evidence"><span>{formatEvaluationCount(course.reviewCount)}</span><span className="written-review-status" data-empty={course.commentCount === 0}>{formatReviewAvailability(course.commentCount, course.reviewCount, course.courseOverall !== null)}</span></div></div>
       <RatingBadge value={course.courseOverall} label="Course" /><ArrowIcon className="size-4 text-[var(--muted)]" />
     </Link>
   );

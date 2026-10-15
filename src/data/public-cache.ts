@@ -11,7 +11,7 @@ export function publicQuery<Args extends unknown[], Result>(
   read: (...args: Args) => Promise<Result>,
   kind: "reviews" | "catalog" = "reviews",
 ) {
-  return unstable_cache(read, ["public-data-v4-review-associations", name], {
+  return unstable_cache(read, ["public-data-v5-owner-corrections", name], {
     tags: [kind === "catalog" ? CATALOG_DATA : REVIEW_DATA],
     revalidate: kind === "catalog" ? 86_400 : 3_600,
   });
@@ -20,4 +20,8 @@ export function publicQuery<Args extends unknown[], Result>(
 export function expireReviewData() {
   // Route Handlers need expire: 0; the "max" profile can serve an old result.
   revalidateTag(REVIEW_DATA, { expire: 0 });
+}
+
+export function expireCatalogData() {
+  revalidateTag(CATALOG_DATA, { expire: 0 });
 }

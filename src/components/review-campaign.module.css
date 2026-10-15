@@ -1,0 +1,23 @@
+.intro { padding: clamp(3.5rem,8vw,7rem) 0; color: var(--cream); background: var(--maroon-deep); }
+.intro h1 { max-width: 57rem; font-size: clamp(2.7rem,6vw,5.7rem); line-height: 1.04; letter-spacing: -.055em; margin-top: 1.3rem; }
+.intro :global(.eyebrow) { color: var(--gold); }
+.lead { max-width: 43rem; margin-top: 2rem; font-size: clamp(1.05rem,2vw,1.25rem); line-height: 1.8; }
+.privacy { margin-top: 1.3rem; font-size: .9rem; color: var(--gold); }
+.classes { padding-top: 4rem; padding-bottom: 4rem; }
+.heading { max-width: 43rem; margin-bottom: 2.4rem; }
+.heading h2,.notes h2 { font-size: clamp(1.8rem,3vw,2.6rem); letter-spacing: -.035em; line-height: 1.2; }
+.heading p { color: var(--muted); margin-top: .7rem; line-height: 1.8; }
+.courseList { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 2.5rem 3rem; margin-bottom: 3rem; }
+.course { display: flex; flex-direction: column; align-items: flex-start; padding-left: 1.1rem; border-left: 2px solid var(--gold); min-width: 0; color: var(--ink); }
+.course:hover .title { text-decoration: underline; text-underline-offset: .2em; }
+.course:focus-visible { outline: 2px solid var(--maroon); outline-offset: .5rem; }
+.subject { font-size: .72rem; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+.course strong { margin-top: .6rem; color: var(--maroon); font-size: 1rem; }
+.title { margin-top: .35rem; font-size: 1.1rem; line-height: 1.5; }
+.action { margin-top: auto; padding-top: 1rem; display: inline-flex; align-items: center; gap: .5rem; color: var(--maroon); font-size: .85rem; font-weight: 700; }
+.notes { padding-top: 3rem; padding-bottom: 5rem; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1.4fr 1fr; gap: 3rem; align-items: center; }
+.notes h2 { margin-top: .7rem; }
+.notes ul { padding-left: 1.25rem; list-style: disc; line-height: 1.9; margin-top: 1.2rem; color: var(--ink-soft); }
+.semester { padding: 2rem; color: var(--maroon-deep); background: var(--gold-pale); font-size: 1.1rem; line-height: 1.9; transform: rotate(-1deg); }
+@media(max-width:800px) { .courseList { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 2rem; } .notes { grid-template-columns: 1fr; } }
+@media(max-width:500px) { .courseList { grid-template-columns: 1fr; } .intro { padding: 3rem 0; } .notes { gap: 1.5rem; } }

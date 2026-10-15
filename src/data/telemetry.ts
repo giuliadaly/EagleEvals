@@ -8,7 +8,7 @@ export type ProductEvent =
   | { name: "search_opened"; kind: "course" | "professor" }
   | { name: "search_submitted" };
 
-const publicPaths = new Set(["/", "/courses", "/professors", "/comments", "/evaluations", "/search", "/review", "/about", "/privacy", "/terms"]);
+const publicPaths = new Set(["/", "/courses", "/professors", "/comments", "/evaluations", "/search", "/review", "/contribute", "/about", "/privacy", "/terms"]);
 
 export function telemetryUrl(raw: string): string | null {
   try {

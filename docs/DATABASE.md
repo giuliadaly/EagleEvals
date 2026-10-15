@@ -18,6 +18,14 @@ come from an authorized recovery snapshot. Before running migrations against
 production, review the SQL, confirm an independent backup, and verify compatibility
 with the currently deployed application.
 
+The production migration adapter checks all existing file checksums before
+starting. Pending schema changes and their checksum registrations commit in
+one transaction. It first acquires existing public relation locks with `NOWAIT`;
+if a live request holds a conflicting lock, the migration stops before changing
+the schema. Retry only after inspecting the recorded migration state. A lost
+commit acknowledgement is not automatically replayed. Query-only adapters are
+reserved for isolated local fixtures.
+
 ## Recovered data
 
 Recovery snapshots stay outside this repository. Never commit database exports,

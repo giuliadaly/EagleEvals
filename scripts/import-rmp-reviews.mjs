@@ -1,17 +1,20 @@
 import { pathToFileURL } from 'node:url';
 import { connectDatabase, databaseUrl } from './lib/database.mjs';
 import { loadRmpSnapshot, prepareRmpImport, UPSERT_PROFILES, UPSERT_REVIEWS } from './lib/rmp-recovery.mjs';
-import {recoveryDiff,assertRecoveryCoverage} from './lib/review-associations.mjs';
+import {recoveryDiff,assertRecoveryCoverage,prepareHistoricalCourses} from './lib/review-associations.mjs';
 
 export async function prepareDatabaseImport(sql,snapshot) {
   const [professors,courses,relationships,existingProfiles,existingReviews]=await Promise.all([
     sql.query('SELECT id,name,titles,phone,catalog_source FROM professors'),
-    sql.query('SELECT id,code,title FROM courses'),
+    sql.query('SELECT id,code,title,catalog_source FROM courses'),
     sql.query('SELECT DISTINCT professor_id,course_id FROM public_rating_records WHERE published AND professor_id IS NOT NULL AND course_id IS NOT NULL'),
     sql.query('SELECT source_teacher_id,professor_id,fetched_at FROM external_review_profiles'),
     sql.query('SELECT source_review_id,course_id,published FROM external_reviews'),
   ]);
-  const plan=prepareRmpImport(snapshot,professors,courses,{catalogProfiles:true,relationships});
+  const catalogCourses=prepareHistoricalCourses(courses);
+  const combinedCourses=[...courses.filter(c=>!catalogCourses.some(a=>a.id===c.id)),...catalogCourses];
+  const plan=prepareRmpImport(snapshot,professors,combinedCourses,{catalogProfiles:true,relationships});
+  plan.catalogCourses=catalogCourses;
   return {plan,diff:recoveryDiff(plan,existingProfiles,existingReviews)};
 }
 
@@ -21,6 +24,13 @@ export async function stageRmpImport(sql, snapshot, plan, batchSize = 200) {
     ON CONFLICT(snapshot_id) DO UPDATE SET status='importing',expected_counts=EXCLUDED.expected_counts,
       verification_manifest=EXCLUDED.verification_manifest,updated_at=now()`,
   [snapshot.snapshotId, JSON.stringify(plan.coverage), JSON.stringify({ sha256: snapshot.sha256, completeSchoolInventory: true })]);
+  for (const course of plan.catalogCourses ?? []) {
+    await sql.query(`INSERT INTO courses(id,code,title,subject,college,description,legacy_document,source_snapshot,catalog_source,catalog_evidence)
+      VALUES($1,$2,$3,$4,$5,$6,'{}',$7,'historical_archive',$8::jsonb)
+      ON CONFLICT(id) DO UPDATE SET catalog_evidence=EXCLUDED.catalog_evidence
+      WHERE courses.catalog_source='historical_archive' AND courses.code=EXCLUDED.code`,
+    [course.id,course.code,course.title,course.subject,course.college,course.description,snapshot.snapshotId,JSON.stringify(course.catalog_evidence)]);
+  }
   const catalogProfiles=plan.catalogProfiles ?? [];
   for (let start=0;start<catalogProfiles.length;start+=batchSize) {
     await sql.query(`INSERT INTO professors(id,name,titles,legacy_document,source_snapshot,catalog_source)
