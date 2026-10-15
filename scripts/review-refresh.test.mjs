@@ -93,7 +93,7 @@ test('full backup uses one read-only snapshot, includes private reports, and res
   const restored = await restorePrivateDatabaseBackup(loaded);
   t.after(() => restored.pg.close());
   assert.equal((await restored.sql.query('SELECT message FROM student_comments'))[0].message, 'An untouched native comment.');
-  assert.equal((await restored.sql.query('SELECT count(*)::integer AS n FROM schema_migrations'))[0].n, 7);
+  assert.equal((await restored.sql.query('SELECT count(*)::integer AS n FROM schema_migrations'))[0].n, 8);
   await chmod(saved.backupPath, 0o644);
   await assert.rejects(loadPrivateDatabaseBackup(saved.backupPath), /permissions must be private/);
   await chmod(saved.backupPath, 0o600);
@@ -119,7 +119,7 @@ test('old-schema backup omits new columns on restore and preserves old migration
   assert.equal(row.catalog_source, 'legacy_eagleeval');
   assert.deepEqual(row.search_names, []);
   assert.deepEqual(row.legacy_document, { original: 'Untouched professor source.' });
-  assert.equal((await restored.sql.query('SELECT count(*)::integer AS n FROM schema_migrations'))[0].n, 7);
+  assert.equal((await restored.sql.query('SELECT count(*)::integer AS n FROM schema_migrations'))[0].n, 8);
 });
 
 test('isolated refresh preserves native data and blocks dropped source coverage before staging', async t => {
@@ -141,6 +141,34 @@ test('isolated refresh preserves native data and blocks dropped source coverage 
   assert.equal(approved.writtenReviews, 1);
   assert.equal(approved.preservedNativeRows, true);
   assert.equal((await sql.query('SELECT count(*)::integer AS n FROM public_written_reviews'))[0].n, 3, 'all testing remains isolated from the original database');
+});
+
+test('source refresh and full restoration retain owner corrections, audit records, and private baselines', async t => {
+  const { sql, parent } = await fixture(t);
+  const current = snapshot();
+  await stageRmpImport(sql, current, (await prepareDatabaseImport(sql, current)).plan);
+  await sql.transaction(publicationStatements(current.snapshotId).map(([query, values]) => sql.query(query, values)));
+  const other = '000000000000000000000009';
+  await sql.query("INSERT INTO courses(id,code,title,subject,description,legacy_document,source_snapshot) VALUES($1,'MATH1102','Calculus I for Science','Mathematics','Fixture','{}','native')", [other]);
+  const reviewId = `rmp:${encode('Rating-1')}`;
+  const state = (await sql.query('SELECT owner_review_state($1) AS state', [reviewId]))[0].state;
+  await sql.query(`SELECT owner_correct_review_association($1,'316411859',$2,$3,$4,$5,$6,$7)`,
+    ['00000000-0000-4000-8000-000000000001', reviewId, state.fingerprint, professor, other, 'Fixture evidence confirms this association.', 'https://www.bc.edu/fixture']);
+  const dataset = { id: 'test-baseline', measuredAt: '2026-10-14T00:00:00Z', traffic: {}, speedInsights: {}, searchConsole: {}, sources: [] };
+  await sql.query('INSERT INTO owner_growth_baselines(id,measured_at,dataset,installed_by_github_id) VALUES($1,$2,$3::jsonb,$4)',
+    [dataset.id, dataset.measuredAt, JSON.stringify(dataset), '316411859']);
+  const saved = await createPrivateDatabaseBackup(sql, { parent });
+  assert.equal(saved.manifest.tables.owner_actions.count, 1);
+  assert.equal(saved.manifest.tables.review_association_overrides.count, 1);
+  assert.equal(saved.manifest.tables.owner_growth_baselines.count, 1);
+  assert.equal((await testReviewRefresh(saved.backupPath, current)).preservedNativeRows, true);
+  const restored = await restorePrivateDatabaseBackup(saved.backupPath);
+  t.after(() => restored.pg.close());
+  await stageRmpImport(restored.sql, current, (await prepareDatabaseImport(restored.sql, current)).plan);
+  assert.equal((await restored.sql.query('SELECT course_id FROM public_written_reviews WHERE id=$1', [reviewId]))[0].course_id, other);
+  assert.equal((await restored.sql.query('SELECT course_id FROM external_reviews WHERE source_review_id=$1', [encode('Rating-1')]))[0].course_id, course, 'automatic import and curated public association remain separate');
+  assert.equal((await restored.sql.query('SELECT count(*)::int AS n FROM owner_actions'))[0].n, 1);
+  assert.deepEqual((await restored.sql.query('SELECT dataset FROM owner_growth_baselines'))[0].dataset, dataset);
 });
 
 test('fresh collection never reuses checkpoints without explicit resume and raw data cannot enter Git', async t => {

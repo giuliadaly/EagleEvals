@@ -115,7 +115,8 @@ test('private reports accept native and unlinked external reviews, reject unknow
   assert.equal((await submitReport({ ...report, reason: 'unknown' })).status, 400);
   const rows = (await pg.query('SELECT * FROM anonymous_reports')).rows;
   assert.equal(rows.length, 4);
-  assert.deepEqual(Object.keys(rows[0]).sort(), ['created_at', 'id', 'message', 'reason', 'resolved_at', 'status', 'target_id', 'target_kind']);
+  assert.deepEqual(Object.keys(rows[0]).sort(), ['created_at', 'id', 'message', 'reason', 'resolved_at', 'status', 'target_id', 'target_kind', 'updated_at', 'version']);
+  assert.equal(rows[0].version, 1);
   assert.deepEqual((await pg.query('SELECT * FROM public_written_reviews ORDER BY id')).rows, before);
   await applyMigrations(sql, path.join(process.cwd(), 'database/migrations'));
   assert.equal((await pg.query('SELECT count(*) FROM anonymous_reports')).rows[0].count, 4);

@@ -1,0 +1,29 @@
+.main { flex: 1; padding: 3rem 0 5rem; }
+.header { display:flex; align-items:flex-start; justify-content:space-between; gap:2rem; margin-bottom:2.5rem; }
+.header h1 { font-size:clamp(2.2rem,4vw,3.5rem); letter-spacing:-.045em; margin:.6rem 0; }
+.header p { color:var(--muted); line-height:1.7; }
+.notice { max-width:46rem; padding:1.5rem; background:var(--gold-pale); line-height:1.8; margin:2rem 0; }
+.section { margin-top:3.5rem; scroll-margin-top:7rem; }
+.section h2 { font-size:1.8rem; letter-spacing:-.03em; margin-bottom:.7rem; }
+.muted { color:var(--muted); line-height:1.7; }
+.stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1rem; }
+.stat { padding:1.4rem; background:var(--paper-ledger); }
+.stat strong { display:block; font-size:2rem; color:var(--maroon-deep); margin-bottom:.25rem; }
+.filters { display:flex; flex-wrap:wrap; gap:1rem; align-items:flex-end; margin:1.4rem 0; }
+.filters label { min-width:10rem; flex:1; }
+.list { display:grid; gap:1.5rem; margin-top:1.5rem; }
+.item { padding:1.5rem; border:1px solid var(--line); background:var(--paper-raised); overflow-wrap:anywhere; }
+.item h3 { font-size:1.1rem; font-weight:700; margin-bottom:.5rem; }
+.text { white-space:pre-wrap; line-height:1.8; margin:1rem 0; }
+.meta { display:flex; flex-wrap:wrap; gap:.6rem 1.2rem; font-size:.85rem; color:var(--muted); }
+.form { margin-top:1.5rem; display:grid; gap:1rem; }
+.form label { display:block; }
+.columns { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.choices { display:grid; max-height:15rem; overflow:auto; margin-top:.5rem; padding:.4rem; border:1px solid var(--line); }
+.choice { text-align:left; padding:.7rem; line-height:1.6; cursor:pointer; }
+.choice:hover,.choice:focus-visible { background:var(--wash); }
+.error { padding:1rem; background:var(--rose-pale); color:var(--rose); line-height:1.7; }
+.success { padding:1rem; background:var(--green-pale); color:var(--green); }
+.json { white-space:pre-wrap; overflow-wrap:anywhere; font-size:.85rem; line-height:1.7; max-height:28rem; overflow:auto; padding:1rem; background:var(--paper-ledger); }
+.pager { display:flex; gap:1rem; margin-top:1.4rem; }
+@media(max-width:700px) { .header { flex-direction:column; } .stats { grid-template-columns:1fr 1fr; } .columns { grid-template-columns:1fr; } .item { padding:1rem; } }

@@ -57,6 +57,7 @@ export default async function CourseDetailPage({ params, searchParams }: { param
           <div className={styles.identity}>
             <p className={styles.eyebrow}>{course.code} · {course.subject}</p>
             <h1>{course.title}</h1>
+            {course.catalogSource === "historical_archive" ? <p className={styles.subtitle}><strong>Historical course archive.</strong> Saved student experiences; this page does not confirm a current offering.</p> : null}
             {collegeName(course.college) ? <p className={styles.subtitle}>{collegeName(course.college)}</p> : null}
             <div className={styles.actions}>
               {instructors.length >= 2 ? <Link className={styles.textLink} href={`/courses/${course.id}/compare`}>Compare professors <ChevronIcon /></Link> : null}
@@ -89,7 +90,9 @@ export default async function CourseDetailPage({ params, searchParams }: { param
               </DetailDisclosure>
             </section>
             <div className={styles.marginDetails}>
-              <DetailDisclosure id="description" title="About this course"><p className={styles.detailText}>{course.description || "No course description is currently available."}</p></DetailDisclosure>
+              <DetailDisclosure id="description" title="About this course"><p className={styles.detailText}>{course.description || "No course description is currently available."}</p>
+                {course.catalogSource === "historical_archive" && course.catalogEvidence?.length ? <ul className={styles.detailText}>{course.catalogEvidence.map(source => <li key={source.url}><a href={source.url} target="_blank" rel="noopener noreferrer">{source.label}</a></li>)}</ul> : null}
+              </DetailDisclosure>
               <DetailDisclosure id="metrics" title="All evaluation ratings">
                 <p className={styles.ratingsNote}>Averages use numerical 1–5 ratings, including the ratings submitted with new anonymous reviews.</p>
                 <DetailMetrics metrics={metrics} />

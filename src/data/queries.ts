@@ -49,6 +49,14 @@ function mapCourse(row: DbRow): CourseSummary {
   return {
     id: String(row.id),
     code: String(row.code),
+    catalogSource: row.catalog_source === "historical_archive" ? "historical_archive" : "legacy_eagleeval",
+    catalogEvidence: typeof row.catalog_evidence === "object" && row.catalog_evidence && "sources" in row.catalog_evidence && Array.isArray(row.catalog_evidence.sources)
+      ? row.catalog_evidence.sources.flatMap((source: unknown) => {
+        if (!source || typeof source !== "object" || !("url" in source) || typeof source.url !== "string") return [];
+        try { const url = new URL(source.url); if (url.protocol !== "https:" || !/(^|\.)bc\.edu$/.test(url.hostname)) return []; }
+        catch { return []; }
+        return [{ url: source.url, label: "year" in source && typeof source.year === "string" ? `Boston College ${source.year} catalog` : "Boston College course reference" }];
+      }) : [],
     title: String(row.title),
     subject: String(row.subject),
     college: row.college ? String(row.college) : null,

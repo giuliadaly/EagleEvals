@@ -233,7 +233,7 @@ export async function restorePrivateDatabaseBackup(loaded, { migrationsPath = pa
 }
 
 async function verifyImportPreservesNative(sql, backup) {
-  const protectedTables = new Set(['courses', 'reviews', 'review_metrics', 'student_comments', 'faculty_directory_entries', 'anonymous_reports', 'review_link_repairs']);
+  const protectedTables = new Set(['courses', 'reviews', 'review_metrics', 'student_comments', 'faculty_directory_entries', 'anonymous_reports', 'review_link_repairs', 'owner_actions', 'review_association_overrides', 'owner_growth_baselines']);
   for (const table of backup.tables) {
     if (!protectedTables.has(table.name) && table.name !== 'professors') continue;
     const expected = table.name === 'professors' ? table.rows.filter(row => row.catalog_source !== 'external_rmp') : table.rows;

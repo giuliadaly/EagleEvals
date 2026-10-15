@@ -1,0 +1,596 @@
+{
+  "version": 1,
+  "verifiedOn": "2026-10-14",
+  "policy": "Only explicitly reviewed code pairs and listed BC source teachers qualify. Keep original class text, source documents and all comments. Posting dates are not class-taken dates and impose no class-term limits. Descriptions are paraphrases of official material. Content conflicts take precedence over code mappings and remain on professor/archive views pending correction.",
+  "mappings": [
+    {
+      "sourceCode": "MT100",
+      "targetCode": "MATH1100",
+      "targetTitle": "Calculus I",
+      "department": "Mathematics",
+      "allowedTeacherIds": [
+        1015730
+      ],
+      "allowSectionSuffix": false,
+      "verification": "official_course_description_and_instructor_context",
+      "evidence": "The two catalogs describe the same introductory life/social-science calculus course, including matching prerequisite and content. The recovered BC Mathematics profile uses the old exact code; this is not a mapping for arbitrary CALC labels.",
+      "catalogSources": [
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1314_undergrad_catalog.pdf",
+          "year": "2013-2014",
+          "pdfPage": 154,
+          "code": "MT100"
+        },
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1415_undergrad_catalog.pdf",
+          "year": "2014-2015",
+          "pdfPage": 167,
+          "code": "MATH1100"
+        }
+      ]
+    },
+    {
+      "sourceCode": "MT102",
+      "targetCode": "MATH1102",
+      "targetTitle": "Calculus I (Mathematics/Science Majors)",
+      "department": "Mathematics",
+      "allowedTeacherIds": [
+        1015730
+      ],
+      "allowSectionSuffix": false,
+      "verification": "official_course_description_and_instructor_context",
+      "evidence": "Both catalogs identify the distinct mathematics/science calculus sequence with the same title, entry restrictions and content. Keep separate from the life/social-science calculus course.",
+      "catalogSources": [
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1314_undergrad_catalog.pdf",
+          "year": "2013-2014",
+          "pdfPage": 154,
+          "code": "MT102"
+        },
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1415_undergrad_catalog.pdf",
+          "year": "2014-2015",
+          "pdfPage": 168,
+          "code": "MATH1102"
+        }
+      ]
+    },
+    {
+      "sourceCode": "MT202",
+      "targetCode": "MATH2202",
+      "targetTitle": "Multivariable Calculus",
+      "department": "Mathematics",
+      "allowedTeacherIds": [
+        1218355
+      ],
+      "allowSectionSuffix": false,
+      "verification": "official_course_description_and_instructor_context",
+      "evidence": "Same multivariable-calculus curriculum in successive catalogs. The recovered Daniel Chambers profile also has native MATH2202 evaluation history.",
+      "catalogSources": [
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1314_undergrad_catalog.pdf",
+          "year": "2013-2014",
+          "pdfPage": 155,
+          "code": "MT202"
+        },
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1415_undergrad_catalog.pdf",
+          "year": "2014-2015",
+          "pdfPage": 168,
+          "code": "MATH2202"
+        }
+      ]
+    },
+    {
+      "sourceCode": "MT004",
+      "targetCode": "MATH1004",
+      "targetTitle": "Finite Probability and Applications",
+      "department": "Mathematics",
+      "allowedTeacherIds": [
+        1041599
+      ],
+      "allowSectionSuffix": false,
+      "verification": "official_course_description_and_instructor_context",
+      "evidence": "Both catalogs describe the same finite probability course. Robert Gross has native MATH1004 evaluation history as well as the recovered exact old-code record.",
+      "catalogSources": [
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1314_undergrad_catalog.pdf",
+          "year": "2013-2014",
+          "pdfPage": 154,
+          "code": "MT004"
+        },
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1415_undergrad_catalog.pdf",
+          "year": "2014-2015",
+          "pdfPage": 167,
+          "code": "MATH1004"
+        }
+      ]
+    },
+    {
+      "sourceCode": "MT410",
+      "targetCode": "MATH4410",
+      "targetTitle": "Differential Equations",
+      "department": "Mathematics",
+      "allowedTeacherIds": [
+        1041599
+      ],
+      "allowSectionSuffix": false,
+      "verification": "official_course_description_and_instructor_context",
+      "evidence": "Same differential-equations course and prerequisites in both catalogs. Robert Gross has native MATH4410 course history.",
+      "catalogSources": [
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1314_undergrad_catalog.pdf",
+          "year": "2013-2014",
+          "pdfPage": 156,
+          "code": "MT410"
+        },
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1415_undergrad_catalog.pdf",
+          "year": "2014-2015",
+          "pdfPage": 169,
+          "code": "MATH4410"
+        }
+      ]
+    },
+    {
+      "sourceCode": "MT322",
+      "targetCode": "MATH3322",
+      "targetTitle": "Analysis II",
+      "department": "Mathematics",
+      "allowedTeacherIds": [
+        1218355
+      ],
+      "allowSectionSuffix": false,
+      "verification": "official_course_description_and_instructor_context",
+      "evidence": "Same second analysis course in both catalogs, including the preceding Analysis I requirement. Daniel Chambers has native MATH3322 evaluation history. This does not license MT301 or MT804 mappings.",
+      "catalogSources": [
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1314_undergrad_catalog.pdf",
+          "year": "2013-2014",
+          "pdfPage": 156,
+          "code": "MT322"
+        },
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1415_undergrad_catalog.pdf",
+          "year": "2014-2015",
+          "pdfPage": 169,
+          "code": "MATH3322"
+        }
+      ]
+    },
+    {
+      "sourceCode": "EN010",
+      "targetCode": "ENGL1010",
+      "targetTitle": "First Year Writing Seminar",
+      "department": "English",
+      "allowedTeacherIds": [
+        14781,
+        309131,
+        844481,
+        1523650
+      ],
+      "allowSectionSuffix": false,
+      "verification": "official_course_description_and_instructor_context",
+      "evidence": "Both catalogs identify the first-year writing seminar with the same program role and writing/conferencing curriculum. Recovered source profiles are English/writing instructors; three also have native ENGL1010 history.",
+      "catalogSources": [
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1314_undergrad_catalog.pdf",
+          "year": "2013-2014",
+          "pdfPage": 107,
+          "code": "EN010"
+        },
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1415_undergrad_catalog.pdf",
+          "year": "2014-2015",
+          "pdfPage": 112,
+          "code": "ENGL1010"
+        }
+      ]
+    },
+    {
+      "sourceCode": "MF801",
+      "targetCode": "MFIN8801",
+      "targetTitle": "Investments",
+      "department": "Finance",
+      "allowedTeacherIds": [
+        1851005
+      ],
+      "allowSectionSuffix": false,
+      "verification": "official_course_description_and_instructor_context",
+      "evidence": "The official combined and graduate catalogs identify the same graduate investments course and risk/security-selection curriculum. Recovered Jeffrey Pontiff is the BC Finance professor; preserve the graduate course distinction from undergraduate MFIN1151.",
+      "catalogSources": [
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/combined0910catalog.pdf",
+          "year": "2009-2010",
+          "pdfPage": 335,
+          "code": "MF801"
+        },
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1415_graduate_catalog.pdf",
+          "year": "2014-2015",
+          "pdfPage": 173,
+          "code": "MFIN8801"
+        },
+        {
+          "url": "https://www.bc.edu/content/bc-web/schools/carroll-school/faculty-research/faculty-directory/jeffrey-pontiff.html",
+          "checkedOn": "2026-10-14",
+          "code": "MFIN8801"
+        }
+      ]
+    },
+    {
+      "sourceCode": "MF151",
+      "targetCode": "MFIN1151",
+      "targetTitle": "Investments",
+      "department": "Finance",
+      "allowedTeacherIds": [
+        512706
+      ],
+      "allowSectionSuffix": false,
+      "verification": "official_course_description_and_instructor_context",
+      "evidence": "These are the undergraduate investments course in successive catalogs. Mike/Michael Barry identity is already verified and his native MFIN1151 course history agrees. Do not mix with graduate MF801.",
+      "catalogSources": [
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1314_undergrad_catalog.pdf",
+          "year": "2013-2014",
+          "pdfPage": 264,
+          "code": "MF151"
+        },
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1415_undergrad_catalog.pdf",
+          "year": "2014-2015",
+          "pdfPage": 295,
+          "code": "MFIN1151"
+        }
+      ]
+    },
+    {
+      "sourceCode": "MK721",
+      "targetCode": "MKTG7720",
+      "targetTitle": "Marketing",
+      "department": "Marketing",
+      "allowedTeacherIds": [
+        1135337
+      ],
+      "allowSectionSuffix": false,
+      "verification": "official_course_description_and_instructor_context",
+      "evidence": "Both official catalogs identify the two-credit graduate marketing course with the same three-part managerial-marketing curriculum. The old catalog names Victoria Crittenden in this marketing offering; no mapping is asserted for her MKT101/MKT4505 labels.",
+      "catalogSources": [
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/combined0910catalog.pdf",
+          "year": "2009-2010",
+          "pdfPage": 344,
+          "code": "MK721"
+        },
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1415_graduate_catalog.pdf",
+          "year": "2014-2015",
+          "pdfPage": 180,
+          "code": "MKTG7720"
+        }
+      ]
+    },
+    {
+      "sourceCode": "PL090",
+      "targetCode": "PHIL1090",
+      "targetTitle": "Perspectives on Western Culture I/Perspectives I",
+      "department": "Philosophy",
+      "allowedTeacherIds": [
+        1172255,
+        1851293
+      ],
+      "allowSectionSuffix": false,
+      "verification": "official_course_description_and_instructor_context",
+      "evidence": "Both catalogs identify the first Perspectives course and its Theology cross-list. Source PL090 remains associated with the Philosophy course identifier; Karen Howard has native PHIL1090/THEO1090 history, and Antonia Atanassova is a BC philosophy/theology instructor.",
+      "catalogSources": [
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1314_undergrad_catalog.pdf",
+          "year": "2013-2014",
+          "pdfPage": 165,
+          "code": "PL090"
+        },
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1415_undergrad_catalog.pdf",
+          "year": "2014-2015",
+          "pdfPage": 180,
+          "code": "PHIL1090"
+        }
+      ]
+    },
+    {
+      "sourceCode": "SC043",
+      "targetCode": "SOCY1043",
+      "targetTitle": "Introduction to African-American Society",
+      "department": "Sociology",
+      "allowedTeacherIds": [
+        886488
+      ],
+      "allowSectionSuffix": false,
+      "verification": "official_course_description_and_instructor_context",
+      "evidence": "Same Sociology course in both catalogs. The verified C. Shawn McGuffey official faculty profile names SOCY1043/AADS1155, and native SOCY1043 history agrees.",
+      "catalogSources": [
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1314_undergrad_catalog.pdf",
+          "year": "2013-2014",
+          "pdfPage": 216,
+          "code": "SC043"
+        },
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1415_undergrad_catalog.pdf",
+          "year": "2014-2015",
+          "pdfPage": 238,
+          "code": "SOCY1043"
+        }
+      ]
+    },
+    {
+      "sourceCode": "HS111",
+      "targetCode": "HIST2475",
+      "targetTitle": "America's War in Vietnam",
+      "department": "History",
+      "allowedTeacherIds": [
+        1114396
+      ],
+      "allowSectionSuffix": false,
+      "verification": "official_course_description_and_instructor_context",
+      "evidence": "The title, Vietnam-war focus and primary/secondary-source curriculum match. Both catalogs name Seth Jacobs for this offering; native HIST2475 history agrees. The changed number demonstrates why a generic numerical crosswalk is unsafe.",
+      "catalogSources": [
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1314_undergrad_catalog.pdf",
+          "year": "2013-2014",
+          "pdfPage": 133,
+          "code": "HS111"
+        },
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1415_undergrad_catalog.pdf",
+          "year": "2014-2015",
+          "pdfPage": 144,
+          "code": "HIST2475"
+        }
+      ]
+    },
+    {
+      "sourceCode": "COMM2225",
+      "targetCode": "COMM2125",
+      "targetTitle": "Introduction to Feminisms",
+      "department": "Communication",
+      "allowedTeacherIds": [
+        2342162,
+        2732926,
+        2781563
+      ],
+      "allowSectionSuffix": true,
+      "verification": "official_course_description_and_instructor_context",
+      "evidence": "The 2018 catalog lists COMM2225 cross-listed with ENGL2125/HIST2502/SOCY2225; the official 2023 WGS course list identifies COMM2125 for the same course. Julia DeVoy and Kristin Peterson have native COMM2125 and ENGL2125 history. Explicit Social Media comments are excluded separately.",
+      "catalogSources": [
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1819_undergraduate_catalog.pdf",
+          "year": "2018-2019",
+          "pdfPage": 101,
+          "code": "COMM2225"
+        },
+        {
+          "url": "https://ccc.bc.edu/content/dam/bc1/schools/mcas/women%20studies/pdf/newsletter/November%202023%20Issue.pdf",
+          "checkedOn": "2026-10-14",
+          "code": "COMM2125"
+        }
+      ]
+    },
+    {
+      "sourceCode": "AADS1155",
+      "targetCode": "SOCY1043",
+      "targetTitle": "Introduction to African-American Society",
+      "department": "Sociology",
+      "allowedTeacherIds": [
+        886488
+      ],
+      "allowSectionSuffix": false,
+      "verification": "official_course_description_and_instructor_context",
+      "evidence": "The official C. Shawn McGuffey profile explicitly pairs SOCY1043/AADS1155 for this course. SOCY1043 exists in the native catalog and has McGuffey evaluation history; this is an exact cross-list, not a guessed suffix match.",
+      "catalogSources": [
+        {
+          "url": "https://www.bc.edu/bc-web/schools/morrissey/departments/sociology/people/faculty-directory/c-shawn-mcguffey.html",
+          "checkedOn": "2026-10-14",
+          "code": "AADS1155/SOCY1043"
+        }
+      ]
+    },
+    {
+      "sourceCode": "SC563",
+      "targetCode": "SOCY5563",
+      "targetTitle": "Trauma, Culture, and Coping",
+      "department": "Sociology",
+      "allowedTeacherIds": [
+        886488
+      ],
+      "allowSectionSuffix": false,
+      "verification": "official_course_description_and_instructor_context",
+      "evidence": "The old catalog and current official McGuffey course list identify the same trauma/culture/coping seminar; the source profile is verified C. Shawn McGuffey. Target course is retained as a sourced archive entry because it is absent from the recovered catalog.",
+      "catalogSources": [
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/combined0910catalog.pdf",
+          "year": "2009-2010",
+          "pdfPage": 241,
+          "code": "SC563"
+        },
+        {
+          "url": "https://www.bc.edu/bc-web/schools/morrissey/departments/sociology/people/faculty-directory/c-shawn-mcguffey.html",
+          "checkedOn": "2026-10-14",
+          "code": "SOCY5563"
+        }
+      ]
+    },
+    {
+      "sourceCode": "NU408",
+      "targetCode": "NURS2080",
+      "targetTitle": "Pathophysiology",
+      "department": "Nursing",
+      "allowedTeacherIds": [
+        1792976
+      ],
+      "allowSectionSuffix": false,
+      "verification": "official_course_description_and_instructor_context",
+      "evidence": "The 2009 and 2014 catalogs describe the same integrated human-disease/pathogenesis curriculum under these codes. Source Dorean Behney-Hurley is verified BC nursing faculty, and two recovered comments explicitly name NURS2080 Pathophysiology despite their NU408 field.",
+      "catalogSources": [
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/combined0910catalog.pdf",
+          "year": "2009-2010",
+          "pdfPage": 367,
+          "code": "NU408"
+        },
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1415_undergrad_catalog.pdf",
+          "year": "2014-2015",
+          "pdfPage": 316,
+          "code": "NURS2080"
+        },
+        {
+          "url": "https://www.bc.edu/bc-web/schools/cson/faculty-research/faculty-directory/dorean-behney-hurley.html",
+          "checkedOn": "2026-10-14",
+          "code": "NURS2080"
+        }
+      ]
+    }
+  ],
+  "archiveCourses": [
+    {
+      "code": "ISYS1021",
+      "title": "Digital Technologies: Strategy and Use",
+      "department": "Information Systems",
+      "college": "CSOM",
+      "description": "A historical introductory management course examining how digital tools support business decisions and organizational strategy. Its documented curriculum combines practical spreadsheet problem solving with study of technology, innovation and competition. Previously listed as Computers in Management. This archive entry does not establish a current offering.",
+      "descriptionIsParaphrase": true,
+      "allowedTeacherIds": [
+        2322507,
+        2406273,
+        2429985,
+        2478583,
+        2675986,
+        2727023,
+        2739459
+      ],
+      "catalogSources": [
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/1819_undergraduate_catalog.pdf",
+          "year": "2018-2019",
+          "pdfPage": 338,
+          "code": "ISYS1021"
+        },
+        {
+          "url": "https://www.bc.edu/bc-web/schools/carroll-school/faculty-research/faculty-directory/anna-karpovsky.html",
+          "checkedOn": "2026-10-14",
+          "code": "ISYS1021"
+        }
+      ],
+      "evidence": "Official 2018 catalog gives the exact code/title/curriculum; Karpovsky official teaching list corroborates the source instructor. Keep separate from BZAN2021 and specific comments describing other courses."
+    },
+    {
+      "code": "HIST1728",
+      "title": "Holocaust History, Representation & Memory",
+      "department": "History",
+      "college": "MCAS",
+      "description": "An Enduring Questions course examining Holocaust history, how it is represented, and how it is remembered. The official Jewish Studies program lists it with UNAS1721 and identifies History and Arts Core credit. This archive entry does not establish a current offering.",
+      "descriptionIsParaphrase": true,
+      "allowedTeacherIds": [
+        2753907
+      ],
+      "catalogSources": [
+        {
+          "url": "https://www.bc.edu/content/bc-web/schools/morrissey/sites/jewish.html",
+          "checkedOn": "2026-10-14",
+          "code": "HIST1728/UNAS1721"
+        },
+        {
+          "url": "https://www.bc.edu/bc-web/schools/morrissey/departments/history/people/faculty-directory/devin-pendas.html",
+          "checkedOn": "2026-10-14",
+          "code": "HIST1728"
+        }
+      ],
+      "evidence": "Official program verifies code/title/cross-list; official Pendas profile confirms Holocaust/history teaching context, and one recovered source comment explicitly identifies the EQ Holocaust class. Explicit Europe in the World II comments remain separate."
+    },
+    {
+      "code": "SOCY5563",
+      "title": "Trauma, Culture, and Coping",
+      "department": "Sociology",
+      "college": "MCAS",
+      "description": "A sociology seminar studying ways to understand trauma and its effects, including cultural, psychological and social responses. The historical catalog and official C. Shawn McGuffey teaching list document this course. This archive entry does not establish a current offering.",
+      "descriptionIsParaphrase": true,
+      "allowedTeacherIds": [
+        886488
+      ],
+      "catalogSources": [
+        {
+          "url": "https://www.bc.edu/content/dam/bc1/offices/student-services/catalog/combined0910catalog.pdf",
+          "year": "2009-2010",
+          "pdfPage": 241,
+          "code": "SC563"
+        },
+        {
+          "url": "https://www.bc.edu/bc-web/schools/morrissey/departments/sociology/people/faculty-directory/c-shawn-mcguffey.html",
+          "checkedOn": "2026-10-14",
+          "code": "SOCY5563"
+        }
+      ],
+      "evidence": "Same course title and seminar content in old catalog and official verified-instructor course list."
+    }
+  ],
+  "courseExclusions": [
+    {
+      "teacherId": 2727023,
+      "reviewId": "UmF0aW5nLTM5MDY5ODA2",
+      "class": "ISYS1021",
+      "requiredText": "Data Visualization",
+      "note": "Comment describes Data Visualization; the source ISYS1021 course label is not verified.",
+      "method": "source_course_conflict"
+    },
+    {
+      "teacherId": 2727023,
+      "reviewId": "UmF0aW5nLTM3OTAyMDUw",
+      "class": "ISYS1021",
+      "requiredText": "coding for business",
+      "note": "Comment describes Coding for Business; the source ISYS1021 course label is not verified.",
+      "method": "source_course_conflict"
+    },
+    {
+      "teacherId": 2478583,
+      "reviewId": "UmF0aW5nLTM3OTkzNjkw",
+      "class": "ISYS1021",
+      "requiredText": "Data Management for Analytics and Applications",
+      "note": "Comment describes Data Management for Analytics and Applications; the source ISYS1021 course label is not verified.",
+      "method": "source_course_conflict"
+    },
+    {
+      "teacherId": 2753907,
+      "reviewId": "UmF0aW5nLTQwMzY5OTIw",
+      "class": "HIST1728",
+      "requiredText": "Europe in the World II (HIST1002)",
+      "note": "Comment identifies Europe in the World II (HIST1002); the source HIST1728 course label is not verified.",
+      "method": "source_course_conflict"
+    },
+    {
+      "teacherId": 2753907,
+      "reviewId": "UmF0aW5nLTQwMjk3MjYx",
+      "class": "HIST1728",
+      "requiredText": "Europe in the world 2",
+      "note": "Comment identifies Europe in the World II; the source HIST1728 course label is not verified.",
+      "method": "source_course_conflict"
+    },
+    {
+      "teacherId": 2781563,
+      "reviewId": "UmF0aW5nLTM2NzQ0MTE5",
+      "class": "COMM2225",
+      "requiredText": "social media",
+      "note": "Comment describes Social Media; the source Introduction to Feminisms course label is not verified.",
+      "method": "source_course_conflict"
+    },
+    {
+      "teacherId": 2781563,
+      "reviewId": "UmF0aW5nLTM2MDA5MTMx",
+      "class": "COMM2225",
+      "requiredText": "social media",
+      "note": "Comment describes Social Media; the source Introduction to Feminisms course label is not verified.",
+      "method": "source_course_conflict"
+    }
+  ]
+}
